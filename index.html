@@ -170,6 +170,11 @@
   object-fit: contain;
   background: none;
 }
+.reaction-icon {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+}
 
     }
   </style>
@@ -279,7 +284,7 @@ async function playVideo(folder, idx){
 
     <div class="reactions">
       <button onclick="addReaction('${folder}', ${idx}, 'like')">
-        <img src="https://png.pngtree.com/png-vector/20190329/ourlarge/pngtree-vector-like-icon-png-image_889403.jpg"> 
+        <img src="https://cdn-icons-png.flaticon.com/512/889/889140.png"> 
         (<span id="likeCount">${v.reactions.like}</span>)
     </div>
 
