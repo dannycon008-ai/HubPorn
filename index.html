@@ -86,12 +86,17 @@
       /* 💬 Estilos de comentarios */
 .comments {
   margin-top: 20px;
-  background: #1c1c1c;
+  background: #1e1e1e;
   padding: 15px;
   border-radius: 12px;
   border: 1px solid #333;
 }
-
+#commentList {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+      
 .comments h2 {
   font-size: 1.2rem;
   margin-bottom: 10px;
@@ -100,7 +105,7 @@
 
 .comments textarea {
   width: 100%;
-  height: 60px;
+  height: 50px;
   border-radius: 8px;
   padding: 10px;
   border: none;
@@ -114,6 +119,20 @@
   outline: 2px solid #ff4444;
 }
 
+    .comment-item {
+  background: #2a2a2a;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #eee;
+}
+      .comments textarea:focus {
+  outline: 2px solid #ff4444;
+}
+.comments button {
+  display: none; /* ocultamos el botón porque ahora usamos Enter */
+      
 /* Botones de reacciones */
 .reactions {
   margin: 15px 0;
