@@ -80,7 +80,20 @@
 <select id="deleteVideoSelect"></select>
 <button onclick="deleteVideo()">Eliminar Video</button>
 
-    /* Responsive */
+  #adminPanel input,
+#adminPanel select,
+#adminPanel textarea {
+  background: #222;       /* fondo oscuro */
+  color: #fff;            /* texto blanco */
+  border: 1px solid #444; /* borde sutil */
+  border-radius: 6px;
+}
+
+#adminPanel input::placeholder,
+#adminPanel textarea::placeholder {
+  color: #aaa;            /* gris claro para placeholder */
+}
+  /* Responsive */
     @media (max-width: 900px){
       .sidebar{ position:static; width:100%; height:auto; border-right:none; top:auto; left:auto; }
       .content{ margin-left:0; }
@@ -121,6 +134,17 @@
     <input type="text" id="videoURL" placeholder="URL del video (mp4)">
     <select id="folderSelect" aria-label="Selecciona carpeta para añadir"></select>
     <button onclick="addVideo()">Agregar Video</button>
+    <hr style="border:0; border-top:1px solid #2a2a2a; margin:14px 0;">
+<h3>Eliminar Carpeta</h3>
+<select id="deleteFolderSelect"></select>
+<button onclick="deleteFolder()">Eliminar Carpeta</button>
+
+<hr style="border:0; border-top:1px solid #2a2a2a; margin:14px 0;">
+<h3>Eliminar Video</h3>
+<select id="deleteVideoFolderSelect" onchange="populateVideosToDelete()"></select>
+<select id="deleteVideoSelect"></select>
+<button onclick="deleteVideo()">Eliminar Video</button>
+
   </section>
 
   <script>
