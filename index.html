@@ -66,6 +66,76 @@ video.preview {
     .comments button:hover{ background:#ff4444; }
     #adminPanel{ margin:20px; padding:20px; background:#1f1f1f; border-radius:10px; border:1px solid #242424; }
     .hidden{ display:none; }
+
+    /* =====================
+   📱 ESTILOS RESPONSIVE
+   ===================== */
+
+/* Para tablets y pantallas medianas */
+@media (max-width: 900px) {
+  header {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .sidebar {
+    position: relative;   /* sidebar ya no fijo */
+    width: 100%;          /* ocupa todo el ancho */
+    height: auto;         /* no bloquea la pantalla */
+    border-right: none;
+  }
+
+  .content {
+    margin-left: 0;       /* quita margen del sidebar */
+    padding: 15px;
+  }
+
+  .video-player video#videoPlayer {
+    max-width: 100%;      /* el video ocupa todo el ancho */
+    height: auto;
+  }
+}
+
+/* Para móviles pequeños (ej. iPhone, Android) */
+@media (max-width: 600px) {
+  .title {
+    font-size: 1.8rem;    /* título más compacto */
+    text-align: center;
+  }
+
+  .video-grid {
+    flex-direction: column; /* cada video uno debajo del otro */
+    gap: 16px;
+  }
+
+  .video-card {
+    width: 100%;         /* cada tarjeta ocupa todo el ancho */
+    max-width: 100%;
+  }
+
+  video.preview {
+    height: auto;        /* ajuste automático en móviles */
+  }
+
+  .reactions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .reactions button,
+  .comments button {
+    width: 100%;         /* botones grandes y fáciles de tocar */
+    font-size: 1rem;
+    padding: 12px;
+  }
+
+  .comments textarea {
+    width: 100%;
+    font-size: 1rem;
+  }
+}
+
   </style>
 </head>
 <body>
