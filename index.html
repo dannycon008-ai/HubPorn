@@ -12,57 +12,17 @@
 
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:"Segoe UI", Tahoma, sans-serif; background:#121212; color:#fff; display:flex; }
 
-    body { 
-      font-family:"Segoe UI", Tahoma, sans-serif; 
-      background:#121212; 
-      color:#fff; 
-      display:block;   /* ✅ Ya no fuerza horizontal */
-    }
-
-    header { 
-      position:fixed; 
-      top:0; left:0; right:0; 
-      background:#1f1f1f; 
-      display:flex;
-      justify-content:center; 
-      align-items:center; 
-      padding:12px 18px; 
-      z-index:100; 
-    }
-
-    .title{ 
-      font-family:"Archivo Black", sans-serif; 
-      font-size:2.5rem;
+    header { position:fixed; top:0; left:0; right:0; background:#1f1f1f; display:flex;
+      justify-content:center; align-items:center; padding:12px 18px; z-index:100; }
+    .title{ font-family:"Archivo Black", sans-serif; font-size:2.5rem;
       background:linear-gradient(to right, #ff4444 50%, #ffffff 50%);
-      -webkit-background-clip:text; 
-      -webkit-text-fill-color:transparent; 
-    }
-
-    main{ 
-      margin-top:74px; 
-      flex:1; 
-      display:flex; 
-    }
-
-    .sidebar{ 
-      width:240px; 
-      background:#1f1f1f; 
-      padding:14px; 
-      height:calc(100vh - 74px);
-      position:fixed; 
-      top:74px; 
-      left:0; 
-      overflow-y:auto; 
-      border-right:1px solid #222; 
-    }
-
-    .content{ 
-      margin-left:240px; 
-      flex:1; 
-      padding:20px; 
-    }
-
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    main{ margin-top:74px; flex:1; display:flex; }
+    .sidebar{ width:240px; background:#1f1f1f; padding:14px; height:calc(100vh - 74px);
+      position:fixed; top:74px; left:0; overflow-y:auto; border-right:1px solid #222; }
+    .content{ margin-left:240px; flex:1; padding:20px; }
     .folder{ margin-bottom:14px; cursor:pointer; }
     .folder h3 {
       color:#ff4444;
@@ -107,7 +67,8 @@
     #adModal {
       display:none; 
       position:fixed; 
-      top:0; left:0;
+      top:0; 
+      left:0;
       width:100%; 
       height:100%; 
       background:rgba(0,0,0,0.9);
@@ -124,10 +85,10 @@
 
     /* Botones de reacciones */
     .reactions {
+      margin: 15px 0;
       display: flex;
       gap: 15px;
       justify-content: center;
-      margin: 15px 0;
     }
 
     .reactions button {
@@ -148,65 +109,6 @@
     .reactions button:hover {
       background: #ff4444;
       transform: scale(1.1);
-    }
-
-    /* 📱 Responsive tablets */
-    @media (max-width: 900px) {
-      header {
-        flex-direction: column;
-        text-align: center;
-        gap: 10px;
-      }
-
-      .sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
-        border-right: none;
-      }
-
-      .content {
-        margin-left: 0;
-        padding: 15px;
-      }
-
-      .video-player video#videoPlayer {
-        max-width: 100%;
-        height: auto;
-      }
-    }
-
-    /* 📱 Responsive móviles */
-    @media (max-width: 600px) {
-      .title {
-        font-size: 1.6rem;
-        text-align: center;
-      }
-
-      .video-grid {
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .video-card {
-        width: 100%;
-        max-width: 100%;
-      }
-
-      video.preview {
-        height: auto;
-      }
-
-      .reactions {
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .reactions button {
-        width: 100%;
-        font-size: 1rem;
-        padding: 12px;
-      }
     }
   </style>
 </head>
@@ -248,7 +150,7 @@
   const videoSection = document.getElementById("videoSection");
 
   // ✅ Mostrar anuncio en modal
-  function showAd(url, videoPlayer){
+  function showAd(url, videoPlayer, stopAfter=false){
     const modal = document.getElementById("adModal");
     const frame = document.getElementById("adFrame");
     modal.style.display = "flex";
@@ -256,7 +158,9 @@
     setTimeout(() => {
       modal.style.display = "none";
       frame.src = "";
-      videoPlayer.play();
+      if (!stopAfter) {
+        videoPlayer.play(); // solo reanuda si no es el anuncio final
+      }
     }, 2000);
   }
 
@@ -314,8 +218,8 @@
         <p id="views">👁️ ${v.views} vistas</p>
 
         <div class="reactions">
-          <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (<span id="likeCount">${v.reactions.like}</span>)</button>
-          <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+          <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 (<span id="likeCount">${v.reactions.like}</span>)</button>
+          <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
         </div>
       </div>
     `;
@@ -353,11 +257,11 @@
       }
     });
 
-    // Al final
+    // Al final → no reanuda
     videoPlayer.addEventListener("ended", () => {
       if(!adsShown.end){
         adsShown.end = true;
-        showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
+        showAd("https://overplantovervaluetwine.com/2061965", videoPlayer, true);
       }
     });
   }
@@ -371,12 +275,20 @@
     const data = docSnap.data();
     const v = data.videos[idx];
 
+    // 🔒 Evitar múltiples reacciones
+    if (v.reacted) {
+      alert("Ya reaccionaste a este video 👍");
+      return;
+    }
+
     v.reactions[type]++;
+    v.reacted = true;   // marcar que ya reaccionó
     data.videos[idx] = v;
 
     await folderRef.update({ videos: data.videos });
 
-    playVideo(folder, idx);
+    // ✅ solo actualizamos el contador en pantalla
+    document.getElementById(type + "Count").textContent = v.reactions[type];
   }
 
   renderSidebar();
