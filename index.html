@@ -1,54 +1,89 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Plataforma de Videos</title>
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
   <style>
-    * {margin:0; padding:0; box-sizing:border-box;}
-    body {
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background:#121212; color:#fff; display:flex;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:"Segoe UI", Tahoma, sans-serif; background:#121212; color:#fff; display:flex; }
+
+    /* Header */
     header {
       position:fixed; top:0; left:0; right:0;
-      background:#1f1f1f; display:flex; justify-content:space-between;
-      padding:15px 30px; box-shadow:0 2px 10px rgba(0,0,0,.5); z-index:100;
+      background:#1f1f1f; display:flex; justify-content:space-between; align-items:center;
+      padding:12px 18px; box-shadow:0 2px 10px rgba(0,0,0,.5); z-index:100;
+      gap:12px; flex-wrap:wrap;
     }
-    .logo-container{display:flex; align-items:center; gap:10px;}
-    .logo{height:40px;}
-    .title {
-  font-family: "Archivo Black", sans-serif;
-  font-size: 2.5rem;
-  background: linear-gradient(to right, #ff4444 50%, #ffffff 50%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+    .logo-container { display:flex; align-items:center; gap:10px; }
+    .logo { height:40px; width:auto; object-fit:contain; }
+    .title{
+      font-family:"Archivo Black", sans-serif;
+      font-size:1.8rem; line-height:1;
+      background:linear-gradient(to right, #ff4444 50%, #ffffff 50%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    header nav button{
+      background:#222; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer;
+    }
+    header nav button:hover{ background:#ff4444; }
 
-    .folder{margin-bottom:15px;}
-    .folder h3{color:#ff4444; margin-bottom:8px;}
-    .folder ul{list-style:none;}
-    .folder li{cursor:pointer; margin-bottom:6px; background:#222; padding:6px; border-radius:5px;}
-    .folder li:hover{background:#ff4444;}
-    /* Contenido principal */
-    .content{margin-left:240px; flex:1; padding:20px;}
-    video.preview{width:100%; max-width:200px; border-radius:8px;}
-    video#videoPlayer{width:100%; max-width:800px; border-radius:12px;}
-    .reactions{margin:15px 0; display:flex; gap:10px; flex-wrap:wrap;}
-    .reactions button{background:#222; border:none; padding:8px 12px; border-radius:6px; color:#fff; cursor:pointer;}
-    .reactions button:hover{background:#ff4444;}
-    .comments{margin-top:20px; background:#1f1f1f; padding:15px; border-radius:10px;}
-    .comments textarea{width:100%; height:60px; margin-top:10px; border-radius:8px; padding:8px; border:none;}
+    /* Layout */
+    main{ margin-top:74px; flex:1; display:flex; }
+    .sidebar{
+      width:240px; background:#1f1f1f; padding:14px;
+      height:calc(100vh - 74px); position:fixed; top:74px; left:0; overflow-y:auto;
+      border-right:1px solid #222;
+    }
+    .content{ margin-left:240px; flex:1; padding:20px; min-height:calc(100vh - 74px); }
+
+    /* Carpetas */
+    .folder{ margin-bottom:14px; cursor:pointer; user-select:none; }
+    .folder h3{ color:#ff4444; font-size:1rem; }
+    .folder:hover h3{ color:#fff; }
+
+    /* Listados y reproductor */
+    .video-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; }
+    .video-card{ background:#1b1b1b; border:1px solid #242424; border-radius:10px; padding:10px; cursor:pointer; }
+    .video-card:hover{ border-color:#ff4444; }
+    video.preview{ width:100%; border-radius:8px; background:#000; }
+    .meta{ margin-top:8px; font-size:.9rem; color:#bbb; }
+
+    .video-player video#videoPlayer{ width:100%; max-width:900px; border-radius:12px; background:#000; }
+    .reactions{ margin:15px 0; display:flex; gap:10px; flex-wrap:wrap; }
+    .reactions button{ background:#222; border:none; padding:8px 12px; border-radius:6px; color:#fff; cursor:pointer; }
+    .reactions button:hover{ background:#ff4444; }
+
+    /* Comentarios */
+    .comments{ margin-top:20px; background:#1f1f1f; padding:15px; border-radius:10px; }
+    .comments textarea{ width:100%; height:60px; margin-top:10px; border-radius:8px; padding:8px; border:none; background:#222; color:#fff; }
+    .comments button{ margin-top:8px; background:#222; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
+    .comments button:hover{ background:#ff4444; }
+    .comment-item{ padding:6px 0; border-bottom:1px solid #232323; }
+    .comment-item:last-child{ border-bottom:none; }
+
     /* Admin */
-    #adminPanel{margin:20px; padding:20px; background:#1f1f1f; border-radius:10px;}
-    .hidden{display:none;}
+    #adminPanel{ margin:20px; padding:20px; background:#1f1f1f; border-radius:10px; border:1px solid #242424; }
+    #adminPanel input, #adminPanel select{ width:100%; max-width:520px; padding:10px; margin:8px 0; border:none; border-radius:8px; background:#222; color:#fff; }
+    #adminPanel button{ background:#222; color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; }
+    #adminPanel button:hover{ background:#ff4444; }
+    .hidden{ display:none; }
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .sidebar{ position:static; width:100%; height:auto; border-right:none; top:auto; left:auto; }
+      .content{ margin-left:0; }
+      header{ justify-content:center; }
+      .title{ font-size:1.5rem; }
+    }
   </style>
 </head>
 <body>
   <!-- Header -->
   <header>
     <div class="logo-container">
+      <!-- Cambia el src por tu propio logo si deseas -->
       <img src="https://sdmntprwestus3.oaiusercontent.com/files/00000000-9cf0-61fd-8161-fdc58c2ac85e/raw?se=2025-08-28T01%3A06%3A44Z&sp=r&sv=2024-08-04&sr=b&scid=d35661a0-b715-528d-b82a-b9b468c00e0f&skoid=c953efd6-2ae8-41b4-a6d6-34b1475ac07c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-08-27T13%3A40%3A49Z&ske=2025-08-28T13%3A40%3A49Z&sks=b&skv=2024-08-04&sig=CNGDPhcWYWmdhPmZTBhOvWhzhfB6Q79gx/G8hwZD31o%3D" alt="Logo" class="logo">
       <h1 class="title">HubPorn</h1>
     </div>
@@ -57,13 +92,13 @@
     </nav>
   </header>
 
-  <!-- Sidebar -->
+  <!-- Sidebar (solo nombres de carpetas) -->
   <aside class="sidebar" id="sidebar"></aside>
 
-  <!-- Contenido -->
+  <!-- Área principal -->
   <main class="content">
     <div id="videoSection">
-      <p>Selecciona un video para reproducir</p>
+      <p>Selecciona una carpeta para ver sus videos</p>
     </div>
   </main>
 
@@ -72,143 +107,149 @@
     <h2>Panel de Administración</h2>
     <input type="text" id="folderName" placeholder="Nombre de carpeta">
     <button onclick="addFolder()">Agregar Carpeta</button>
-    <hr>
-    <input type="text" id="videoURL" placeholder="URL del video">
-    <select id="folderSelect"></select>
+    <hr style="border:0; border-top:1px solid #2a2a2a; margin:14px 0;">
+    <input type="text" id="videoURL" placeholder="URL del video (mp4)">
+    <select id="folderSelect" aria-label="Selecciona carpeta para añadir"></select>
     <button onclick="addVideo()">Agregar Video</button>
   </section>
 
   <script>
-   const sidebar = document.getElementById("sidebar");
-      const videoSection = document.getElementById("videoSection");
-   const folderSelect = document.getElementById("folderSelect");
+    const sidebar      = document.getElementById("sidebar");
+    const videoSection = document.getElementById("videoSection");
+    const folderSelect = document.getElementById("folderSelect");
 
-   <script>
-  // Sustituye tu declaración actual de folders por esta:
-  let folders = JSON.parse(localStorage.getItem("folders")) || {};
+    /* Estado persistente */
+    let folders = JSON.parse(localStorage.getItem("folders")) || {};
 
-  function saveData() {
-    localStorage.setItem("folders", JSON.stringify(folders));
-  }
+    function saveData(){
+      localStorage.setItem("folders", JSON.stringify(folders));
+    }
 
     function toggleAdminPanel(){
       document.getElementById("adminPanel").classList.toggle("hidden");
     }
 
-    // Crear carpeta
-    <script>
-  function addFolder(){
-    const name = document.getElementById("folderName").value.trim();
-    if (name && !folders[name]) {
-      folders[name] = [];                   // cada carpeta es un array de videos
+    /* Crear carpeta */
+    function addFolder(){
+      const name = document.getElementById("folderName").value.trim();
+      if (!name) return;
+      if (folders[name]) return;         // ya existe
+      folders[name] = [];                // cada carpeta es un array de videos
       saveData();
       renderSidebar();
       document.getElementById("folderName").value = "";
     }
-  }
-    // Agregar video
+
+    /* Agregar video (máx 30 por carpeta) */
     function addVideo(){
-    const url = document.getElementById("videoURL").value.trim();
-    const folder = document.getElementById("folderSelect").value;
-    if (url && folder && folders[folder].length < 30) {
+      const url    = document.getElementById("videoURL").value.trim();
+      const folder = document.getElementById("folderSelect").value;
+      if (!url || !folder) return;
+      if (!folders[folder]) folders[folder] = [];
+      if (folders[folder].length >= 30) return;
+
       folders[folder].push({
         url,
         views: 0,
-        reactions: { like: 0, dislike: 0, love: 0, amazing: 0 },
-        reacted: false,    // si el usuario ya reaccionó a este video
-        comments: []       // lista de comentarios
+        reactions: { like:0, dislike:0, love:0, amazing:0 },
+        reacted: false,
+        comments: []
       });
+
       saveData();
       renderSidebar();
+      showFolder(folder); // opcional: refresca listado actual
       document.getElementById("videoURL").value = "";
-      }
     }
 
-    // Renderizar sidebar
+    /* Sidebar (solo carpetas) */
     function renderSidebar(){
-    sidebar.innerHTML = "";
-    folderSelect.innerHTML = "";
+      sidebar.innerHTML = "";
+      folderSelect.innerHTML = "";
+      for (let folder in folders){
+        const item = document.createElement("div");
+        item.className = "folder";
+        item.setAttribute("role","button");
+        item.innerHTML = `<h3>${folder}</h3>`;
+        item.onclick = () => showFolder(folder);
+        sidebar.appendChild(item);
 
-    for (let folder in folders) {
-      // Carpeta clicable
-      const div = document.createElement("div");
-      div.className = "folder";
-      div.innerHTML = `<h3>${folder}</h3>`;
-      div.onclick = () => showFolder(folder);     // al clicar, carga todos los videos en el área central
-      sidebar.appendChild(div);
-        });
-        div.appendChild(ul);
-        sidebar.appendChild(div);
-
-        // opciones en admin
-       const option = document.createElement("option");
-      option.value = folder; option.textContent = folder;
-      folderSelect.appendChild(option);
+        const opt = document.createElement("option");
+        opt.value = folder; opt.textContent = folder;
+        folderSelect.appendChild(opt);
       }
     }
 
-    // Reproducir video
-    function playVideo(folder, idx){
-    const v = folders[folder][idx];
-    v.views++;
-    saveData();
-
-    videoSection.innerHTML = `
-      <div class="video-player">
-        <video id="videoPlayer" controls autoplay>
-          <source src="${v.url}" type="video/mp4">
-        </video>
-        <p id="views">👁️ ${v.views} vistas</p>
-
-        <div class="reactions">
-          <button onclick="addReaction('${folder}', ${idx}, 'like')">
-            👍 Like (<span id="likeCount">${v.reactions.like}</span>)
-          </button>
-          <button onclick="addReaction('${folder}', ${idx}, 'dislike')">
-            👎 Dislike (<span id="dislikeCount">${v.reactions.dislike}</span>)
-          </button>
-          <button onclick="addReaction('${folder}', ${idx}, 'love')">
-            ❤️ Me Gusta (<span id="loveCount">${v.reactions.love}</span>)
-          </button>
-          <button onclick="addReaction('${folder}', ${idx}, 'amazing')">
-            😍 Me Encanta (<span id="amazingCount">${v.reactions.amazing}</span>)
-          </button>
+    /* Mostrar videos de una carpeta en la zona central */
+    function showFolder(folder){
+      const list = folders[folder] || [];
+      if (!list.length){
+        videoSection.innerHTML = `<h2>${folder}</h2><p class="meta">No hay videos aquí todavía.</p>`;
+        return;
+      }
+      const grid = list.map((v, idx) => `
+        <div class="video-card" onclick="playVideo('${folder}', ${idx})" role="button" tabindex="0">
+          <video class="preview" src="${v.url}" muted preload="metadata"></video>
+          <div class="meta">${v.views} vistas</div>
         </div>
+      `).join("");
+      videoSection.innerHTML = `<h2>${folder}</h2><div class="video-grid">${grid}</div>`;
+    }
 
-        <section class="comments">
-          <h2>Comentarios</h2>
-          <div id="commentList">
-            ${v.comments.map(c => "<p>💬 " + c + "</p>").join("")}
-          </div>
-          <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
-          <button onclick="addComment('${folder}', ${idx})">Comentar</button>
-        </section>
-      </div>
-    `;
-  }
-
-    // Reacciones
-    function addReaction(folder,idx,type){
-      const videoObj=folders[folder][idx];
-      if(videoObj.reacted){ alert("Ya reaccionaste ✅"); return; }
-      videoObj.reactions[type]++;
-      videoObj.reacted=true;
+    /* Reproducir un video y mostrar controles */
+    function playVideo(folder, idx){
+      const v = folders[folder][idx];
+      v.views++;
       saveData();
-      playVideo(folder,idx); // refrescar UI
+
+      videoSection.innerHTML = `
+        <div class="video-player">
+          <video id="videoPlayer" controls autoplay>
+            <source src="${v.url}" type="video/mp4">
+          </video>
+          <p id="views">👁️ ${v.views} vistas</p>
+
+          <div class="reactions">
+            <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (<span id="likeCount">${v.reactions.like}</span>)</button>
+            <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+            <button onclick="addReaction('${folder}', ${idx}, 'love')">❤️ Me Gusta (<span id="loveCount">${v.reactions.love}</span>)</button>
+            <button onclick="addReaction('${folder}', ${idx}, 'amazing')">😍 Me Encanta (<span id="amazingCount">${v.reactions.amazing}</span>)</button>
+          </div>
+
+          <section class="comments">
+            <h2>Comentarios</h2>
+            <div id="commentList">
+              ${v.comments.map(c => `<p class="comment-item">💬 ${c}</p>`).join("")}
+            </div>
+            <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
+            <button onclick="addComment('${folder}', ${idx})">Comentar</button>
+          </section>
+        </div>
+      `;
     }
 
-    // Comentarios
-    function addComment(folder,idx){
-      const input=document.getElementById("commentInput");
-      const text=input.value.trim();
-      if(text){
-        folders[folder][idx].comments.push(text);
-        saveData();
-        playVideo(folder,idx); // refrescar UI
-      }
+    /* Reacciones: una sola por video (sin alert; ignorar extra clics) */
+    function addReaction(folder, idx, type){
+      const v = folders[folder][idx];
+      if (v.reacted) return;                       // ya reaccionó → no hacer nada
+      if (!v.reactions[type]) v.reactions[type] = 0;
+      v.reactions[type]++;
+      v.reacted = true;
+      saveData();
+      playVideo(folder, idx);                      // refrescar UI
     }
 
-    // Inicializar
+    /* Comentarios: persistentes */
+    function addComment(folder, idx){
+      const input = document.getElementById("commentInput");
+      const text  = input.value.trim();
+      if (!text) return;
+      folders[folder][idx].comments.push(text);
+      saveData();
+      playVideo(folder, idx);                      // refrescar UI (y limpiar textarea)
+    }
+
+    /* Init */
     renderSidebar();
   </script>
 </body>
