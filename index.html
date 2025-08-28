@@ -308,16 +308,6 @@ async function playVideo(folder, idx){
 
   const videoPlayer = document.getElementById("videoPlayer");
 
-  // 🔒 Bloqueo: no dejar adelantar
-  videoPlayer.addEventListener("seeking", (e) => {
-    if(videoPlayer.currentTime > videoPlayer.lastTime){
-      videoPlayer.currentTime = videoPlayer.lastTime; 
-    }
-  });
-  videoPlayer.addEventListener("timeupdate", () => {
-    videoPlayer.lastTime = videoPlayer.currentTime; 
-  });
-
   // 📺 Anuncios cada 20s y 40s (solo 2 veces)
   let adsShown = 0;
   videoPlayer.addEventListener("timeupdate", () => {
