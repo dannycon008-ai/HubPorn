@@ -1,35 +1,29 @@
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-<script>
-  // Configuración de tu app Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
-    authDomain: "minitinder-f6314.firebaseapp.com",
-    projectId: "minitinder-f6314",
-    storageBucket: "minitinder-f6314.appspot.com",
-    messagingSenderId: "659347167496",
-    appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd",
-    measurementId: "G-L0E0Y4ZLK6"
-  };
-
-  // Inicializar Firebase
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-</script>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Plataforma de Videos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = { ... };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+
   <style>
-    /* === tus estilos tal cual los tienes === */
+    /* tus estilos aquí */
   </style>
 </head>
 <body>
+  <!-- tu HTML -->
+</body>
+</html>
+
   <!-- Header -->
   <header>
     <div class="logo-container">
