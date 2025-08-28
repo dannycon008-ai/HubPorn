@@ -290,38 +290,34 @@ async function playVideo(folder, idx){
   data.videos[idx] = v;
   await folderRef.update({ videos: data.videos });
 
- videoSection.innerHTML = `
+videoSection.innerHTML = `
   <div class="video-player">
     <video id="videoPlayer" controls autoplay>
       <source src="${v.url}" type="video/mp4">
     </video>
     <p id="views">👁️ ${v.views} vistas</p>
 
-<div class="reactions">
-  <button onclick="addReaction('${folder}', ${idx}, 'like')">
-    👍 (<span id="likeCount">${v.reactions.like}</span>)
-  </button>
+    <!-- Reacciones -->
+    <div class="reactions">
+      <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 (<span id="likeCount">${v.reactions.like}</span>)</button>
+      <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+    </div>
 
-  <button onclick="addReaction('${folder}', ${idx}, 'dislike')">
-    👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)
-  </button>
-</div>
-
-
+    <!-- Comentarios -->
     <section class="comments">
       <h2>Comentarios</h2>
       <div id="commentList">
         ${v.comments.map(c => `<p class="comment-item">💬 ${c}</p>`).join("")}
       </div>
-      <textarea id="commentInput" placeholder="Escribe un comentario y presiona Enter..."></textarea>
+      <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
     </section>
   </div>
 `;
 
-// 🚀 Detectar Enter en comentarios
-const commentInput = document.getElementById("commentInput");
-commentInput.addEventListener("keypress", function(e){
-  if(e.key === "Enter" && !e.shiftKey){
+
+// ✅ Aquí va tu código de Enter
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && e.target.id === "commentInput") {
     e.preventDefault();
     addComment(folder, idx);
   }
