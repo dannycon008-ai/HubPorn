@@ -200,7 +200,13 @@
     function renderSidebar(){
       sidebar.innerHTML = "";
       folderSelect.innerHTML = "";
-      for (let folder in folders){
+      
+     const deleteFolderSelect = document.getElementById("deleteFolderSelect");
+const deleteVideoFolderSelect = document.getElementById("deleteVideoFolderSelect");
+deleteFolderSelect.innerHTML = "";
+deleteVideoFolderSelect.innerHTML = "";
+      
+       for (let folder in folders){
         const item = document.createElement("div");
         item.className = "folder";
         item.setAttribute("role","button");
@@ -208,9 +214,23 @@
         item.onclick = () => showFolder(folder);
         sidebar.appendChild(item);
 
-        const opt = document.createElement("option");
-        opt.value = folder; opt.textContent = folder;
-        folderSelect.appendChild(opt);
+        // select para agregar video
+    const opt = document.createElement("option");
+    opt.value = folder; 
+    opt.textContent = folder;
+    folderSelect.appendChild(opt);
+ // 🔹 select para eliminar carpeta
+    const optDeleteFolder = document.createElement("option");
+    optDeleteFolder.value = folder;
+    optDeleteFolder.textContent = folder;
+    deleteFolderSelect.appendChild(optDeleteFolder);
+
+    // 🔹 select para elegir carpeta al eliminar videos
+    const optDeleteVideo = document.createElement("option");
+    optDeleteVideo.value = folder;
+    optDeleteVideo.textContent = folder;
+    deleteVideoFolderSelect.appendChild(optDeleteVideo);
+         
       }
     }
 
