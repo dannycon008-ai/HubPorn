@@ -12,23 +12,63 @@
 
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:"Segoe UI", Tahoma, sans-serif; background:#121212; color:#fff; display:flex; }
 
-    header { position:fixed; top:0; left:0; right:0; background:#1f1f1f; display:flex;
-      justify-content:center; align-items:center; padding:12px 18px; z-index:100; }
-    .title{ font-family:"Archivo Black", sans-serif; font-size:2.5rem;
+    body { 
+      font-family:"Segoe UI", Tahoma, sans-serif; 
+      background:#121212; 
+      color:#fff; 
+      display:block;   /* ✅ Ya no fuerza horizontal */
+    }
+
+    header { 
+      position:fixed; 
+      top:0; left:0; right:0; 
+      background:#1f1f1f; 
+      display:flex;
+      justify-content:center; 
+      align-items:center; 
+      padding:12px 18px; 
+      z-index:100; 
+    }
+
+    .title{ 
+      font-family:"Archivo Black", sans-serif; 
+      font-size:2.5rem;
       background:linear-gradient(to right, #ff4444 50%, #ffffff 50%);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    main{ margin-top:74px; flex:1; display:flex; }
-    .sidebar{ width:240px; background:#1f1f1f; padding:14px; height:calc(100vh - 74px);
-      position:fixed; top:74px; left:0; overflow-y:auto; border-right:1px solid #222; }
-    .content{ margin-left:240px; flex:1; padding:20px; }
+      -webkit-background-clip:text; 
+      -webkit-text-fill-color:transparent; 
+    }
+
+    main{ 
+      margin-top:74px; 
+      flex:1; 
+      display:flex; 
+    }
+
+    .sidebar{ 
+      width:240px; 
+      background:#1f1f1f; 
+      padding:14px; 
+      height:calc(100vh - 74px);
+      position:fixed; 
+      top:74px; 
+      left:0; 
+      overflow-y:auto; 
+      border-right:1px solid #222; 
+    }
+
+    .content{ 
+      margin-left:240px; 
+      flex:1; 
+      padding:20px; 
+    }
+
     .folder{ margin-bottom:14px; cursor:pointer; }
     .folder h3 {
-  color:#ff4444;
-  font-size:1rem;
-  font-family: "Archivo Black", sans-serif;
-}
+      color:#ff4444;
+      font-size:1rem;
+      font-family: "Archivo Black", sans-serif;
+    }
 
     .video-grid {
       display: flex;
@@ -67,8 +107,7 @@
     #adModal {
       display:none; 
       position:fixed; 
-      top:0; 
-      left:0;
+      top:0; left:0;
       width:100%; 
       height:100%; 
       background:rgba(0,0,0,0.9);
@@ -81,173 +120,93 @@
       height:80%; 
       border:none; 
       border-radius:12px;
-      
-/* Botones de reacciones */
-.reactions {
-  margin: 15px 0;
-  display: flex;
-  gap: 12px;
-}
+    }
 
-.reactions button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #2a2a2a;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 6px;
-  color: #fff;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
+    /* Botones de reacciones */
+    .reactions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin: 15px 0;
+    }
 
-.reactions button:hover {
-  background: #ff4444;
-}
+    .reactions button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px;
+      border: none;
+      border-radius: 50px;
+      background: #222;
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+    }
 
-.reactions img {
-  width: 20px;
-  height: 20px;
-}
+    .reactions button:hover {
+      background: #ff4444;
+      transform: scale(1.1);
+    }
 
-      /* 🔘 Estilo para botones de reacción */
-.reactions button {
-  background: #1b1b1b;
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 6px 12px;
-  cursor: pointer;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+    /* 📱 Responsive tablets */
+    @media (max-width: 900px) {
+      header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+      }
 
-.reactions button:hover {
-  background: #ff4444;
-  transform: scale(1.05);
-  transition: 0.2s;
-}
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        border-right: none;
+      }
 
-/* 🔘 Íconos dentro de botones */
-.reaction-icon {
-  width: 20px;   /* Tamaño del ícono */
-  height: 20px;
-  object-fit: contain;
-  background: none;
-}
-.reactions {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
+      .content {
+        margin-left: 0;
+        padding: 15px;
+      }
 
-.reactions button {
-  background: #222;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 1.2rem;  /* tamaño del emoji */
-  cursor: pointer;
-  transition: background 0.3s;
-}
+      .video-player video#videoPlayer {
+        max-width: 100%;
+        height: auto;
+      }
+    }
 
-.reactions button:hover {
-  background: #ff4444;
-}
-.reactions {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  margin: 15px 0;
-}
+    /* 📱 Responsive móviles */
+    @media (max-width: 600px) {
+      .title {
+        font-size: 1.6rem;
+        text-align: center;
+      }
 
-.reactions button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 12px;
-  border: none;
-  border-radius: 50px;   /* 🔵 forma circular */
-  background: #222;      /* fondo oscuro */
-  color: #fff;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
+      .video-grid {
+        flex-direction: column;
+        gap: 12px;
+      }
 
-.reactions button:hover {
-  background: #ff4444;   /* efecto hover rojo */
-  transform: scale(1.1); /* efecto de agrandar un poco */
-}
+      .video-card {
+        width: 100%;
+        max-width: 100%;
+      }
 
-.reactions span {
-  font-weight: bold;
-  color: #fff;
-}
-/* 📱 Ajustes para tablets (pantallas medianas) */
-@media (max-width: 900px) {
-  header {
-    flex-direction: column;
-    text-align: center;
-    gap: 10px;
-  }
+      video.preview {
+        height: auto;
+      }
 
-  .sidebar {
-    position: relative;   /* Sidebar ya no fija */
-    width: 100%;          /* Ocupa todo el ancho */
-    height: auto;
-    border-right: none;
-  }
+      .reactions {
+        flex-direction: column;
+        gap: 10px;
+      }
 
-  .content {
-    margin-left: 0;       /* Quita el margen del sidebar */
-    padding: 15px;
-  }
-
-  .video-player video#videoPlayer {
-    max-width: 100%;      /* Video ocupa todo el ancho */
-    height: auto;
-  }
-}
-
-/* 📱 Ajustes para móviles (Android, iPhone) */
-@media (max-width: 600px) {
-  .title {
-    font-size: 1.6rem;    /* Título más pequeño */
-    text-align: center;
-  }
-
-  .video-grid {
-    flex-direction: column; /* Videos en columna */
-    gap: 12px;
-  }
-
-  .video-card {
-    width: 100%;         /* Cada tarjeta ocupa todo el ancho */
-    max-width: 100%;
-  }
-
-  video.preview {
-    height: auto;        /* Ajusta automáticamente */
-  }
-
-  .reactions {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .reactions button {
-    width: 100%;
-    font-size: 1rem;
-    padding: 12px;
-  }
-}
-
+      .reactions button {
+        width: 100%;
+        font-size: 1rem;
+        padding: 12px;
+      }
     }
   </style>
 </head>
