@@ -157,35 +157,63 @@
       }
     }
 
-    /* -------- ELIMINAR CARPETA -------- */
-    async function deleteFolder(){
-      const folder = deleteFolderSelect.value;
-      if (!folder) return;
-      if (confirm(`¿Seguro que quieres eliminar la carpeta "${folder}"?`)) {
-        await db.collection("folders").doc(folder).delete();
-        renderSidebar();
-        alert("Carpeta eliminada ✅");
-      }
-    }
+   // ✅ Mostrar los videos de la carpeta seleccionada con miniatura
+async function populateVideosToDelete(){
+  const folder = deleteVideoFolderSelect.value;
+  const container = document.getElementById("deleteVideoList");
+  container.innerHTML = "";
 
-    /* -------- ELIMINAR VIDEO -------- */
-    async function populateVideosToDelete(){
-      const folder = deleteVideoFolderSelect.value;
-      deleteVideoSelect.innerHTML = "";
-      if (!folder) return;
+  if (!folder) return;
 
-      const folderRef = db.collection("folders").doc(folder);
-      const docSnap = await folderRef.get();
-      if (docSnap.exists){
-        const data = docSnap.data();
-        data.videos.forEach((v, idx) => {
-          let opt = document.createElement("option");
-          opt.value = idx;
-          opt.textContent = `Video ${idx+1} - ${v.url.substring(0,30)}...`;
-          deleteVideoSelect.appendChild(opt);
-        });
-      }
+  const folderRef = db.collection("folders").doc(folder);
+  const docSnap = await folderRef.get();
+
+  if (docSnap.exists){
+    const data = docSnap.data();
+
+    data.videos.forEach((v, idx) => {
+      const videoItem = document.createElement("div");
+      videoItem.style.width = "140px";
+      videoItem.style.textAlign = "center";
+      videoItem.style.background = "#1b1b1b";
+      videoItem.style.padding = "8px";
+      videoItem.style.borderRadius = "8px";
+      videoItem.style.border = "1px solid #333";
+
+      videoItem.innerHTML = `
+        <video src="${v.url}" width="120" height="70" muted></video>
+        <p style="color:#fff; font-size:0.9rem; margin:5px 0;">Video ${idx+1}</p>
+        <button onclick="deleteVideo('${folder}', ${idx})" 
+          style="padding:6px 10px; background:#ff4444; color:white; border:none; border-radius:6px; cursor:pointer;">
+          Eliminar
+        </button>
+      `;
+
+      container.appendChild(videoItem);
+    });
+  }
+}
+
+// ✅ Función para eliminar el video seleccionado
+async function deleteVideo(folder, idx){
+  if (!folder || idx === "") return;
+
+  if (confirm("¿Seguro que quieres eliminar este video?")) {
+    const folderRef = db.collection("folders").doc(folder);
+    const docSnap = await folderRef.get();
+
+    if (docSnap.exists){
+      const data = docSnap.data();
+      data.videos.splice(idx, 1); // eliminar por índice
+      await folderRef.update({ videos: data.videos });
+
+      populateVideosToDelete(); // refrescar lista de videos
+      renderSidebar(); // refrescar carpetas
+      videoSection.innerHTML = "<p>Selecciona una carpeta para ver sus videos</p>";
     }
+  }
+}
+
 
     async function deleteVideo(){
       const folder = deleteVideoFolderSelect.value;
