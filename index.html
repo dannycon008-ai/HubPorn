@@ -347,70 +347,85 @@ video.preview {
       }
     }
 /* -------- REPRODUCIR VIDEO -------- */
-function playVideo(folder, idx){
-  // Mostrar reproductor
+async function playVideo(folder, idx){
+  const folderRef = db.collection("folders").doc(folder);
+  const docSnap = await folderRef.get();
+  if (!docSnap.exists) return;
+
+  const data = docSnap.data();
+  const v = data.videos[idx];
+
+  // Aumentar vistas
+  v.views++;
+  data.videos[idx] = v;
+  await folderRef.update({ videos: data.videos });
+
   videoSection.innerHTML = `
     <div class="video-player">
       <video id="videoPlayer" controls autoplay>
-        <source src="${folders?.[folder]?.[idx]?.url || ''}" type="video/mp4">
+        <source src="${v.url}" type="video/mp4">
       </video>
-      <p id="views">👁️ ${folders?.[folder]?.[idx]?.views || 0} vistas</p>
+      <p id="views">👁️ ${v.views} vistas</p>
+
+      <div class="reactions">
+        <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (<span id="likeCount">${v.reactions.like}</span>)</button>
+        <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+        <button onclick="addReaction('${folder}', ${idx}, 'love')">❤️ Me Gusta (<span id="loveCount">${v.reactions.love}</span>)</button>
+        <button onclick="addReaction('${folder}', ${idx}, 'amazing')">😍 Me Encanta (<span id="amazingCount">${v.reactions.amazing}</span>)</button>
+      </div>
+
+      <section class="comments">
+        <h2>Comentarios</h2>
+        <div id="commentList">
+          ${v.comments.map(c => `<p class="comment-item">💬 ${c}</p>`).join("")}
+        </div>
+        <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
+        <button onclick="addComment('${folder}', ${idx})">Comentar</button>
+      </section>
     </div>
   `;
 
   const videoPlayer = document.getElementById("videoPlayer");
 
-  // 🔒 Bloqueo de adelantar
+  /* 🔒 Bloqueo: evitar adelantar */
   videoPlayer.addEventListener("seeking", () => {
-    if (videoPlayer.currentTime > (videoPlayer.lastTime || 0)) {
-      videoPlayer.currentTime = videoPlayer.lastTime || 0;
+    if(videoPlayer.currentTime > (videoPlayer.lastTime || 0)){
+      videoPlayer.currentTime = videoPlayer.lastTime; 
     }
   });
   videoPlayer.addEventListener("timeupdate", () => {
-    videoPlayer.lastTime = videoPlayer.currentTime;
+    videoPlayer.lastTime = videoPlayer.currentTime; 
   });
 
-  // 🟢 Reiniciar banderas cada vez que se carga un nuevo video
-  let adStartShown = false;
-  let adMidShown = false;
-  let adEndShown = false;
+  /* 📺 Anuncios: inicio (0s), 50s y final */
+  let adsShown = { start:false, mid:false, end:false };
 
-  // 1️⃣ Al inicio
-  videoPlayer.addEventListener("play", () => {
-    if (!adStartShown) {
-      adStartShown = true;
-      showAd(0, videoPlayer);
-    }
-  });
+  // Anuncio al inicio
+  if (!adsShown.start){
+    adsShown.start = true;
+    window.open("https://overplantovervaluetwine.com/2061965", "_blank");
+  }
 
-  // 2️⃣ A los 50s o mitad si dura menos
   videoPlayer.addEventListener("timeupdate", () => {
-    const midPoint = videoPlayer.duration < 50 ? videoPlayer.duration / 2 : 50;
-    if (videoPlayer.currentTime >= midPoint && !adMidShown) {
-      adMidShown = true;
-      showAd(videoPlayer.currentTime, videoPlayer);
+    // A los 50s
+    if (videoPlayer.currentTime >= 50 && !adsShown.mid){
+      adsShown.mid = true;
+      const currentTime = videoPlayer.currentTime;
+      videoPlayer.pause();
+      window.open("https://overplantovervaluetwine.com/2061965", "_blank");
+      setTimeout(() => {
+        videoPlayer.currentTime = currentTime;
+        videoPlayer.play();
+      }, 2000);
     }
-  });
 
-  // 3️⃣ Al finalizar
-  videoPlayer.addEventListener("ended", () => {
-    if (!adEndShown) {
-      adEndShown = true;
-      showAd(videoPlayer.duration, videoPlayer);
+    // Al final del video
+    if (videoPlayer.currentTime >= videoPlayer.duration - 1 && !adsShown.end){
+      adsShown.end = true;
+      window.open("https://overplantovervaluetwine.com/2061965", "_blank");
     }
   });
 }
-
-// 🔗 Función de anuncio
-function showAd(currentTime, videoPlayer){
-  videoPlayer.pause();
-  window.open("https://overplantovervaluetwine.com/2061965", "_blank");
-  setTimeout(() => {
-    videoPlayer.currentTime = currentTime;
-    videoPlayer.play();
-  }, 2000);
-}
-
 
 
   /* -------- REACCIONES -------- */
