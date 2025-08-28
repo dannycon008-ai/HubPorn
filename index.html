@@ -135,6 +135,25 @@ video.preview {
     font-size: 1rem;
   }
 }
+/* 🔥 Modal anuncios */
+#adModal {
+  display:none; 
+  position:fixed; 
+  top:0; 
+  left:0;
+  width:100%; 
+  height:100%; 
+  background:rgba(0,0,0,0.9);
+  z-index:999; 
+  justify-content:center; 
+  align-items:center;
+}
+#adModal iframe {
+  width:80%; 
+  height:80%; 
+  border:none; 
+  border-radius:12px;
+}
 
   </style>
 </head>
@@ -341,6 +360,21 @@ video.preview {
           const data = docSnap.data();
           data.videos.splice(idx, 1);
           await folderRef.update({ videos: data.videos });
+
+          // Función para mostrar anuncio en modal
+function showAd(url, videoPlayer){
+  const modal = document.getElementById("adModal");
+  const frame = document.getElementById("adFrame");
+  modal.style.display = "flex";
+  frame.src = url;
+
+  setTimeout(() => {
+    modal.style.display = "none";
+    frame.src = "";
+    videoPlayer.play(); // reanudar video
+  }, 2000); // 2 segundos
+}
+
           renderSidebar();
           showFolder(folder);
         }
@@ -397,36 +431,34 @@ async function playVideo(folder, idx){
     videoPlayer.lastTime = videoPlayer.currentTime; 
   });
 
-  /* 📺 Anuncios: inicio (0s), 50s y final */
-  let adsShown = { start:false, mid:false, end:false };
+ // 📺 Anuncios: inicio, 50s y final
+let adsShown = { start:false, mid:false, end:false };
 
-  // Anuncio al inicio
-  if (!adsShown.start){
+// Al iniciar
+videoPlayer.addEventListener("play", () => {
+  if(!adsShown.start){
+    videoPlayer.pause();
     adsShown.start = true;
-    window.open("https://overplantovervaluetwine.com/2061965", "_blank");
+    showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
   }
+});
 
-  videoPlayer.addEventListener("timeupdate", () => {
-    // A los 50s
-    if (videoPlayer.currentTime >= 50 && !adsShown.mid){
-      adsShown.mid = true;
-      const currentTime = videoPlayer.currentTime;
-      videoPlayer.pause();
-      window.open("https://overplantovervaluetwine.com/2061965", "_blank");
-      setTimeout(() => {
-        videoPlayer.currentTime = currentTime;
-        videoPlayer.play();
-      }, 2000);
-    }
+// A los 50s
+videoPlayer.addEventListener("timeupdate", () => {
+  if(videoPlayer.currentTime >= 50 && !adsShown.mid){
+    adsShown.mid = true;
+    videoPlayer.pause();
+    showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
+  }
+});
 
-    // Al final del video
-    if (videoPlayer.currentTime >= videoPlayer.duration - 1 && !adsShown.end){
-      adsShown.end = true;
-      window.open("https://overplantovervaluetwine.com/2061965", "_blank");
-    }
-  });
-}
-
+// Al final
+videoPlayer.addEventListener("ended", () => {
+  if(!adsShown.end){
+    adsShown.end = true;
+    showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
+  }
+});
 
   /* -------- REACCIONES -------- */
   async function addReaction(folder, idx, type){
