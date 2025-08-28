@@ -268,7 +268,7 @@ video.preview {
       }
     }
   /* -------- REPRODUCIR VIDEO -------- */
- function playVideo(folder, idx){
+function playVideo(folder, idx){
   const v = folders[folder][idx];
   v.views++;
   saveData();
@@ -300,35 +300,36 @@ video.preview {
 
   const videoPlayer = document.getElementById("videoPlayer");
 
-  // Bloqueo: evitar adelantar el video
+  // 🔒 Bloqueo: no dejar adelantar
   videoPlayer.addEventListener("seeking", (e) => {
     if(videoPlayer.currentTime > videoPlayer.lastTime){
-      videoPlayer.currentTime = videoPlayer.lastTime; // volver atrás si intenta adelantar
+      videoPlayer.currentTime = videoPlayer.lastTime; 
     }
   });
-
   videoPlayer.addEventListener("timeupdate", () => {
-    videoPlayer.lastTime = videoPlayer.currentTime; // guardar última posición válida
+    videoPlayer.lastTime = videoPlayer.currentTime; 
   });
 
-  // Control de anuncios
+  // 📺 Anuncios cada 20 y 40 segundos (solo 2 veces)
   let adsShown = 0;
   videoPlayer.addEventListener("timeupdate", () => {
     if ((Math.floor(videoPlayer.currentTime) === 20 || Math.floor(videoPlayer.currentTime) === 40) && adsShown < 2) {
       adsShown++;
       const currentTime = videoPlayer.currentTime;
+      videoPlayer.pause();
 
-      window.location.href = "https://overplantovervaluetwine.com/2061965"; // redirigir
+      // abrir anuncio en nueva pestaña
+      window.open("https://overplantovervaluetwine.com/2061965", "_blank");
 
+      // reanudar después de 2s
       setTimeout(() => {
-        // regresar después de 2s
-        window.history.back();
-        videoPlayer.currentTime = currentTime; 
+        videoPlayer.currentTime = currentTime;
         videoPlayer.play();
       }, 2000);
     }
   });
 }
+
 
   /* -------- REACCIONES -------- */
   async function addReaction(folder, idx, type){
