@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Plataforma de Videos</title>
+  <title>Panel de Administración</title>
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
   <!-- Firebase SDK -->
@@ -11,155 +11,221 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:"Segoe UI", Tahoma, sans-serif; background:#121212; color:#fff; display:flex; }
-
-    header { position:fixed; top:0; left:0; right:0; background:#1f1f1f; display:flex;
-      justify-content:center; align-items:center; padding:12px 18px; z-index:100; }
-    .title{ font-family:"Archivo Black", sans-serif; font-size:2.5rem;
-      background:linear-gradient(to right, #ff4444 50%, #ffffff 50%);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    main{ margin-top:74px; flex:1; display:flex; }
-    .sidebar{ width:240px; background:#1f1f1f; padding:14px; height:calc(100vh - 74px);
-      position:fixed; top:74px; left:0; overflow-y:auto; border-right:1px solid #222; }
-    .content{ margin-left:240px; flex:1; padding:20px; }
-    .folder{ margin-bottom:14px; cursor:pointer; }
-    .folder h3{ color:#ff4444; font-size:1rem; }
-    
-    .video-grid {
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #121212;
+      color: #fff;
+      margin: 0;
+      padding: 0;
       display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      padding: 10px;
-      justify-content: flex-start;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
     }
-    .video-card {
-      flex: 0 0 auto;
-      width: 160px;
-      background: #1b1b1b;
-      border: 1px solid #242424;
-      border-radius: 10px;
-      padding: 6px;
-    }
-    video.preview {
-      width: 100%;
-      height: 90px;
-      object-fit: cover;
-    }
-    .video-player video#videoPlayer {
-      width: 60%;
-      max-width: 600px;
-      height: auto;
+    .panel {
+      margin-top: 40px;
+      background: #1f1f1f;
+      padding: 20px;
       border-radius: 12px;
-      background:#000;
-      display: block;
-      margin: 0 auto;
+      width: 90%;
+      max-width: 500px;
+      border: 1px solid #333;
     }
-
-    .reactions button{ background:#222; border:none; padding:8px 12px; border-radius:6px; color:#fff; cursor:pointer; }
-    .reactions button:hover{ background:#ff4444; }
-    .comments{ margin-top:20px; background:#1f1f1f; padding:15px; border-radius:10px; }
-    .comments textarea{ width:100%; height:60px; margin-top:10px; border-radius:8px; padding:8px; border:none; background:#222; color:#fff; }
-    .comments button{ margin-top:8px; background:#222; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
-    .comments button:hover{ background:#ff4444; }
-
-    /* Responsive */
-    @media (max-width: 900px) {
-      header { flex-direction: column; }
-      .sidebar { position:relative; width:100%; height:auto; border-right:none; }
-      .content { margin-left:0; }
-      .video-player video#videoPlayer { max-width:100%; }
+    h1 {
+      font-family: "Archivo Black", sans-serif;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 2rem;
+      background: linear-gradient(to right, #ff4444, #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-    @media (max-width: 600px) {
-      .title { font-size: 1.8rem; }
-      .video-grid { flex-direction: column; gap: 16px; }
-      .video-card { width:100%; }
+    input, select, button {
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+    }
+    input, select {
+      background: #2a2a2a;
+      color: #fff;
+    }
+    button {
+      background: #ff4444;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #ff2222;
+    }
+    hr {
+      border: 0;
+      border-top: 1px solid #333;
+      margin: 20px 0;
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header>
-    <h1 class="title">HubPorn</h1>
-  </header>
+  <div class="panel">
+    <h1>Panel de Admin</h1>
 
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar"></aside>
+    <!-- Agregar carpeta -->
+    <h3>📁 Crear Carpeta</h3>
+    <input type="text" id="folderName" placeholder="Nombre de carpeta">
+    <button onclick="addFolder()">Agregar Carpeta</button>
+    <hr>
 
-  <!-- Contenido -->
-  <main class="content">
-    <div id="videoSection"><p>Selecciona una carpeta para ver sus videos</p></div>
-  </main>
+    <!-- Agregar video -->
+    <h3>🎬 Agregar Video</h3>
+    <input type="text" id="videoURL" placeholder="URL del video (mp4)">
+    <select id="folderSelect"></select>
+    <button onclick="addVideo()">Agregar Video</button>
+    <hr>
+
+    <!-- Eliminar carpeta -->
+    <h3>🗑️ Eliminar Carpeta</h3>
+    <select id="deleteFolderSelect"></select>
+    <button onclick="deleteFolder()">Eliminar Carpeta</button>
+    <hr>
+
+    <!-- Eliminar video -->
+    <h3>🗑️ Eliminar Video</h3>
+    <select id="deleteVideoFolderSelect" onchange="populateVideosToDelete()"></select>
+    <select id="deleteVideoSelect"></select>
+    <button onclick="deleteVideo()">Eliminar Video</button>
+  </div>
 
   <script>
     // Configuración Firebase
     const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "TU_AUTH_DOMAIN",
-      projectId: "TU_PROJECT_ID",
-      storageBucket: "TU_STORAGE_BUCKET",
-      messagingSenderId: "TU_MSG_ID",
-      appId: "TU_APP_ID",
-      measurementId: "TU_MEASURE_ID"
+      apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
+      authDomain: "minitinder-f6314.firebaseapp.com",
+      projectId: "minitinder-f6314",
+      storageBucket: "minitinder-f6314.appspot.com",
+      messagingSenderId: "659347167496",
+      appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd",
+      measurementId: "G-L0E0Y4ZLK6"
     };
+
+    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const sidebar = document.getElementById("sidebar");
-    const videoSection = document.getElementById("videoSection");
+    const folderSelect = document.getElementById("folderSelect");
+    const deleteFolderSelect = document.getElementById("deleteFolderSelect");
+    const deleteVideoFolderSelect = document.getElementById("deleteVideoFolderSelect");
+    const deleteVideoSelect = document.getElementById("deleteVideoSelect");
 
-    /* -------- RENDER SIDEBAR -------- */
+    /* -------- AGREGAR CARPETA -------- */
+    async function addFolder(){
+      const name = document.getElementById("folderName").value.trim();
+      if (!name) return alert("Debes escribir un nombre.");
+      await db.collection("folders").doc(name).set({ videos: [] });
+      renderSidebar();
+      document.getElementById("folderName").value = "";
+      alert("Carpeta creada ✅");
+    }
+
+    /* -------- AGREGAR VIDEO -------- */
+    async function addVideo(){
+      const url = document.getElementById("videoURL").value.trim();
+      const folder = folderSelect.value;
+      if (!url || !folder) return alert("Debes seleccionar carpeta y poner un URL.");
+
+      const folderRef = db.collection("folders").doc(folder);
+      const folderDoc = await folderRef.get();
+
+      if (folderDoc.exists){
+        const data = folderDoc.data();
+        const videos = data.videos || [];
+        if (videos.length >= 30) return alert("Máximo 30 videos por carpeta.");
+
+        videos.push({
+          url,
+          views: 0,
+          reactions: { like:0, dislike:0, love:0, amazing:0 },
+          reacted: false,
+          comments: []
+        });
+
+        await folderRef.update({ videos });
+        document.getElementById("videoURL").value = "";
+        alert("Video agregado ✅");
+      }
+    }
+
+    /* -------- ELIMINAR CARPETA -------- */
+    async function deleteFolder(){
+      const folder = deleteFolderSelect.value;
+      if (!folder) return;
+      if (confirm(`¿Seguro que quieres eliminar la carpeta "${folder}"?`)) {
+        await db.collection("folders").doc(folder).delete();
+        renderSidebar();
+        alert("Carpeta eliminada ✅");
+      }
+    }
+
+    /* -------- ELIMINAR VIDEO -------- */
+    async function populateVideosToDelete(){
+      const folder = deleteVideoFolderSelect.value;
+      deleteVideoSelect.innerHTML = "";
+      if (!folder) return;
+
+      const folderRef = db.collection("folders").doc(folder);
+      const docSnap = await folderRef.get();
+      if (docSnap.exists){
+        const data = docSnap.data();
+        data.videos.forEach((v, idx) => {
+          let opt = document.createElement("option");
+          opt.value = idx;
+          opt.textContent = `Video ${idx+1} - ${v.url.substring(0,30)}...`;
+          deleteVideoSelect.appendChild(opt);
+        });
+      }
+    }
+
+    async function deleteVideo(){
+      const folder = deleteVideoFolderSelect.value;
+      const idx = deleteVideoSelect.value;
+      if (!folder || idx === "") return;
+      if (confirm("¿Seguro que quieres eliminar este video?")) {
+        const folderRef = db.collection("folders").doc(folder);
+        const docSnap = await folderRef.get();
+        if (docSnap.exists){
+          const data = docSnap.data();
+          data.videos.splice(idx, 1);
+          await folderRef.update({ videos: data.videos });
+          populateVideosToDelete();
+          alert("Video eliminado ✅");
+        }
+      }
+    }
+
+    /* -------- RENDER -------- */
     async function renderSidebar(){
-      sidebar.innerHTML = "";
+      folderSelect.innerHTML = "";
+      deleteFolderSelect.innerHTML = "";
+      deleteVideoFolderSelect.innerHTML = "";
+
       const snapshot = await db.collection("folders").get();
       snapshot.forEach(doc => {
         const folder = doc.id;
-        const item = document.createElement("div");
-        item.className = "folder";
-        item.innerHTML = `<h3>${folder}</h3>`;
-        item.onclick = () => showFolder(folder);
-        sidebar.appendChild(item);
+
+        let opt1 = document.createElement("option");
+        opt1.value = folder; opt1.textContent = folder;
+        folderSelect.appendChild(opt1);
+
+        let opt2 = document.createElement("option");
+        opt2.value = folder; opt2.textContent = folder;
+        deleteFolderSelect.appendChild(opt2);
+
+        let opt3 = document.createElement("option");
+        opt3.value = folder; opt3.textContent = folder;
+        deleteVideoFolderSelect.appendChild(opt3);
       });
-    }
-
-    /* -------- MOSTRAR VIDEOS -------- */
-    async function showFolder(folder){
-      const folderRef = db.collection("folders").doc(folder);
-      const docSnap = await folderRef.get();
-      if (!docSnap.exists){
-        videoSection.innerHTML = `<h2>${folder}</h2><p>No hay videos aquí todavía.</p>`;
-        return;
-      }
-      const data = docSnap.data();
-      const grid = data.videos.map((v, idx) => `
-        <div class="video-card" onclick="playVideo('${folder}', ${idx})">
-          <video class="preview" src="${v.url}" muted preload="metadata"></video>
-          <div>${v.views} vistas</div>
-        </div>
-      `).join("");
-      videoSection.innerHTML = `<h2>${folder}</h2><div class="video-grid">${grid}</div>`;
-    }
-
-    /* -------- REPRODUCIR VIDEO -------- */
-    async function playVideo(folder, idx){
-      const folderRef = db.collection("folders").doc(folder);
-      const docSnap = await folderRef.get();
-      if (!docSnap.exists) return;
-      const data = docSnap.data();
-      const v = data.videos[idx];
-
-      v.views++;
-      data.videos[idx] = v;
-      await folderRef.update({ videos: data.videos });
-
-      videoSection.innerHTML = `
-        <div class="video-player">
-          <video id="videoPlayer" controls autoplay>
-            <source src="${v.url}" type="video/mp4">
-          </video>
-          <p>👁️ ${v.views} vistas</p>
-        </div>
-      `;
     }
 
     renderSidebar();
