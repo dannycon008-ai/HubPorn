@@ -200,7 +200,20 @@
     function renderSidebar(){
       sidebar.innerHTML = "";
       folderSelect.innerHTML = "";
-      
+/* Eliminar carpeta */
+function deleteFolder(){
+  const folder = document.getElementById("deleteFolderSelect").value;
+  if (!folder) return;
+
+  // Confirmación de seguridad
+  if (confirm(`¿Seguro que quieres eliminar la carpeta "${folder}" con todos sus videos?`)) {
+    delete folders[folder];       // elimina la carpeta del objeto
+    saveData();                   // guarda en localStorage
+    renderSidebar();              // refresca el sidebar y los selects
+    videoSection.innerHTML = "<p>Selecciona una carpeta para ver sus videos</p>"; // limpia la pantalla central
+  }
+}
+
      const deleteFolderSelect = document.getElementById("deleteFolderSelect");
 const deleteVideoFolderSelect = document.getElementById("deleteVideoFolderSelect");
 deleteFolderSelect.innerHTML = "";
