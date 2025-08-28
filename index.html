@@ -170,6 +170,26 @@
   object-fit: contain;
   background: none;
 }
+.reactions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.reactions button {
+  background: #222;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1.2rem;  /* tamaño del emoji */
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.reactions button:hover {
+  background: #ff4444;
+}
 
     }
   </style>
@@ -279,8 +299,11 @@ async function playVideo(folder, idx){
 
 <div class="reactions">
   <button onclick="addReaction('${folder}', ${idx}, 'like')">
-    <img src="👍" class="reaction-icon" />
-    (<span id="likeCount">${v.reactions.like}</span>)
+    👍 (<span id="likeCount">${v.reactions.like}</span>)
+  </button>
+
+  <button onclick="addReaction('${folder}', ${idx}, 'dislike')">
+    👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)
   </button>
 </div>
 
