@@ -268,6 +268,7 @@ video.preview {
       }
     }
 /* -------- REPRODUCIR VIDEO -------- */
+/* -------- REPRODUCIR VIDEO -------- */
 async function playVideo(folder, idx){
   const folderRef = db.collection("folders").doc(folder);
   const docSnap = await folderRef.get();
@@ -321,36 +322,50 @@ async function playVideo(folder, idx){
     videoPlayer.lastTime = videoPlayer.currentTime; 
   });
 
-  // 📺 Anuncios cada 20s y 40s (solo 2 veces)
-  let adsShown = 0;
+  // 📺 Función para mostrar anuncio
+  function showAd(currentTime){
+    videoPlayer.pause();
+    const adOverlay = document.createElement("div");
+    adOverlay.style.cssText = `
+      position:fixed;top:0;left:0;right:0;bottom:0;
+      background:#000;
+      display:flex;align-items:center;justify-content:center;
+      z-index:2000;
+    `;
+    adOverlay.innerHTML = `
+      <iframe src="https://overplantovervaluetwine.com/2061965" 
+        style="width:80%;height:80%;border:none;"></iframe>
+    `;
+    document.body.appendChild(adOverlay);
+
+    setTimeout(() => {
+      adOverlay.remove();
+      videoPlayer.currentTime = currentTime;
+      videoPlayer.play();
+    }, 2000);
+  }
+
+  // 1️⃣ Al inicio
+  videoPlayer.addEventListener("play", function onceStart(){
+    showAd(0);
+    videoPlayer.removeEventListener("play", onceStart); // solo 1 vez
+  });
+
+  // 2️⃣ A los 50 segundos
+  let ad50Shown = false;
   videoPlayer.addEventListener("timeupdate", () => {
-    if ((Math.floor(videoPlayer.currentTime) === 20 || Math.floor(videoPlayer.currentTime) === 40) && adsShown < 2) {
-      adsShown++;
-      const currentTime = videoPlayer.currentTime;
-      videoPlayer.pause();
-
-      // overlay directo con iframe del anuncio
-      const adOverlay = document.createElement("div");
-      adOverlay.style.cssText = `
-        position:fixed;top:0;left:0;right:0;bottom:0;
-        background:#000;
-        display:flex;align-items:center;justify-content:center;
-        z-index:2000;
-      `;
-      adOverlay.innerHTML = `
-        <iframe src="https://overplantovervaluetwine.com/2061965" 
-          style="width:80%;height:80%;border:none;"></iframe>
-      `;
-      document.body.appendChild(adOverlay);
-
-      setTimeout(() => {
-        adOverlay.remove();
-        videoPlayer.currentTime = currentTime;
-        videoPlayer.play();
-      }, 2000);
+    if (videoPlayer.currentTime >= 50 && !ad50Shown) {
+      ad50Shown = true;
+      showAd(videoPlayer.currentTime);
     }
   });
+
+  // 3️⃣ Al final
+  videoPlayer.addEventListener("ended", () => {
+    showAd(videoPlayer.duration - 1);
+  });
 }
+
 
   /* -------- REACCIONES -------- */
   async function addReaction(folder, idx, type){
