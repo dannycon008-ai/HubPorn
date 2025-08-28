@@ -158,6 +158,37 @@
 .reactions button:hover {
   background: #ff4444;
 }
+.reactions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.reactions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  border: none;
+  border-radius: 50px;   /* 🔵 forma circular */
+  background: #222;      /* fondo oscuro */
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.reactions button:hover {
+  background: #ff4444;   /* efecto hover rojo */
+  transform: scale(1.1); /* efecto de agrandar un poco */
+}
+
+.reactions span {
+  font-weight: bold;
+  color: #fff;
+}
 
     }
   </style>
@@ -252,6 +283,15 @@ async function playVideo(folder, idx){
 
   const data = docSnap.data();
   const v = data.videos[idx];
+  // sumar reacción
+  v.reactions[type]++;
+  data.videos[idx] = v;
+
+  await folderRef.update({ videos: data.videos });
+
+  // refrescar la vista del video
+  playVideo(folder, idx);
+}
 
   // 📈 Aumentar vistas
   v.views++;
@@ -270,15 +310,6 @@ async function playVideo(folder, idx){
         <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (<span id="likeCount">${v.reactions.like}</span>)</button>
         <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
       </div>
-
-      <section class="comments">
-        <h2>Comentarios</h2>
-        <div id="commentList">
-          ${v.comments.map(c => `<p class="comment-item">💬 ${c}</p>`).join("")}
-        </div>
-        <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
-      </section>
-    </div>
   `;
 
   const videoPlayer = document.getElementById("videoPlayer");
