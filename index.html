@@ -213,153 +213,157 @@
   </div>
 
   <script>
-    // Configuración Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
-      authDomain: "minitinder-f6314.firebaseapp.com",
-      projectId: "minitinder-f6314",
-      storageBucket: "minitinder-f6314.appspot.com",
-      messagingSenderId: "659347167496",
-      appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd",
-      measurementId: "G-L0E0Y4ZLK6"
-    };
+  // Configuración Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
+    authDomain: "minitinder-f6314.firebaseapp.com",
+    projectId: "minitinder-f6314",
+    storageBucket: "minitinder-f6314.appspot.com",
+    messagingSenderId: "659347167496",
+    appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd",
+    measurementId: "G-L0E0Y4ZLK6"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-    const sidebar = document.getElementById("sidebar");
-    const videoSection = document.getElementById("videoSection");
+  const sidebar = document.getElementById("sidebar");
+  const videoSection = document.getElementById("videoSection");
 
-    // ✅ Mostrar anuncio en modal
-    function showAd(url, videoPlayer){
-      const modal = document.getElementById("adModal");
-      const frame = document.getElementById("adFrame");
-      modal.style.display = "flex";
-      frame.src = url;
-      setTimeout(() => {
-        modal.style.display = "none";
-        frame.src = "";
-        videoPlayer.play();
-      }, 2000);
+  // ✅ Mostrar anuncio en modal
+  function showAd(url, videoPlayer){
+    const modal = document.getElementById("adModal");
+    const frame = document.getElementById("adFrame");
+    modal.style.display = "flex";
+    frame.src = url;
+    setTimeout(() => {
+      modal.style.display = "none";
+      frame.src = "";
+      videoPlayer.play();
+    }, 2000);
+  }
+
+  // ✅ Renderizar carpetas
+  async function renderSidebar(){
+    sidebar.innerHTML = "";
+    const snapshot = await db.collection("folders").get();
+    snapshot.forEach(doc => {
+      const folder = doc.id;
+      const item = document.createElement("div");
+      item.className = "folder";
+      item.innerHTML = `<h3>${folder}</h3>`;
+      item.onclick = () => showFolder(folder);
+      sidebar.appendChild(item);
+    });
+  }
+
+  // ✅ Mostrar videos de una carpeta
+  async function showFolder(folder){
+    const docSnap = await db.collection("folders").doc(folder).get();
+    if (!docSnap.exists){
+      videoSection.innerHTML = `<h2>${folder}</h2><p>No hay videos aquí todavía.</p>`;
+      return;
     }
-
-    // ✅ Renderizar carpetas
-    async function renderSidebar(){
-      sidebar.innerHTML = "";
-      const snapshot = await db.collection("folders").get();
-      snapshot.forEach(doc => {
-        const folder = doc.id;
-        const item = document.createElement("div");
-        item.className = "folder";
-        item.innerHTML = `<h3>${folder}</h3>`;
-        item.onclick = () => showFolder(folder);
-        sidebar.appendChild(item);
-      });
-    }
-
-    // ✅ Mostrar videos de una carpeta
-    async function showFolder(folder){
-      const docSnap = await db.collection("folders").doc(folder).get();
-      if (!docSnap.exists){
-        videoSection.innerHTML = `<h2>${folder}</h2><p>No hay videos aquí todavía.</p>`;
-        
-        return;
-      }
-      const data = docSnap.data();
-      const grid = data.videos.map((v, idx) => `
-        <div class="video-card" onclick="playVideo('${folder}', ${idx})">
-          <video class="preview" src="${v.url}" muted preload="metadata"></video>
-          <div>${v.views} vistas</div>
-        </div>
-      `).join("");
-      videoSection.innerHTML = `<h2>${folder}</h2><div class="video-grid">${grid}</div>`;
-    }
-
- /* -------- REPRODUCIR VIDEO -------- */
-async function playVideo(folder, idx){
-  const folderRef = db.collection("folders").doc(folder);
-  const docSnap = await folderRef.get();
-  if (!docSnap.exists) return;
-
-  const data = docSnap.data();
-  const v = data.videos[idx];
-  // sumar reacción
-  v.reactions[type]++;
-  data.videos[idx] = v;
-
-  await folderRef.update({ videos: data.videos });
-
-  // refrescar la vista del video
-  playVideo(folder, idx);
-}
-
-  // 📈 Aumentar vistas
-  v.views++;
-  data.videos[idx] = v;
-  await folderRef.update({ videos: data.videos });
-
-  // 🎬 Renderizar video + reacciones + comentarios
-  videoSection.innerHTML = `
-    <div class="video-player">
-      <video id="videoPlayer" controls autoplay>
-        <source src="${v.url}" type="video/mp4">
-      </video>
-      <p id="views">👁️ ${v.views} vistas</p>
-
-      <div class="reactions">
-        <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (<span id="likeCount">${v.reactions.like}</span>)</button>
-        <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+    const data = docSnap.data();
+    const grid = data.videos.map((v, idx) => `
+      <div class="video-card" onclick="playVideo('${folder}', ${idx})">
+        <video class="preview" src="${v.url}" muted preload="metadata"></video>
+        <div>${v.views} vistas</div>
       </div>
-  `;
+    `).join("");
+    videoSection.innerHTML = `<h2>${folder}</h2><div class="video-grid">${grid}</div>`;
+  }
 
-  const videoPlayer = document.getElementById("videoPlayer");
+  /* -------- REPRODUCIR VIDEO -------- */
+  async function playVideo(folder, idx){
+    const folderRef = db.collection("folders").doc(folder);
+    const docSnap = await folderRef.get();
+    if (!docSnap.exists) return;
 
-  // 🔒 Bloqueo para que no adelanten
-  videoPlayer.addEventListener("seeking", () => {
-    if(videoPlayer.currentTime > (videoPlayer.lastTime || 0)){
-      videoPlayer.currentTime = videoPlayer.lastTime; 
-    }
-  });
-  videoPlayer.addEventListener("timeupdate", () => {
-    videoPlayer.lastTime = videoPlayer.currentTime; 
-  });
+    const data = docSnap.data();
+    const v = data.videos[idx];
 
-  videoPlayer.addEventListener("timeupdate", () => {
-    videoPlayer.lastTime = videoPlayer.currentTime; 
-  });
+    // 📈 Aumentar vistas
+    v.views++;
+    data.videos[idx] = v;
+    await folderRef.update({ videos: data.videos });
 
-  /* 📺 Anuncios */
-  let adsShown = { start:false, mid:false, end:false };
+    // 🎬 Renderizar video + reacciones
+    videoSection.innerHTML = `
+      <div class="video-player">
+        <video id="videoPlayer" controls autoplay>
+          <source src="${v.url}" type="video/mp4">
+        </video>
+        <p id="views">👁️ ${v.views} vistas</p>
 
-  // Al iniciar
-  videoPlayer.addEventListener("play", () => {
-    if(!adsShown.start){
-      videoPlayer.pause();
-      adsShown.start = true;
-      showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
-    }
-  });
+        <div class="reactions">
+          <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (<span id="likeCount">${v.reactions.like}</span>)</button>
+          <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+        </div>
+      </div>
+    `;
 
-  // A los 50s
-  videoPlayer.addEventListener("timeupdate", () => {
-    if(videoPlayer.currentTime >= 50 && !adsShown.mid){
-      adsShown.mid = true;
-      videoPlayer.pause();
-      showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
-    }
-  });
+    const videoPlayer = document.getElementById("videoPlayer");
 
-  // Al final
-  videoPlayer.addEventListener("ended", () => {
-    if(!adsShown.end){
-      adsShown.end = true;
-      showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
-    }
-  });
-}
+    // 🔒 Bloqueo para que no adelanten
+    videoPlayer.addEventListener("seeking", () => {
+      if(videoPlayer.currentTime > (videoPlayer.lastTime || 0)){
+        videoPlayer.currentTime = videoPlayer.lastTime; 
+      }
+    });
+    videoPlayer.addEventListener("timeupdate", () => {
+      videoPlayer.lastTime = videoPlayer.currentTime; 
+    });
 
+    /* 📺 Anuncios */
+    let adsShown = { start:false, mid:false, end:false };
 
-    renderSidebar();
-  </script>
+    // Al iniciar
+    videoPlayer.addEventListener("play", () => {
+      if(!adsShown.start){
+        videoPlayer.pause();
+        adsShown.start = true;
+        showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
+      }
+    });
+
+    // A los 50s
+    videoPlayer.addEventListener("timeupdate", () => {
+      if(videoPlayer.currentTime >= 50 && !adsShown.mid){
+        adsShown.mid = true;
+        videoPlayer.pause();
+        showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
+      }
+    });
+
+    // Al final
+    videoPlayer.addEventListener("ended", () => {
+      if(!adsShown.end){
+        adsShown.end = true;
+        showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
+      }
+    });
+  }
+
+  /* -------- REACCIONES -------- */
+  async function addReaction(folder, idx, type){
+    const folderRef = db.collection("folders").doc(folder);
+    const docSnap = await folderRef.get();
+    if (!docSnap.exists) return;
+
+    const data = docSnap.data();
+    const v = data.videos[idx];
+
+    v.reactions[type]++;
+    data.videos[idx] = v;
+
+    await folderRef.update({ videos: data.videos });
+
+    playVideo(folder, idx);
+  }
+
+  renderSidebar();
+</script>
+
 </body>
 </html>
