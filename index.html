@@ -48,7 +48,16 @@ video.preview {
   object-fit: cover;
 }
 
-    .video-player video#videoPlayer{ width:100%; max-width:900px; border-radius:12px; background:#000; }
+ .video-player video#videoPlayer {
+  width: 60%;          /* ancho más reducido */
+  max-width: 600px;    /* antes era 900px */
+  height: auto;        /* mantiene proporción */
+  border-radius: 12px;
+  background: #000;
+  display: block;
+  margin: 0 auto;      /* centra el video */
+}
+
     .reactions button{ background:#222; border:none; padding:8px 12px; border-radius:6px; color:#fff; cursor:pointer; }
     .reactions button:hover{ background:#ff4444; }
     .comments{ margin-top:20px; background:#1f1f1f; padding:15px; border-radius:10px; }
