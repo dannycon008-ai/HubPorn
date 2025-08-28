@@ -10,7 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script>
-    // Configuración de Firebase
+    // Configuración Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
       authDomain: "minitinder-f6314.firebaseapp.com",
@@ -61,7 +61,7 @@
     .folder h3{ color:#ff4444; font-size:1rem; }
     .folder:hover h3{ color:#fff; }
 
-    /* Listados y reproductor */
+    /* Videos */
     .video-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; }
     .video-card{ background:#1b1b1b; border:1px solid #242424; border-radius:10px; padding:10px; cursor:pointer; }
     .video-card:hover{ border-color:#ff4444; }
@@ -134,29 +134,50 @@
     const videoSection = document.getElementById("videoSection");
     const folderSelect = document.getElementById("folderSelect");
 
-    let folders = {}; // aquí luego irán tus datos de Firestore
+    let folders = {};
 
     function toggleAdminPanel(){
       document.getElementById("adminPanel").classList.toggle("hidden");
     }
 
+    // === Cargar datos desde Firestore ===
+    function loadData(){
+      db.collection("folders").get().then(snapshot=>{
+        folders = {};
+        snapshot.forEach(doc=>{
+          folders[doc.id] = doc.data().videos || [];
+        });
+        renderSidebar();
+      });
+    }
+
+    // === Crear carpeta ===
     function addFolder(){
       const name = document.getElementById("folderName").value.trim();
       if (!name) return;
-      folders[name] = [];
-      renderSidebar();
-      document.getElementById("folderName").value = "";
+      db.collection("folders").doc(name).set({ videos: [] })
+        .then(()=>{ loadData(); document.getElementById("folderName").value = ""; });
     }
 
+    // === Agregar video ===
     function addVideo(){
       const url = document.getElementById("videoURL").value.trim();
-      const folder = folderSelect.value;
+      const folder = document.getElementById("folderSelect").value;
       if (!url || !folder) return;
-      folders[folder].push({ url, views:0, reactions:{like:0,dislike:0,love:0,amazing:0}, reacted:false, comments:[] });
-      renderSidebar();
-      document.getElementById("videoURL").value = "";
+
+      const video = {
+        url,
+        views: 0,
+        reactions: { like:0, dislike:0, love:0, amazing:0 },
+        comments: []
+      };
+
+      db.collection("folders").doc(folder).update({
+        videos: firebase.firestore.FieldValue.arrayUnion(video)
+      }).then(()=>{ loadData(); document.getElementById("videoURL").value = ""; });
     }
 
+    // === Renderizar Sidebar ===
     function renderSidebar(){
       sidebar.innerHTML = "";
       folderSelect.innerHTML = "";
@@ -173,10 +194,11 @@
       }
     }
 
+    // === Mostrar videos de una carpeta ===
     function showFolder(folder){
       const list = folders[folder] || [];
       if (!list.length){
-        videoSection.innerHTML = `<h2>${folder}</h2><p>No hay videos aquí todavía.</p>`;
+        videoSection.innerHTML = `<h2>${folder}</h2><p>No hay videos.</p>`;
         return;
       }
       const grid = list.map((v, idx) => `
@@ -188,20 +210,58 @@
       videoSection.innerHTML = `<h2>${folder}</h2><div class="video-grid">${grid}</div>`;
     }
 
+    // === Reproducir video ===
     function playVideo(folder, idx){
-      const v = folders[folder][idx];
+      let videos = folders[folder];
+      let v = videos[idx];
       v.views++;
+
+      // Guardar en Firestore
+      videos[idx] = v;
+      db.collection("folders").doc(folder).update({ videos });
+
       videoSection.innerHTML = `
         <div class="video-player">
           <video id="videoPlayer" controls autoplay>
             <source src="${v.url}" type="video/mp4">
           </video>
           <p>👁️ ${v.views} vistas</p>
+          <div class="reactions">
+            <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (${v.reactions.like})</button>
+            <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (${v.reactions.dislike})</button>
+            <button onclick="addReaction('${folder}', ${idx}, 'love')">❤️ Me Gusta (${v.reactions.love})</button>
+            <button onclick="addReaction('${folder}', ${idx}, 'amazing')">😍 Me Encanta (${v.reactions.amazing})</button>
+          </div>
+          <section class="comments">
+            <h2>Comentarios</h2>
+            <div id="commentList">${v.comments.map(c => `<p>💬 ${c}</p>`).join("")}</div>
+            <textarea id="commentInput"></textarea>
+            <button onclick="addComment('${folder}', ${idx})">Comentar</button>
+          </section>
         </div>
       `;
     }
 
-    renderSidebar();
+    // === Reacciones ===
+    function addReaction(folder, idx, type){
+      let videos = folders[folder];
+      videos[idx].reactions[type]++;
+      db.collection("folders").doc(folder).update({ videos })
+        .then(()=> playVideo(folder, idx));
+    }
+
+    // === Comentarios ===
+    function addComment(folder, idx){
+      const text = document.getElementById("commentInput").value.trim();
+      if (!text) return;
+      let videos = folders[folder];
+      videos[idx].comments.push(text);
+      db.collection("folders").doc(folder).update({ videos })
+        .then(()=> playVideo(folder, idx));
+    }
+
+    // Inicializar
+    loadData();
   </script>
 </body>
 </html>
