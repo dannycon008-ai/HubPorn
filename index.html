@@ -189,6 +189,64 @@
   font-weight: bold;
   color: #fff;
 }
+/* 📱 Ajustes para tablets (pantallas medianas) */
+@media (max-width: 900px) {
+  header {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .sidebar {
+    position: relative;   /* Sidebar ya no fija */
+    width: 100%;          /* Ocupa todo el ancho */
+    height: auto;
+    border-right: none;
+  }
+
+  .content {
+    margin-left: 0;       /* Quita el margen del sidebar */
+    padding: 15px;
+  }
+
+  .video-player video#videoPlayer {
+    max-width: 100%;      /* Video ocupa todo el ancho */
+    height: auto;
+  }
+}
+
+/* 📱 Ajustes para móviles (Android, iPhone) */
+@media (max-width: 600px) {
+  .title {
+    font-size: 1.6rem;    /* Título más pequeño */
+    text-align: center;
+  }
+
+  .video-grid {
+    flex-direction: column; /* Videos en columna */
+    gap: 12px;
+  }
+
+  .video-card {
+    width: 100%;         /* Cada tarjeta ocupa todo el ancho */
+    max-width: 100%;
+  }
+
+  video.preview {
+    height: auto;        /* Ajusta automáticamente */
+  }
+
+  .reactions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .reactions button {
+    width: 100%;
+    font-size: 1rem;
+    padding: 12px;
+  }
+}
 
     }
   </style>
