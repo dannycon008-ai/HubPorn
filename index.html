@@ -69,6 +69,16 @@
     #adminPanel button{ background:#222; color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; }
     #adminPanel button:hover{ background:#ff4444; }
     .hidden{ display:none; }
+<hr style="border:0; border-top:1px solid #2a2a2a; margin:14px 0;">
+<h3>Eliminar Carpeta</h3>
+<select id="deleteFolderSelect"></select>
+<button onclick="deleteFolder()">Eliminar Carpeta</button>
+
+<hr style="border:0; border-top:1px solid #2a2a2a; margin:14px 0;">
+<h3>Eliminar Video</h3>
+<select id="deleteVideoFolderSelect" onchange="populateVideosToDelete()"></select>
+<select id="deleteVideoSelect"></select>
+<button onclick="deleteVideo()">Eliminar Video</button>
 
     /* Responsive */
     @media (max-width: 900px){
