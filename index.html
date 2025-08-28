@@ -25,38 +25,39 @@
     .content{ margin-left:240px; flex:1; padding:20px; }
     .folder{ margin-bottom:14px; cursor:pointer; }
     .folder h3{ color:#ff4444; font-size:1rem; }
- .video-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 10px;
-  justify-content: flex-start;
-}
 
-.video-card {
-  flex: 0 0 auto;        /* No se encogen ni crecen */
-  width: 160px;           /* Ajusta según prefieras */
-  background: #1b1b1b;
-  border: 1px solid #242424;
-  border-radius: 10px;
-  padding: 6px;
-}
+    .video-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 10px;
+      justify-content: flex-start;
+    }
 
-video.preview {
-  width: 100%;
-  height: 90px;           /* Tamaño definido para que se vean más compactos */
-  object-fit: cover;
-}
+    .video-card {
+      flex: 0 0 auto;
+      width: 160px;
+      background: #1b1b1b;
+      border: 1px solid #242424;
+      border-radius: 10px;
+      padding: 6px;
+    }
 
- .video-player video#videoPlayer {
-  width: 60%;          /* ancho más reducido */
-  max-width: 600px;    /* antes era 900px */
-  height: auto;        /* mantiene proporción */
-  border-radius: 12px;
-  background: #000;
-  display: block;
-  margin: 0 auto;      /* centra el video */
-}
+    video.preview {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+    }
+
+    .video-player video#videoPlayer {
+      width: 60%;
+      max-width: 600px;
+      height: auto;
+      border-radius: 12px;
+      background: #000;
+      display: block;
+      margin: 0 auto;
+    }
 
     .reactions button{ background:#222; border:none; padding:8px 12px; border-radius:6px; color:#fff; cursor:pointer; }
     .reactions button:hover{ background:#ff4444; }
@@ -67,94 +68,25 @@ video.preview {
     #adminPanel{ margin:20px; padding:20px; background:#1f1f1f; border-radius:10px; border:1px solid #242424; }
     .hidden{ display:none; }
 
-    /* =====================
-   📱 ESTILOS RESPONSIVE
-   ===================== */
-
-/* Para tablets y pantallas medianas */
-@media (max-width: 900px) {
-  header {
-    flex-direction: column;
-    text-align: center;
-    gap: 10px;
-  }
-
-  .sidebar {
-    position: relative;   /* sidebar ya no fijo */
-    width: 100%;          /* ocupa todo el ancho */
-    height: auto;         /* no bloquea la pantalla */
-    border-right: none;
-  }
-
-  .content {
-    margin-left: 0;       /* quita margen del sidebar */
-    padding: 15px;
-  }
-
-  .video-player video#videoPlayer {
-    max-width: 100%;      /* el video ocupa todo el ancho */
-    height: auto;
-  }
-}
-
-/* Para móviles pequeños (ej. iPhone, Android) */
-@media (max-width: 600px) {
-  .title {
-    font-size: 1.8rem;    /* título más compacto */
-    text-align: center;
-  }
-
-  .video-grid {
-    flex-direction: column; /* cada video uno debajo del otro */
-    gap: 16px;
-  }
-
-  .video-card {
-    width: 100%;         /* cada tarjeta ocupa todo el ancho */
-    max-width: 100%;
-  }
-
-  video.preview {
-    height: auto;        /* ajuste automático en móviles */
-  }
-
-  .reactions {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .reactions button,
-  .comments button {
-    width: 100%;         /* botones grandes y fáciles de tocar */
-    font-size: 1rem;
-    padding: 12px;
-  }
-
-  .comments textarea {
-    width: 100%;
-    font-size: 1rem;
-  }
-}
-/* 🔥 Modal anuncios */
-#adModal {
-  display:none; 
-  position:fixed; 
-  top:0; 
-  left:0;
-  width:100%; 
-  height:100%; 
-  background:rgba(0,0,0,0.9);
-  z-index:999; 
-  justify-content:center; 
-  align-items:center;
-}
-#adModal iframe {
-  width:80%; 
-  height:80%; 
-  border:none; 
-  border-radius:12px;
-}
-
+    /* 🔥 Modal anuncios */
+    #adModal {
+      display:none; 
+      position:fixed; 
+      top:0; 
+      left:0;
+      width:100%; 
+      height:100%; 
+      background:rgba(0,0,0,0.9);
+      z-index:999; 
+      justify-content:center; 
+      align-items:center;
+    }
+    #adModal iframe {
+      width:80%; 
+      height:80%; 
+      border:none; 
+      border-radius:12px;
+    }
   </style>
 </head>
 <body>
@@ -175,26 +107,27 @@ video.preview {
   <!-- Panel de administración -->
   <section id="adminPanel" class="hidden">
     <h2>Panel de Admin</h2>
-    <!-- Agregar carpeta -->
     <input type="text" id="folderName" placeholder="Nombre de carpeta">
     <button onclick="addFolder()">Agregar Carpeta</button>
     <hr>
-    <!-- Agregar video -->
     <input type="text" id="videoURL" placeholder="URL del video (mp4)">
     <select id="folderSelect"></select>
     <button onclick="addVideo()">Agregar Video</button>
     <hr>
-    <!-- Eliminar carpeta -->
     <h3>Eliminar Carpeta</h3>
     <select id="deleteFolderSelect"></select>
     <button onclick="deleteFolder()">Eliminar Carpeta</button>
     <hr>
-    <!-- Eliminar video -->
     <h3>Eliminar Video</h3>
     <select id="deleteVideoFolderSelect" onchange="populateVideosToDelete()"></select>
     <select id="deleteVideoSelect"></select>
     <button onclick="deleteVideo()">Eliminar Video</button>
   </section>
+
+  <!-- Modal anuncios -->
+  <div id="adModal">
+    <iframe id="adFrame" src=""></iframe>
+  </div>
 
   <script>
     // Configuración Firebase
@@ -208,7 +141,6 @@ video.preview {
       measurementId: "G-L0E0Y4ZLK6"
     };
 
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
@@ -223,119 +155,67 @@ video.preview {
       document.getElementById("adminPanel").classList.toggle("hidden");
     }
 
-    /* -------- AGREGAR CARPETA -------- */
     async function addFolder(){
       const name = document.getElementById("folderName").value.trim();
       if (!name) return;
-
       await db.collection("folders").doc(name).set({ videos: [] });
       renderSidebar();
       document.getElementById("folderName").value = "";
     }
 
-    /* -------- AGREGAR VIDEO -------- */
     async function addVideo(){
       const url = document.getElementById("videoURL").value.trim();
       const folder = document.getElementById("folderSelect").value;
       if (!url || !folder) return;
-
       const folderRef = db.collection("folders").doc(folder);
       const folderDoc = await folderRef.get();
-
       if (folderDoc.exists){
         const data = folderDoc.data();
         const videos = data.videos || [];
-
         if (videos.length >= 30) return;
-
-        videos.push({
-          url,
-          views: 0,
-          reactions: { like:0, dislike:0, love:0, amazing:0 },
-          reacted: false,
-          comments: []
-        });
-
+        videos.push({ url, views: 0, reactions:{like:0,dislike:0,love:0,amazing:0}, reacted:false, comments:[] });
         await folderRef.update({ videos });
         showFolder(folder);
       }
       document.getElementById("videoURL").value = "";
     }
 
-    /* -------- RENDER SIDEBAR -------- */
     async function renderSidebar(){
       sidebar.innerHTML = "";
       folderSelect.innerHTML = "";
       deleteFolderSelect.innerHTML = "";
       deleteVideoFolderSelect.innerHTML = "";
-
       const snapshot = await db.collection("folders").get();
       snapshot.forEach(doc => {
         const folder = doc.id;
-
-        // sidebar
         const item = document.createElement("div");
         item.className = "folder";
         item.innerHTML = `<h3>${folder}</h3>`;
         item.onclick = () => showFolder(folder);
         sidebar.appendChild(item);
-
-        // selects
-        let opt1 = document.createElement("option");
-        opt1.value = folder; opt1.textContent = folder;
-        folderSelect.appendChild(opt1);
-
-        let opt2 = document.createElement("option");
-        opt2.value = folder; opt2.textContent = folder;
-        deleteFolderSelect.appendChild(opt2);
-
-        let opt3 = document.createElement("option");
-        opt3.value = folder; opt3.textContent = folder;
-        deleteVideoFolderSelect.appendChild(opt3);
+        [folderSelect, deleteFolderSelect, deleteVideoFolderSelect].forEach(sel=>{
+          let opt = document.createElement("option");
+          opt.value = folder; opt.textContent = folder;
+          sel.appendChild(opt);
+        });
       });
     }
 
-    /* -------- ELIMINAR CARPETA -------- */
     async function deleteFolder(){
       const folder = deleteFolderSelect.value;
       if (!folder) return;
-
-      if (confirm(`¿Seguro que quieres eliminar la carpeta "${folder}" con todos sus videos?`)) {
+      if (confirm(`¿Eliminar carpeta "${folder}" con todos sus videos?`)) {
         await db.collection("folders").doc(folder).delete();
         renderSidebar();
         videoSection.innerHTML = "<p>Selecciona una carpeta para ver sus videos</p>";
       }
     }
 
-    /* -------- MOSTRAR VIDEOS -------- */
-    async function showFolder(folder){
-      const folderRef = db.collection("folders").doc(folder);
-      const docSnap = await folderRef.get();
-      if (!docSnap.exists){
-        videoSection.innerHTML = `<h2>${folder}</h2><p>No hay videos aquí todavía.</p>`;
-        return;
-      }
-
-      const data = docSnap.data();
-      const grid = data.videos.map((v, idx) => `
-        <div class="video-card" onclick="playVideo('${folder}', ${idx})">
-          <video class="preview" src="${v.url}" muted preload="metadata"></video>
-          <div>${v.views} vistas</div>
-        </div>
-      `).join("");
-
-      videoSection.innerHTML = `<h2>${folder}</h2><div class="video-grid">${grid}</div>`;
-    }
-
-    /* -------- ELIMINAR VIDEO -------- */
     async function populateVideosToDelete(){
       const folder = deleteVideoFolderSelect.value;
       deleteVideoSelect.innerHTML = "";
-
       if (!folder) return;
-      const folderRef = db.collection("folders").doc(folder);
-      const docSnap = await folderRef.get();
-
+      const docSnap = await db.collection("folders").doc(folder).get();
       if (docSnap.exists){
         const data = docSnap.data();
         data.videos.forEach((v, idx) => {
@@ -351,149 +231,94 @@ video.preview {
       const folder = deleteVideoFolderSelect.value;
       const idx = deleteVideoSelect.value;
       if (!folder || idx === "") return;
-
-      if (confirm("¿Seguro que quieres eliminar este video?")) {
+      if (confirm("¿Eliminar este video?")) {
         const folderRef = db.collection("folders").doc(folder);
         const docSnap = await folderRef.get();
-
         if (docSnap.exists){
           const data = docSnap.data();
           data.videos.splice(idx, 1);
           await folderRef.update({ videos: data.videos });
-
-          // Función para mostrar anuncio en modal
-function showAd(url, videoPlayer){
-  const modal = document.getElementById("adModal");
-  const frame = document.getElementById("adFrame");
-  modal.style.display = "flex";
-  frame.src = url;
-
-  setTimeout(() => {
-    modal.style.display = "none";
-    frame.src = "";
-    videoPlayer.play(); // reanudar video
-  }, 2000); // 2 segundos
-}
-
           renderSidebar();
           showFolder(folder);
         }
       }
     }
-/* -------- REPRODUCIR VIDEO -------- */
-async function playVideo(folder, idx){
-  const folderRef = db.collection("folders").doc(folder);
-  const docSnap = await folderRef.get();
-  if (!docSnap.exists) return;
 
-  const data = docSnap.data();
-  const v = data.videos[idx];
-
-  // Aumentar vistas
-  v.views++;
-  data.videos[idx] = v;
-  await folderRef.update({ videos: data.videos });
-
-  videoSection.innerHTML = `
-    <div class="video-player">
-      <video id="videoPlayer" controls autoplay>
-        <source src="${v.url}" type="video/mp4">
-      </video>
-      <p id="views">👁️ ${v.views} vistas</p>
-
-      <div class="reactions">
-        <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (<span id="likeCount">${v.reactions.like}</span>)</button>
-        <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
-        <button onclick="addReaction('${folder}', ${idx}, 'love')">❤️ Me Gusta (<span id="loveCount">${v.reactions.love}</span>)</button>
-        <button onclick="addReaction('${folder}', ${idx}, 'amazing')">😍 Me Encanta (<span id="amazingCount">${v.reactions.amazing}</span>)</button>
-      </div>
-
-      <section class="comments">
-        <h2>Comentarios</h2>
-        <div id="commentList">
-          ${v.comments.map(c => `<p class="comment-item">💬 ${c}</p>`).join("")}
-        </div>
-        <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
-        <button onclick="addComment('${folder}', ${idx})">Comentar</button>
-      </section>
-    </div>
-  `;
-
-  const videoPlayer = document.getElementById("videoPlayer");
-
-  /* 🔒 Bloqueo: evitar adelantar */
-  videoPlayer.addEventListener("seeking", () => {
-    if(videoPlayer.currentTime > (videoPlayer.lastTime || 0)){
-      videoPlayer.currentTime = videoPlayer.lastTime; 
+    // ✅ Función global para mostrar anuncio
+    function showAd(url, videoPlayer){
+      const modal = document.getElementById("adModal");
+      const frame = document.getElementById("adFrame");
+      modal.style.display = "flex";
+      frame.src = url;
+      setTimeout(() => {
+        modal.style.display = "none";
+        frame.src = "";
+        videoPlayer.play();
+      }, 2000);
     }
-  });
-  videoPlayer.addEventListener("timeupdate", () => {
-    videoPlayer.lastTime = videoPlayer.currentTime; 
-  });
 
- // 📺 Anuncios: inicio, 50s y final
-let adsShown = { start:false, mid:false, end:false };
+    async function showFolder(folder){
+      const docSnap = await db.collection("folders").doc(folder).get();
+      if (!docSnap.exists){
+        videoSection.innerHTML = `<h2>${folder}</h2><p>No hay videos aquí todavía.</p>`;
+        return;
+      }
+      const data = docSnap.data();
+      const grid = data.videos.map((v, idx) => `
+        <div class="video-card" onclick="playVideo('${folder}', ${idx})">
+          <video class="preview" src="${v.url}" muted preload="metadata"></video>
+          <div>${v.views} vistas</div>
+        </div>
+      `).join("");
+      videoSection.innerHTML = `<h2>${folder}</h2><div class="video-grid">${grid}</div>`;
+    }
 
-// Al iniciar
-videoPlayer.addEventListener("play", () => {
-  if(!adsShown.start){
-    videoPlayer.pause();
-    adsShown.start = true;
-    showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
-  }
-});
+    async function playVideo(folder, idx){
+      const folderRef = db.collection("folders").doc(folder);
+      const docSnap = await folderRef.get();
+      if (!docSnap.exists) return;
+      const data = docSnap.data();
+      const v = data.videos[idx];
+      v.views++;
+      data.videos[idx] = v;
+      await folderRef.update({ videos: data.videos });
 
-// A los 50s
-videoPlayer.addEventListener("timeupdate", () => {
-  if(videoPlayer.currentTime >= 50 && !adsShown.mid){
-    adsShown.mid = true;
-    videoPlayer.pause();
-    showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
-  }
-});
+      videoSection.innerHTML = `
+        <div class="video-player">
+          <video id="videoPlayer" controls autoplay>
+            <source src="${v.url}" type="video/mp4">
+          </video>
+          <p id="views">👁️ ${v.views} vistas</p>
+        </div>
+      `;
 
-// Al final
-videoPlayer.addEventListener("ended", () => {
-  if(!adsShown.end){
-    adsShown.end = true;
-    showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
-  }
-});
+      const videoPlayer = document.getElementById("videoPlayer");
+      let adsShown = { start:false, mid:false, end:false };
 
-  /* -------- REACCIONES -------- */
-  async function addReaction(folder, idx, type){
-    const folderRef = db.collection("folders").doc(folder);
-    const docSnap = await folderRef.get();
-    if (!docSnap.exists) return;
+      videoPlayer.addEventListener("play", () => {
+        if(!adsShown.start){
+          videoPlayer.pause();
+          adsShown.start = true;
+          showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
+        }
+      });
 
-    const data = docSnap.data();
-    const v = data.videos[idx];
+      videoPlayer.addEventListener("timeupdate", () => {
+        if(videoPlayer.currentTime >= 50 && !adsShown.mid){
+          adsShown.mid = true;
+          videoPlayer.pause();
+          showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
+        }
+      });
 
-    if (v.reacted) return; // ya reaccionó
-    v.reactions[type]++;
-    v.reacted = true;
-    data.videos[idx] = v;
+      videoPlayer.addEventListener("ended", () => {
+        if(!adsShown.end){
+          adsShown.end = true;
+          showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
+        }
+      });
+    }
 
-    await folderRef.update({ videos: data.videos });
-    playVideo(folder, idx); // refresca vista
-  }
-
-  /* -------- COMENTARIOS -------- */
-  async function addComment(folder, idx){
-    const input = document.getElementById("commentInput");
-    const text = input.value.trim();
-    if (!text) return;
-
-    const folderRef = db.collection("folders").doc(folder);
-    const docSnap = await folderRef.get();
-    if (!docSnap.exists) return;
-
-    const data = docSnap.data();
-    data.videos[idx].comments.push(text);
-
-    await folderRef.update({ videos: data.videos });
-    playVideo(folder, idx);
-  }
     renderSidebar();
   </script>
 </body>
