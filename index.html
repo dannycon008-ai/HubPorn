@@ -268,45 +268,67 @@ video.preview {
       }
     }
   /* -------- REPRODUCIR VIDEO -------- */
-  async function playVideo(folder, idx){
-    const folderRef = db.collection("folders").doc(folder);
-    const docSnap = await folderRef.get();
+ function playVideo(folder, idx){
+  const v = folders[folder][idx];
+  v.views++;
+  saveData();
 
-    if (docSnap.exists){
-      const data = docSnap.data();
-      const v = data.videos[idx];
+  videoSection.innerHTML = `
+    <div class="video-player">
+      <video id="videoPlayer" controls autoplay>
+        <source src="${v.url}" type="video/mp4">
+      </video>
+      <p id="views">👁️ ${v.views} vistas</p>
 
-      // Aumentar contador de vistas
-      v.views++;
-      data.videos[idx] = v;
-      await folderRef.update({ videos: data.videos });
+      <div class="reactions">
+        <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (<span id="likeCount">${v.reactions.like}</span>)</button>
+        <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+        <button onclick="addReaction('${folder}', ${idx}, 'love')">❤️ Me Gusta (<span id="loveCount">${v.reactions.love}</span>)</button>
+        <button onclick="addReaction('${folder}', ${idx}, 'amazing')">😍 Me Encanta (<span id="amazingCount">${v.reactions.amazing}</span>)</button>
+      </div>
 
-      videoSection.innerHTML = `
-        <div class="video-player">
-          <video id="videoPlayer" controls autoplay>
-            <source src="${v.url}" type="video/mp4">
-          </video>
-          <p>👁️ ${v.views} vistas</p>
-
-          <div class="reactions">
-            <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (${v.reactions.like})</button>
-            <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (${v.reactions.dislike})</button>
-            <button onclick="addReaction('${folder}', ${idx}, 'love')">❤️ Me gusta (${v.reactions.love})</button>
-            <button onclick="addReaction('${folder}', ${idx}, 'amazing')">😍 Me encanta (${v.reactions.amazing})</button>
-          </div>
-
-          <section class="comments">
-            <h2>Comentarios</h2>
-            <div id="commentList">
-              ${v.comments.map(c => `<p class="comment-item">💬 ${c}</p>`).join("")}
-            </div>
-            <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
-            <button onclick="addComment('${folder}', ${idx})">Comentar</button>
-          </section>
+      <section class="comments">
+        <h2>Comentarios</h2>
+        <div id="commentList">
+          ${v.comments.map(c => `<p class="comment-item">💬 ${c}</p>`).join("")}
         </div>
-      `;
+        <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
+        <button onclick="addComment('${folder}', ${idx})">Comentar</button>
+      </section>
+    </div>
+  `;
+
+  const videoPlayer = document.getElementById("videoPlayer");
+
+  // Bloqueo: evitar adelantar el video
+  videoPlayer.addEventListener("seeking", (e) => {
+    if(videoPlayer.currentTime > videoPlayer.lastTime){
+      videoPlayer.currentTime = videoPlayer.lastTime; // volver atrás si intenta adelantar
     }
-  }
+  });
+
+  videoPlayer.addEventListener("timeupdate", () => {
+    videoPlayer.lastTime = videoPlayer.currentTime; // guardar última posición válida
+  });
+
+  // Control de anuncios
+  let adsShown = 0;
+  videoPlayer.addEventListener("timeupdate", () => {
+    if ((Math.floor(videoPlayer.currentTime) === 20 || Math.floor(videoPlayer.currentTime) === 40) && adsShown < 2) {
+      adsShown++;
+      const currentTime = videoPlayer.currentTime;
+
+      window.location.href = "https://overplantovervaluetwine.com/2061965"; // redirigir
+
+      setTimeout(() => {
+        // regresar después de 2s
+        window.history.back();
+        videoPlayer.currentTime = currentTime; 
+        videoPlayer.play();
+      }, 2000);
+    }
+  });
+}
 
   /* -------- REACCIONES -------- */
   async function addReaction(folder, idx, type){
