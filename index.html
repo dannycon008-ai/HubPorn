@@ -93,7 +93,6 @@
   <!-- Header -->
   <header>
     <h1 class="title">HubPorn</h1>
-    <nav><button onclick="toggleAdminPanel()">Admin</button></nav>
   </header>
 
   <!-- Sidebar -->
@@ -103,26 +102,6 @@
   <main class="content">
     <div id="videoSection"><p>Selecciona una carpeta para ver sus videos</p></div>
   </main>
-
-  <!-- Panel de administración -->
-  <section id="adminPanel" class="hidden">
-    <h2>Panel de Admin</h2>
-    <input type="text" id="folderName" placeholder="Nombre de carpeta">
-    <button onclick="addFolder()">Agregar Carpeta</button>
-    <hr>
-    <input type="text" id="videoURL" placeholder="URL del video (mp4)">
-    <select id="folderSelect"></select>
-    <button onclick="addVideo()">Agregar Video</button>
-    <hr>
-    <h3>Eliminar Carpeta</h3>
-    <select id="deleteFolderSelect"></select>
-    <button onclick="deleteFolder()">Eliminar Carpeta</button>
-    <hr>
-    <h3>Eliminar Video</h3>
-    <select id="deleteVideoFolderSelect" onchange="populateVideosToDelete()"></select>
-    <select id="deleteVideoSelect"></select>
-    <button onclick="deleteVideo()">Eliminar Video</button>
-  </section>
 
   <!-- Modal anuncios -->
   <div id="adModal">
@@ -146,10 +125,6 @@
 
     const sidebar = document.getElementById("sidebar");
     const videoSection = document.getElementById("videoSection");
-    const folderSelect = document.getElementById("folderSelect");
-    const deleteFolderSelect = document.getElementById("deleteFolderSelect");
-    const deleteVideoFolderSelect = document.getElementById("deleteVideoFolderSelect");
-    const deleteVideoSelect = document.getElementById("deleteVideoSelect");
 
     function toggleAdminPanel(){
       document.getElementById("adminPanel").classList.toggle("hidden");
