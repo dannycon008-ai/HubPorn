@@ -247,6 +247,83 @@
         }
       }
     }
+<script>
+  /* -------- REPRODUCIR VIDEO -------- */
+  async function playVideo(folder, idx){
+    const folderRef = db.collection("folders").doc(folder);
+    const docSnap = await folderRef.get();
+
+    if (docSnap.exists){
+      const data = docSnap.data();
+      const v = data.videos[idx];
+
+      // Aumentar contador de vistas
+      v.views++;
+      data.videos[idx] = v;
+      await folderRef.update({ videos: data.videos });
+
+      videoSection.innerHTML = `
+        <div class="video-player">
+          <video id="videoPlayer" controls autoplay>
+            <source src="${v.url}" type="video/mp4">
+          </video>
+          <p>👁️ ${v.views} vistas</p>
+
+          <div class="reactions">
+            <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (${v.reactions.like})</button>
+            <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (${v.reactions.dislike})</button>
+            <button onclick="addReaction('${folder}', ${idx}, 'love')">❤️ Me gusta (${v.reactions.love})</button>
+            <button onclick="addReaction('${folder}', ${idx}, 'amazing')">😍 Me encanta (${v.reactions.amazing})</button>
+          </div>
+
+          <section class="comments">
+            <h2>Comentarios</h2>
+            <div id="commentList">
+              ${v.comments.map(c => `<p class="comment-item">💬 ${c}</p>`).join("")}
+            </div>
+            <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
+            <button onclick="addComment('${folder}', ${idx})">Comentar</button>
+          </section>
+        </div>
+      `;
+    }
+  }
+
+  /* -------- REACCIONES -------- */
+  async function addReaction(folder, idx, type){
+    const folderRef = db.collection("folders").doc(folder);
+    const docSnap = await folderRef.get();
+    if (!docSnap.exists) return;
+
+    const data = docSnap.data();
+    const v = data.videos[idx];
+
+    if (v.reacted) return; // ya reaccionó
+    v.reactions[type]++;
+    v.reacted = true;
+    data.videos[idx] = v;
+
+    await folderRef.update({ videos: data.videos });
+    playVideo(folder, idx); // refresca vista
+  }
+
+  /* -------- COMENTARIOS -------- */
+  async function addComment(folder, idx){
+    const input = document.getElementById("commentInput");
+    const text = input.value.trim();
+    if (!text) return;
+
+    const folderRef = db.collection("folders").doc(folder);
+    const docSnap = await folderRef.get();
+    if (!docSnap.exists) return;
+
+    const data = docSnap.data();
+    data.videos[idx].comments.push(text);
+
+    await folderRef.update({ videos: data.videos });
+    playVideo(folder, idx);
+  }
+</script>
 
     renderSidebar();
   </script>
