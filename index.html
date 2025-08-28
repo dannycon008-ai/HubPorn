@@ -25,30 +25,27 @@
     .content{ margin-left:240px; flex:1; padding:20px; }
     .folder{ margin-bottom:14px; cursor:pointer; }
     .folder h3{ color:#ff4444; font-size:1rem; }
-    .video-grid {
-  display: flex;          /* Ahora en fila horizontal */
-  flex-wrap: nowrap;      /* No salta de línea */
-  overflow-x: auto;       /* Barra de scroll horizontal */
-  gap: 12px;              /* Espacio entre videos */
+ .video-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   padding: 10px;
+  justify-content: flex-start;
 }
 
 .video-card {
-  flex: 0 0 auto;         /* No se encoge */
-  width: 180px;           /* Tamaño fijo más pequeño */
+  flex: 0 0 auto;        /* No se encogen ni crecen */
+  width: 160px;           /* Ajusta según prefieras */
   background: #1b1b1b;
   border: 1px solid #242424;
   border-radius: 10px;
   padding: 6px;
-  cursor: pointer;
 }
 
 video.preview {
   width: 100%;
-  height: 100px;          /* 🔥 Hace el video más pequeño */
-  object-fit: cover;      /* Recorta para que no se deforme */
-  border-radius: 8px;
-  background: #000;
+  height: 90px;           /* Tamaño definido para que se vean más compactos */
+  object-fit: cover;
 }
 
     .video-player video#videoPlayer{ width:100%; max-width:900px; border-radius:12px; background:#000; }
