@@ -10,20 +10,94 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script>
-    const firebaseConfig = { ... };
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
+      authDomain: "minitinder-f6314.firebaseapp.com",
+      projectId: "minitinder-f6314",
+      storageBucket: "minitinder-f6314.appspot.com",
+      messagingSenderId: "659347167496",
+      appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd",
+      measurementId: "G-L0E0Y4ZLK6"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
   </script>
 
   <style>
-    /* tus estilos aquí */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:"Segoe UI", Tahoma, sans-serif; background:#121212; color:#fff; display:flex; }
+
+    /* Header */
+    header {
+      position:fixed; top:0; left:0; right:0;
+      background:#1f1f1f; display:flex; justify-content:space-between; align-items:center;
+      padding:12px 18px; box-shadow:0 2px 10px rgba(0,0,0,.5); z-index:100;
+      gap:12px; flex-wrap:wrap;
+    }
+    .logo-container { display:flex; align-items:center; gap:10px; }
+    .title{
+      font-family:"Archivo Black", sans-serif;
+      font-size:3rem; line-height:1;
+      background:linear-gradient(to right, #ff4444 50%, #ffffff 50%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    header nav button{
+      background:#222; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer;
+    }
+    header nav button:hover{ background:#ff4444; }
+
+    /* Layout */
+    main{ margin-top:74px; flex:1; display:flex; }
+    .sidebar{
+      width:240px; background:#1f1f1f; padding:14px;
+      height:calc(100vh - 74px); position:fixed; top:74px; left:0; overflow-y:auto;
+      border-right:1px solid #222;
+    }
+    .content{ margin-left:240px; flex:1; padding:20px; min-height:calc(100vh - 74px); }
+
+    /* Carpetas */
+    .folder{ margin-bottom:14px; cursor:pointer; user-select:none; }
+    .folder h3{ color:#ff4444; font-size:1rem; }
+    .folder:hover h3{ color:#fff; }
+
+    /* Listados y reproductor */
+    .video-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; }
+    .video-card{ background:#1b1b1b; border:1px solid #242424; border-radius:10px; padding:10px; cursor:pointer; }
+    .video-card:hover{ border-color:#ff4444; }
+    video.preview{ width:100%; border-radius:8px; background:#000; }
+    .meta{ margin-top:8px; font-size:.9rem; color:#bbb; }
+
+    .video-player video#videoPlayer{ width:100%; max-width:900px; border-radius:12px; background:#000; }
+    .reactions{ margin:15px 0; display:flex; gap:10px; flex-wrap:wrap; }
+    .reactions button{ background:#222; border:none; padding:8px 12px; border-radius:6px; color:#fff; cursor:pointer; }
+    .reactions button:hover{ background:#ff4444; }
+
+    /* Comentarios */
+    .comments{ margin-top:20px; background:#1f1f1f; padding:15px; border-radius:10px; }
+    .comments textarea{ width:100%; height:60px; margin-top:10px; border-radius:8px; padding:8px; border:none; background:#222; color:#fff; }
+    .comments button{ margin-top:8px; background:#222; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
+    .comments button:hover{ background:#ff4444; }
+    .comment-item{ padding:6px 0; border-bottom:1px solid #232323; }
+    .comment-item:last-child{ border-bottom:none; }
+
+    /* Admin */
+    #adminPanel{ margin:20px; padding:20px; background:#1f1f1f; border-radius:10px; border:1px solid #242424; }
+    #adminPanel input, #adminPanel select{ width:100%; max-width:520px; padding:10px; margin:8px 0; border:none; border-radius:8px; background:#222; color:#fff; }
+    #adminPanel button{ background:#222; color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; }
+    #adminPanel button:hover{ background:#ff4444; }
+    .hidden{ display:none; }
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .sidebar{ position:static; width:100%; height:auto; border-right:none; top:auto; left:auto; }
+      .content{ margin-left:0; }
+      header{ justify-content:center; }
+      .title{ font-size:1.5rem; }
+    }
   </style>
 </head>
 <body>
-  <!-- tu HTML -->
-</body>
-</html>
-
   <!-- Header -->
   <header>
     <div class="logo-container">
@@ -37,14 +111,14 @@
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar"></aside>
 
-  <!-- Área principal -->
+  <!-- Contenido principal -->
   <main class="content">
     <div id="videoSection">
       <p>Selecciona una carpeta para ver sus videos</p>
     </div>
   </main>
 
-  <!-- Panel admin -->
+  <!-- Panel de administración -->
   <section id="adminPanel" class="hidden">
     <h2>Panel de Admin</h2>
     <input type="text" id="folderName" placeholder="Nombre de carpeta">
@@ -53,15 +127,6 @@
     <input type="text" id="videoURL" placeholder="URL del video (mp4)">
     <select id="folderSelect"></select>
     <button onclick="addVideo()">Agregar Video</button>
-    <hr>
-    <h3>Eliminar Carpeta</h3>
-    <select id="deleteFolderSelect"></select>
-    <button onclick="deleteFolder()">Eliminar Carpeta</button>
-    <hr>
-    <h3>Eliminar Video</h3>
-    <select id="deleteVideoFolderSelect" onchange="populateVideosToDelete()"></select>
-    <select id="deleteVideoSelect"></select>
-    <button onclick="deleteVideo()">Eliminar Video</button>
   </section>
 
   <script>
@@ -69,81 +134,49 @@
     const videoSection = document.getElementById("videoSection");
     const folderSelect = document.getElementById("folderSelect");
 
+    let folders = {}; // aquí luego irán tus datos de Firestore
+
     function toggleAdminPanel(){
       document.getElementById("adminPanel").classList.toggle("hidden");
     }
 
-    /* Crear carpeta */
     function addFolder(){
       const name = document.getElementById("folderName").value.trim();
       if (!name) return;
-      db.collection("carpetas").doc(name).set({ videos: [] }).then(() => {
-        renderSidebar();
-        document.getElementById("folderName").value = "";
-      });
+      folders[name] = [];
+      renderSidebar();
+      document.getElementById("folderName").value = "";
     }
 
-    /* Agregar video */
     function addVideo(){
-      const url    = document.getElementById("videoURL").value.trim();
-      const folder = document.getElementById("folderSelect").value;
+      const url = document.getElementById("videoURL").value.trim();
+      const folder = folderSelect.value;
       if (!url || !folder) return;
-
-      const videoObj = {
-        url,
-        views: 0,
-        reactions: { like:0, dislike:0, love:0, amazing:0 },
-        comments: []
-      };
-
-      db.collection("carpetas").doc(folder).update({
-        videos: firebase.firestore.FieldValue.arrayUnion(videoObj)
-      }).then(() => {
-        renderSidebar();
-        showFolder(folder);
-        document.getElementById("videoURL").value = "";
-      });
+      folders[folder].push({ url, views:0, reactions:{like:0,dislike:0,love:0,amazing:0}, reacted:false, comments:[] });
+      renderSidebar();
+      document.getElementById("videoURL").value = "";
     }
 
-    /* Render sidebar */
     function renderSidebar(){
       sidebar.innerHTML = "";
       folderSelect.innerHTML = "";
-      document.getElementById("deleteFolderSelect").innerHTML = "";
-      document.getElementById("deleteVideoFolderSelect").innerHTML = "";
+      for (let folder in folders){
+        const item = document.createElement("div");
+        item.className = "folder";
+        item.innerHTML = `<h3>${folder}</h3>`;
+        item.onclick = () => showFolder(folder);
+        sidebar.appendChild(item);
 
-      db.collection("carpetas").get().then(snapshot => {
-        snapshot.forEach(doc => {
-          const folder = doc.id;
-          const data   = doc.data();
-
-          // Sidebar
-          const item = document.createElement("div");
-          item.className = "folder";
-          item.innerHTML = `<h3>${folder}</h3>`;
-          item.onclick = () => showFolder(folder, data.videos);
-          sidebar.appendChild(item);
-
-          // Selects
-          const opt = document.createElement("option");
-          opt.value = folder; opt.textContent = folder;
-          folderSelect.appendChild(opt);
-
-          const optDel = document.createElement("option");
-          optDel.value = folder; optDel.textContent = folder;
-          document.getElementById("deleteFolderSelect").appendChild(optDel);
-
-          const optVid = document.createElement("option");
-          optVid.value = folder; optVid.textContent = folder;
-          document.getElementById("deleteVideoFolderSelect").appendChild(optVid);
-        });
-      });
+        const opt = document.createElement("option");
+        opt.value = folder; opt.textContent = folder;
+        folderSelect.appendChild(opt);
+      }
     }
 
-    /* Mostrar videos */
-    function showFolder(folder, list){
-      if (!list || !list.length){
-        videoSection.innerHTML = `<h2>${folder}</h2><p>No hay videos.</p>`;
+    function showFolder(folder){
+      const list = folders[folder] || [];
+      if (!list.length){
+        videoSection.innerHTML = `<h2>${folder}</h2><p>No hay videos aquí todavía.</p>`;
         return;
       }
       const grid = list.map((v, idx) => `
@@ -155,108 +188,19 @@
       videoSection.innerHTML = `<h2>${folder}</h2><div class="video-grid">${grid}</div>`;
     }
 
-    /* Reproducir video */
     function playVideo(folder, idx){
-      db.collection("carpetas").doc(folder).get().then(doc => {
-        if (!doc.exists) return;
-        let videos = doc.data().videos;
-        let v = videos[idx];
-        v.views++;
-
-        videos[idx] = v;
-        db.collection("carpetas").doc(folder).update({ videos });
-
-        videoSection.innerHTML = `
-          <div class="video-player">
-            <video id="videoPlayer" controls autoplay>
-              <source src="${v.url}" type="video/mp4">
-            </video>
-            <p>👁️ ${v.views} vistas</p>
-            <div class="reactions">
-              <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (${v.reactions.like})</button>
-              <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (${v.reactions.dislike})</button>
-              <button onclick="addReaction('${folder}', ${idx}, 'love')">❤️ Me Gusta (${v.reactions.love})</button>
-              <button onclick="addReaction('${folder}', ${idx}, 'amazing')">😍 Me Encanta (${v.reactions.amazing})</button>
-            </div>
-            <section class="comments">
-              <h2>Comentarios</h2>
-              <div id="commentList">${v.comments.map(c => `<p>💬 ${c}</p>`).join("")}</div>
-              <textarea id="commentInput"></textarea>
-              <button onclick="addComment('${folder}', ${idx})">Comentar</button>
-            </section>
-          </div>
-        `;
-      });
+      const v = folders[folder][idx];
+      v.views++;
+      videoSection.innerHTML = `
+        <div class="video-player">
+          <video id="videoPlayer" controls autoplay>
+            <source src="${v.url}" type="video/mp4">
+          </video>
+          <p>👁️ ${v.views} vistas</p>
+        </div>
+      `;
     }
 
-    /* Reacciones */
-    function addReaction(folder, idx, type){
-      db.collection("carpetas").doc(folder).get().then(doc => {
-        if (!doc.exists) return;
-        let videos = doc.data().videos;
-        videos[idx].reactions[type]++;
-        db.collection("carpetas").doc(folder).update({ videos }).then(() => {
-          playVideo(folder, idx);
-        });
-      });
-    }
-
-    /* Comentarios */
-    function addComment(folder, idx){
-      const text = document.getElementById("commentInput").value.trim();
-      if (!text) return;
-      db.collection("carpetas").doc(folder).get().then(doc => {
-        let videos = doc.data().videos;
-        videos[idx].comments.push(text);
-        db.collection("carpetas").doc(folder).update({ videos }).then(() => {
-          playVideo(folder, idx);
-        });
-      });
-    }
-
-    /* Eliminar carpeta */
-    function deleteFolder(){
-      const folder = document.getElementById("deleteFolderSelect").value;
-      if (!folder) return;
-      if (confirm("¿Eliminar carpeta?")) {
-        db.collection("carpetas").doc(folder).delete().then(renderSidebar);
-      }
-    }
-
-    /* Cargar videos en select eliminar */
-    function populateVideosToDelete(){
-      const folder = document.getElementById("deleteVideoFolderSelect").value;
-      const videoSelect = document.getElementById("deleteVideoSelect");
-      videoSelect.innerHTML = "";
-
-      db.collection("carpetas").doc(folder).get().then(doc => {
-        if (!doc.exists) return;
-        doc.data().videos.forEach((v, idx) => {
-          const opt = document.createElement("option");
-          opt.value = idx;
-          opt.textContent = `Video ${idx+1} - ${v.url.substring(0,30)}...`;
-          videoSelect.appendChild(opt);
-        });
-      });
-    }
-
-    /* Eliminar video */
-    function deleteVideo(){
-      const folder = document.getElementById("deleteVideoFolderSelect").value;
-      const idx = document.getElementById("deleteVideoSelect").value;
-      if (!folder || idx === "") return;
-
-      db.collection("carpetas").doc(folder).get().then(doc => {
-        let videos = doc.data().videos;
-        videos.splice(idx, 1);
-        db.collection("carpetas").doc(folder).update({ videos }).then(() => {
-          renderSidebar();
-          showFolder(folder, videos);
-        });
-      });
-    }
-
-    /* Init */
     renderSidebar();
   </script>
 </body>
