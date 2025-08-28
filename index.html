@@ -267,11 +267,19 @@ video.preview {
         }
       }
     }
-  /* -------- REPRODUCIR VIDEO -------- */
-function playVideo(folder, idx){
-  const v = folders[folder][idx];
+ /* -------- REPRODUCIR VIDEO -------- */
+async function playVideo(folder, idx){
+  const folderRef = db.collection("folders").doc(folder);
+  const docSnap = await folderRef.get();
+  if (!docSnap.exists) return;
+
+  const data = docSnap.data();
+  const v = data.videos[idx];
+
+  // aumentar vistas
   v.views++;
-  saveData();
+  data.videos[idx] = v;
+  await folderRef.update({ videos: data.videos });
 
   videoSection.innerHTML = `
     <div class="video-player">
@@ -310,7 +318,7 @@ function playVideo(folder, idx){
     videoPlayer.lastTime = videoPlayer.currentTime; 
   });
 
-  // 📺 Anuncios cada 20 y 40 segundos (solo 2 veces)
+  // 📺 Anuncios cada 20s y 40s (solo 2 veces)
   let adsShown = 0;
   videoPlayer.addEventListener("timeupdate", () => {
     if ((Math.floor(videoPlayer.currentTime) === 20 || Math.floor(videoPlayer.currentTime) === 40) && adsShown < 2) {
@@ -318,18 +326,28 @@ function playVideo(folder, idx){
       const currentTime = videoPlayer.currentTime;
       videoPlayer.pause();
 
-      // abrir anuncio en nueva pestaña
-      window.open("https://overplantovervaluetwine.com/2061965", "_blank");
+      // ✅ Muestra overlay en lugar de redirigir (evita bloqueos)
+      const adOverlay = document.createElement("div");
+      adOverlay.style.cssText = `
+        position:fixed;top:0;left:0;right:0;bottom:0;
+        background:rgba(0,0,0,0.9);
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        color:#fff;z-index:2000;font-size:1.5rem;
+      `;
+      adOverlay.innerHTML = `
+        <p>Publicidad</p>
+        <a href="https://overplantovervaluetwine.com/2061965" target="_blank" style="color:#ff4444;font-size:1.2rem;">Visita el anuncio</a>
+      `;
+      document.body.appendChild(adOverlay);
 
-      // reanudar después de 2s
       setTimeout(() => {
+        adOverlay.remove();
         videoPlayer.currentTime = currentTime;
         videoPlayer.play();
       }, 2000);
     }
   });
 }
-
 
   /* -------- REACCIONES -------- */
   async function addReaction(folder, idx, type){
