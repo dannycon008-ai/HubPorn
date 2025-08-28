@@ -247,7 +247,6 @@
         }
       }
     }
-<script>
   /* -------- REPRODUCIR VIDEO -------- */
   async function playVideo(folder, idx){
     const folderRef = db.collection("folders").doc(folder);
@@ -323,8 +322,6 @@
     await folderRef.update({ videos: data.videos });
     playVideo(folder, idx);
   }
-</script>
-
     renderSidebar();
   </script>
 </body>
