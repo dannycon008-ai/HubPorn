@@ -244,7 +244,7 @@
       videoSection.innerHTML = `<h2>${folder}</h2><div class="video-grid">${grid}</div>`;
     }
 
-   /* -------- REPRODUCIR VIDEO -------- */
+ /* -------- REPRODUCIR VIDEO -------- */
 async function playVideo(folder, idx){
   const folderRef = db.collection("folders").doc(folder);
   const docSnap = await folderRef.get();
@@ -253,45 +253,46 @@ async function playVideo(folder, idx){
   const data = docSnap.data();
   const v = data.videos[idx];
 
-  // 📊 Aumentar vistas
+  // 📈 Aumentar vistas
   v.views++;
   data.videos[idx] = v;
   await folderRef.update({ videos: data.videos });
 
-videoSection.innerHTML = `
-  <div class="video-player">
-    <video id="videoPlayer" controls autoplay>
-      <source src="${v.url}" type="video/mp4">
-    </video>
-    <p id="views">👁️ ${v.views} vistas</p>
+  // 🎬 Renderizar video + reacciones + comentarios
+  videoSection.innerHTML = `
+    <div class="video-player">
+      <video id="videoPlayer" controls autoplay>
+        <source src="${v.url}" type="video/mp4">
+      </video>
+      <p id="views">👁️ ${v.views} vistas</p>
 
-    <!-- Reacciones -->
-    <div class="reactions">
-      <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 (<span id="likeCount">${v.reactions.like}</span>)</button>
-      <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+      <div class="reactions">
+        <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 Like (<span id="likeCount">${v.reactions.like}</span>)</button>
+        <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 Dislike (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+      </div>
+
+      <section class="comments">
+        <h2>Comentarios</h2>
+        <div id="commentList">
+          ${v.comments.map(c => `<p class="comment-item">💬 ${c}</p>`).join("")}
+        </div>
+        <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
+      </section>
     </div>
-
-  </div>
-`;
-
-
-// ✅ Aquí va tu código de Enter
-document.addEventListener("keydown", function(e) {
-  if (e.key === "Enter" && e.target.id === "commentInput") {
-    e.preventDefault();
-    addComment(folder, idx);
-  }
-});
-
+  `;
 
   const videoPlayer = document.getElementById("videoPlayer");
 
-  /* 🔒 Bloqueo: evitar adelantar */
+  // 🔒 Bloqueo para que no adelanten
   videoPlayer.addEventListener("seeking", () => {
     if(videoPlayer.currentTime > (videoPlayer.lastTime || 0)){
       videoPlayer.currentTime = videoPlayer.lastTime; 
     }
   });
+  videoPlayer.addEventListener("timeupdate", () => {
+    videoPlayer.lastTime = videoPlayer.currentTime; 
+  });
+
   videoPlayer.addEventListener("timeupdate", () => {
     videoPlayer.lastTime = videoPlayer.currentTime; 
   });
