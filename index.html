@@ -79,101 +79,113 @@
   </section>
 
   <script>
-    const sidebar=document.getElementById("sidebar");
-    const videoSection=document.getElementById("videoSection");
-    const folderSelect=document.getElementById("folderSelect");
+   const sidebar = document.getElementById("sidebar");
+      const videoSection = document.getElementById("videoSection");
+   const folderSelect = document.getElementById("folderSelect");
 
-    // Cargar datos desde localStorage
-    let folders=JSON.parse(localStorage.getItem("folders")) || {};
+   <script>
+  // Sustituye tu declaración actual de folders por esta:
+  let folders = JSON.parse(localStorage.getItem("folders")) || {};
 
-    function saveData(){ localStorage.setItem("folders", JSON.stringify(folders)); }
+  function saveData() {
+    localStorage.setItem("folders", JSON.stringify(folders));
+  }
 
     function toggleAdminPanel(){
       document.getElementById("adminPanel").classList.toggle("hidden");
     }
 
     // Crear carpeta
-    function addFolder(){
-      const name=document.getElementById("folderName").value.trim();
-      if(name && !folders[name]){
-        folders[name]=[];
-        saveData();
-        renderSidebar();
-        document.getElementById("folderName").value="";
-      }
+    <script>
+  function addFolder(){
+    const name = document.getElementById("folderName").value.trim();
+    if (name && !folders[name]) {
+      folders[name] = [];                   // cada carpeta es un array de videos
+      saveData();
+      renderSidebar();
+      document.getElementById("folderName").value = "";
     }
-
+  }
     // Agregar video
     function addVideo(){
-      const url=document.getElementById("videoURL").value.trim();
-      const folder=document.getElementById("folderSelect").value;
-      if(url && folder && folders[folder].length<30){
-        // cada video es un objeto con datos persistentes
-        folders[folder].push({
-          url:url,
-          views:0,
-          reactions:{like:0,dislike:0,love:0,amazing:0},
-          reacted:false,
-          comments:[]
-        });
-        saveData();
-        renderSidebar();
-        document.getElementById("videoURL").value="";
+    const url = document.getElementById("videoURL").value.trim();
+    const folder = document.getElementById("folderSelect").value;
+    if (url && folder && folders[folder].length < 30) {
+      folders[folder].push({
+        url,
+        views: 0,
+        reactions: { like: 0, dislike: 0, love: 0, amazing: 0 },
+        reacted: false,    // si el usuario ya reaccionó a este video
+        comments: []       // lista de comentarios
+      });
+      saveData();
+      renderSidebar();
+      document.getElementById("videoURL").value = "";
       }
     }
 
     // Renderizar sidebar
     function renderSidebar(){
-      sidebar.innerHTML="";
-      folderSelect.innerHTML="";
-      for(let folder in folders){
-        const div=document.createElement("div");
-        div.className="folder";
-        div.innerHTML=`<h3>${folder}</h3>`;
-        const ul=document.createElement("ul");
-        folders[folder].forEach((videoObj,idx)=>{
-          const li=document.createElement("li");
-          li.innerHTML=`<video class="preview" src="${videoObj.url}" muted></video>`;
-          li.onclick=()=>playVideo(folder,idx);
-          ul.appendChild(li);
+    sidebar.innerHTML = "";
+    folderSelect.innerHTML = "";
+
+    for (let folder in folders) {
+      // Carpeta clicable
+      const div = document.createElement("div");
+      div.className = "folder";
+      div.innerHTML = `<h3>${folder}</h3>`;
+      div.onclick = () => showFolder(folder);     // al clicar, carga todos los videos en el área central
+      sidebar.appendChild(div);
         });
         div.appendChild(ul);
         sidebar.appendChild(div);
 
         // opciones en admin
-        const option=document.createElement("option");
-        option.value=folder; option.textContent=folder;
-        folderSelect.appendChild(option);
+       const option = document.createElement("option");
+      option.value = folder; option.textContent = folder;
+      folderSelect.appendChild(option);
       }
     }
 
     // Reproducir video
-    function playVideo(folder,idx){
-      const videoObj=folders[folder][idx];
-      videoObj.views++;
-      saveData();
-      videoSection.innerHTML=`
-        <div class="video-player">
-          <video id="videoPlayer" controls autoplay>
-            <source src="${videoObj.url}" type="video/mp4">
-          </video>
-          <p id="views">👁️ ${videoObj.views} vistas</p>
-          <div class="reactions">
-            <button onclick="addReaction('${folder}',${idx},'like')">👍 Like (<span id="likeCount">${videoObj.reactions.like}</span>)</button>
-            <button onclick="addReaction('${folder}',${idx},'dislike')">👎 Dislike (<span id="dislikeCount">${videoObj.reactions.dislike}</span>)</button>
-            <button onclick="addReaction('${folder}',${idx},'love')">❤️ Me Gusta (<span id="loveCount">${videoObj.reactions.love}</span>)</button>
-            <button onclick="addReaction('${folder}',${idx},'amazing')">😍 Me Encanta (<span id="amazingCount">${videoObj.reactions.amazing}</span>)</button>
+    function playVideo(folder, idx){
+    const v = folders[folder][idx];
+    v.views++;
+    saveData();
+
+    videoSection.innerHTML = `
+      <div class="video-player">
+        <video id="videoPlayer" controls autoplay>
+          <source src="${v.url}" type="video/mp4">
+        </video>
+        <p id="views">👁️ ${v.views} vistas</p>
+
+        <div class="reactions">
+          <button onclick="addReaction('${folder}', ${idx}, 'like')">
+            👍 Like (<span id="likeCount">${v.reactions.like}</span>)
+          </button>
+          <button onclick="addReaction('${folder}', ${idx}, 'dislike')">
+            👎 Dislike (<span id="dislikeCount">${v.reactions.dislike}</span>)
+          </button>
+          <button onclick="addReaction('${folder}', ${idx}, 'love')">
+            ❤️ Me Gusta (<span id="loveCount">${v.reactions.love}</span>)
+          </button>
+          <button onclick="addReaction('${folder}', ${idx}, 'amazing')">
+            😍 Me Encanta (<span id="amazingCount">${v.reactions.amazing}</span>)
+          </button>
+        </div>
+
+        <section class="comments">
+          <h2>Comentarios</h2>
+          <div id="commentList">
+            ${v.comments.map(c => "<p>💬 " + c + "</p>").join("")}
           </div>
-          <section class="comments">
-            <h2>Comentarios</h2>
-            <div id="commentList">
-              ${videoObj.comments.map(c=>"<p>💬 "+c+"</p>").join("")}
-            </div>
-            <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
-            <button onclick="addComment('${folder}',${idx})">Comentar</button>
-          </section>
-        </div>`;
-    }
+          <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
+          <button onclick="addComment('${folder}', ${idx})">Comentar</button>
+        </section>
+      </div>
+    `;
+  }
 
     // Reacciones
     function addReaction(folder,idx,type){
