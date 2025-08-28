@@ -197,71 +197,89 @@
     }
 
     /* Sidebar (solo carpetas) */
-    function renderSidebar(){
-      sidebar.innerHTML = "";
-      folderSelect.innerHTML = "";
-/* Eliminar carpeta */
-function deleteFolder(){
-  const folder = document.getElementById("deleteFolderSelect").value;
-  if (!folder) return;
+    /* Sidebar (solo carpetas) */
+function renderSidebar(){
+  sidebar.innerHTML = "";
+  folderSelect.innerHTML = "";
 
-  // Confirmación de seguridad
-  if (confirm(`¿Seguro que quieres eliminar la carpeta "${folder}" con todos sus videos?`)) {
-    delete folders[folder];       // elimina la carpeta del objeto
-    saveData();                   // guarda en localStorage
-    renderSidebar();              // refresca el sidebar y los selects
-    videoSection.innerHTML = "<p>Selecciona una carpeta para ver sus videos</p>"; // limpia la pantalla central
-  }
-}
+  // limpiar selects de eliminar
+  const deleteFolderSelect = document.getElementById("deleteFolderSelect");
+  const deleteVideoFolderSelect = document.getElementById("deleteVideoFolderSelect");
+  deleteFolderSelect.innerHTML = "";
+  deleteVideoFolderSelect.innerHTML = "";
 
-     const deleteFolderSelect = document.getElementById("deleteFolderSelect");
-const deleteVideoFolderSelect = document.getElementById("deleteVideoFolderSelect");
-deleteFolderSelect.innerHTML = "";
-deleteVideoFolderSelect.innerHTML = "";
-      
-       for (let folder in folders){
-        const item = document.createElement("div");
-        item.className = "folder";
-        item.setAttribute("role","button");
-        item.innerHTML = `<h3>${folder}</h3>`;
-        item.onclick = () => showFolder(folder);
-        sidebar.appendChild(item);
+  for (let folder in folders){
+    // sidebar
+    const item = document.createElement("div");
+    item.className = "folder";
+    item.setAttribute("role","button");
+    item.innerHTML = `<h3>${folder}</h3>`;
+    item.onclick = () => showFolder(folder);
+    sidebar.appendChild(item);
 
-        // select para agregar video
+    // select para agregar video
     const opt = document.createElement("option");
-    opt.value = folder; 
+    opt.value = folder;
     opt.textContent = folder;
     folderSelect.appendChild(opt);
- // 🔹 select para eliminar carpeta
+
+    // select para eliminar carpeta
     const optDeleteFolder = document.createElement("option");
     optDeleteFolder.value = folder;
     optDeleteFolder.textContent = folder;
     deleteFolderSelect.appendChild(optDeleteFolder);
 
-    // 🔹 select para elegir carpeta al eliminar videos
+    // select para elegir carpeta al eliminar videos
     const optDeleteVideo = document.createElement("option");
     optDeleteVideo.value = folder;
     optDeleteVideo.textContent = folder;
     deleteVideoFolderSelect.appendChild(optDeleteVideo);
-         
-      }
-    }
+  }
+}
 
-    /* Mostrar videos de una carpeta en la zona central */
-    function showFolder(folder){
-      const list = folders[folder] || [];
-      if (!list.length){
-        videoSection.innerHTML = `<h2>${folder}</h2><p class="meta">No hay videos aquí todavía.</p>`;
-        return;
-      }
-      const grid = list.map((v, idx) => `
-        <div class="video-card" onclick="playVideo('${folder}', ${idx})" role="button" tabindex="0">
-          <video class="preview" src="${v.url}" muted preload="metadata"></video>
-          <div class="meta">${v.views} vistas</div>
-        </div>
-      `).join("");
-      videoSection.innerHTML = `<h2>${folder}</h2><div class="video-grid">${grid}</div>`;
-    }
+/* Eliminar carpeta */
+function deleteFolder(){
+  const folder = document.getElementById("deleteFolderSelect").value;
+  if (!folder) return;
+
+  if (confirm(`¿Seguro que quieres eliminar la carpeta "${folder}" con todos sus videos?`)) {
+    delete folders[folder];       // elimina la carpeta del objeto
+    saveData();                   // guarda en localStorage
+    renderSidebar();              // refresca sidebar y selects
+    videoSection.innerHTML = "<p>Selecciona una carpeta para ver sus videos</p>";
+  }
+}
+
+/* Cargar videos en select de eliminar video */
+function populateVideosToDelete(){
+  const folder = document.getElementById("deleteVideoFolderSelect").value;
+  const videoSelect = document.getElementById("deleteVideoSelect");
+  videoSelect.innerHTML = "";
+
+  if (!folder || !folders[folder]) return;
+
+  folders[folder].forEach((v, idx) => {
+    const opt = document.createElement("option");
+    opt.value = idx;
+    opt.textContent = `Video ${idx+1} - ${v.url.substring(0,30)}...`;
+    videoSelect.appendChild(opt);
+  });
+}
+
+/* Eliminar video */
+function deleteVideo(){
+  const folder = document.getElementById("deleteVideoFolderSelect").value;
+  const idx = document.getElementById("deleteVideoSelect").value;
+  if (!folder || idx === "") return;
+
+  if (confirm("¿Seguro que quieres eliminar este video?")) {
+    folders[folder].splice(idx, 1);   // elimina el video
+    saveData();                       // guarda cambios
+    renderSidebar();                  // refresca sidebar y selects
+    showFolder(folder);               // vuelve a mostrar carpeta actualizada
+  }
+}
+
 
     /* Reproducir un video y mostrar controles */
     function playVideo(folder, idx){
