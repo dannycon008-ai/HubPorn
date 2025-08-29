@@ -104,6 +104,11 @@
   <div class="panel">
     <h1>Panel de Admin</h1>
 
+    <!-- 📊 Estadísticas -->
+    <h3>📊 Estadísticas</h3>
+    <p>Total de visitas: <span id="visitCount">0</span></p>
+    <hr>
+
     <!-- Agregar carpeta -->
     <h3>📁 Crear Carpeta</h3>
     <input type="text" id="folderName" placeholder="Nombre de carpeta">
@@ -147,6 +152,15 @@
     const folderSelect = document.getElementById("folderSelect");
     const deleteFolderSelect = document.getElementById("deleteFolderSelect");
     const deleteVideoFolderSelect = document.getElementById("deleteVideoFolderSelect");
+
+    /* -------- CONTADOR DE VISITAS -------- */
+    async function loadVisits(){
+      const counterRef = db.collection("stats").doc("visits");
+      const docSnap = await counterRef.get();
+      if (docSnap.exists){
+        document.getElementById("visitCount").textContent = docSnap.data().count;
+      }
+    }
 
     /* -------- AGREGAR CARPETA -------- */
     async function addFolder(){
@@ -266,7 +280,9 @@
       });
     }
 
+    // 🚀 Cargar al iniciar
     renderSidebar();
+    loadVisits();
   </script>
 </body>
 </html>
