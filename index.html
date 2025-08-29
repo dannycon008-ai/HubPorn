@@ -45,6 +45,7 @@
       border: 1px solid #242424;
       border-radius: 10px;
       padding: 6px;
+      cursor:pointer;
     }
 
     video.preview {
@@ -123,7 +124,7 @@
 
   <!-- Contenido -->
   <main class="content">
-    <div id="videoSection"><p>Selecciona una carpeta para ver sus videos</p></div>
+    <div id="videoSection"></div>
   </main>
 
   <!-- Modal anuncios -->
@@ -164,7 +165,7 @@
     }, 2000);
   }
 
-  // ✅ Renderizar carpetas
+  // ✅ Renderizar carpetas en el sidebar
   async function renderSidebar(){
     sidebar.innerHTML = "";
     const snapshot = await db.collection("folders").get();
@@ -176,6 +177,40 @@
       item.onclick = () => showFolder(folder);
       sidebar.appendChild(item);
     });
+  }
+
+  // ✅ Render presentación inicial con todas las carpetas
+  async function renderPresentation(){
+    const snapshot = await db.collection("folders").get();
+    
+    if (snapshot.empty){
+      videoSection.innerHTML = "<p>No hay carpetas creadas todavía</p>";
+      return;
+    }
+
+    let grid = "";
+
+    for (const doc of snapshot.docs){
+      const folder = doc.id;
+      const data = doc.data();
+      const videos = data.videos || [];
+
+      // Tomamos el primer video como preview
+      let preview = videos.length > 0 ? videos[0].url : "";
+      
+      grid += `
+        <div class="video-card" onclick="showFolder('${folder}')">
+          ${preview ? 
+            `<video class="preview" src="${preview}" muted preload="metadata"></video>` : 
+            `<div style="height:90px;display:flex;align-items:center;justify-content:center;background:#222;color:#aaa;">
+               Sin videos
+             </div>`}
+          <h3 style="color:#fff; font-size:0.9rem; text-align:center; margin-top:6px;">${folder}</h3>
+        </div>
+      `;
+    }
+
+    videoSection.innerHTML = `<h2>📂 Todas las carpetas</h2><div class="video-grid">${grid}</div>`;
   }
 
   // ✅ Mostrar videos de una carpeta
@@ -226,16 +261,6 @@
 
     const videoPlayer = document.getElementById("videoPlayer");
 
-    // 🔒 Bloqueo para que no adelanten
-    videoPlayer.addEventListener("seeking", () => {
-      if(videoPlayer.currentTime > (videoPlayer.lastTime || 0)){
-        videoPlayer.currentTime = videoPlayer.lastTime; 
-      }
-    });
-    videoPlayer.addEventListener("timeupdate", () => {
-      videoPlayer.lastTime = videoPlayer.currentTime; 
-    });
-
     /* 📺 Anuncios */
     let adsShown = { start:false, mid:false, end:false };
 
@@ -282,52 +307,19 @@
     }
 
     v.reactions[type]++;
-    v.reacted = true;   // marcar que ya reaccionó
+    v.reacted = true;
     data.videos[idx] = v;
 
     await folderRef.update({ videos: data.videos });
 
-    // ✅ solo actualizamos el contador en pantalla
+    // ✅ Actualizar solo contador
     document.getElementById(type + "Count").textContent = v.reactions[type];
   }
 
+  // 🔥 Inicialización
   renderSidebar();
+  renderPresentation(); // 👈 muestra presentación inicial
 
-    // ✅ Mostrar presentación inicial con todas las carpetas
-async function renderPresentation(){
-  const snapshot = await db.collection("folders").get();
-  
-  if (snapshot.empty){
-    videoSection.innerHTML = "<p>No hay carpetas creadas todavía</p>";
-    return;
-  }
-
-  let grid = "";
-
-  for (const doc of snapshot.docs){
-    const folder = doc.id;
-    const data = doc.data();
-    const videos = data.videos || [];
-
-    // Tomamos el primer video como preview, si existe
-    let preview = videos.length > 0 ? videos[0].url : "";
-    
-    grid += `
-      <div class="video-card" onclick="showFolder('${folder}')">
-        ${preview ? 
-          `<video class="preview" src="${preview}" muted preload="metadata"></video>` : 
-          `<div style="height:90px;display:flex;align-items:center;justify-content:center;background:#222;color:#aaa;">
-             Sin videos
-           </div>`}
-        <h3 style="color:#fff; font-size:0.9rem; text-align:center; margin-top:6px;">${folder}</h3>
-      </div>
-    `;
-  }
-
-  videoSection.innerHTML = `<h2>📂 Todas las carpetas</h2><div class="video-grid">${grid}</div>`;
-}
-
-</script>
-
+  </script>
 </body>
 </html>
