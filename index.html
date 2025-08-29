@@ -16,50 +16,52 @@
 
     header { position:fixed; top:0; left:0; right:0; background:#1f1f1f; display:flex;
       justify-content:center; align-items:center; padding:12px 18px; z-index:100; }
-    .title{ font-family:"Archivo Black", sans-serif; font-size:2.5rem;
+    .title{
+      font-family:"Archivo Black", sans-serif;
+      font-size:2.5rem;
       background:linear-gradient(to right, #ff4444 50%, #ffffff 50%);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
     main{ margin-top:74px; flex:1; display:flex; }
     .sidebar{ width:240px; background:#1f1f1f; padding:14px; height:calc(100vh - 74px);
       position:fixed; top:74px; left:0; overflow-y:auto; border-right:1px solid #222; }
     .content{ margin-left:240px; flex:1; padding:20px; }
-    .folder{ margin-bottom:14px; cursor:pointer; }
 
-    /* 📂 Nombres de carpetas más pequeños y con interlineado */
     .folder h3 {
       color:#ff4444;
       font-size:0.9rem;
-      line-height:1.5;
+      line-height:1.5; /* interlineado */
       font-family: "Archivo Black", sans-serif;
     }
 
     .video-grid {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       gap: 12px;
       padding: 10px;
-      justify-content: flex-start;
     }
 
     .video-card {
-      flex: 0 0 auto;
-      width: 160px;
       background: #1b1b1b;
       border: 1px solid #242424;
       border-radius: 10px;
       padding: 6px;
+      text-align: center;
+      cursor: pointer;
     }
 
     video.preview {
       width: 100%;
       height: 90px;
       object-fit: cover;
+      border-radius: 6px;
     }
 
-    /* 🔒 Bloquear descargas en móviles */
-    video {
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
+    .video-player {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
     }
 
     .video-player video#videoPlayer {
@@ -69,30 +71,24 @@
       border-radius: 12px;
       background: #000;
       display: block;
-      margin: 0 auto;
     }
 
     /* 🔥 Modal anuncios */
     #adModal {
       display:none; 
       position:fixed; 
-      top:0; 
-      left:0;
-      width:100%; 
-      height:100%; 
+      top:0; left:0;
+      width:100%; height:100%; 
       background:rgba(0,0,0,0.9);
       z-index:999; 
       justify-content:center; 
       align-items:center;
     }
     #adModal iframe {
-      width:80%; 
-      height:80%; 
-      border:none; 
-      border-radius:12px;
+      width:80%; height:80%; border:none; border-radius:12px;
     }
 
-    /* Botones de reacciones */
+    /* Reacciones */
     .reactions {
       margin: 15px 0;
       display: flex;
@@ -119,12 +115,21 @@
       background: #ff4444;
       transform: scale(1.1);
     }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .content { margin-left:0; padding:10px; }
+      .sidebar { display:none; }
+      .video-grid { grid-template-columns: repeat(2, 1fr); }
+      .title { font-size:1.8rem; }
+      .video-player video#videoPlayer { width:100%; max-width:100%; }
+    }
   </style>
 </head>
 <body>
   <!-- Header -->
   <header>
-    <h1 class="title">Mi Proyecto</h1>
+    <h1 class="title">MiProyecto</h1>
   </header>
 
   <!-- Sidebar -->
@@ -132,7 +137,7 @@
 
   <!-- Contenido -->
   <main class="content">
-    <div id="videoSection"><p>Selecciona una carpeta para ver sus videos</p></div>
+    <div id="videoSection"></div>
   </main>
 
   <!-- Modal anuncios -->
@@ -143,13 +148,13 @@
   <script>
   // Configuración Firebase
   const firebaseConfig = {
-    apiKey: "xxxxxxxxxxxxxxxx",
-    authDomain: "xxxxxxxxxxxx",
-    projectId: "xxxxxxxxxxxx",
-    storageBucket: "xxxxxxxxxxxx",
-    messagingSenderId: "xxxxxxxxxxxx",
-    appId: "xxxxxxxxxxxx",
-    measurementId: "xxxxxxxxxxxx"
+    apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
+    authDomain: "minitinder-f6314.firebaseapp.com",
+    projectId: "minitinder-f6314",
+    storageBucket: "minitinder-f6314.appspot.com",
+    messagingSenderId: "659347167496",
+    appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd",
+    measurementId: "G-L0E0Y4ZLK6"
   };
 
   firebase.initializeApp(firebaseConfig);
@@ -158,7 +163,22 @@
   const sidebar = document.getElementById("sidebar");
   const videoSection = document.getElementById("videoSection");
 
-  // ✅ Renderizar carpetas
+  // ✅ Mostrar anuncio en modal
+  function showAd(url, videoPlayer, stopAfter=false){
+    const modal = document.getElementById("adModal");
+    const frame = document.getElementById("adFrame");
+    modal.style.display = "flex";
+    frame.src = url;
+    setTimeout(() => {
+      modal.style.display = "none";
+      frame.src = "";
+      if (!stopAfter) {
+        videoPlayer.play();
+      }
+    }, 2000);
+  }
+
+  // ✅ Renderizar carpetas en sidebar
   async function renderSidebar(){
     sidebar.innerHTML = "";
     const snapshot = await db.collection("folders").get();
@@ -170,6 +190,35 @@
       item.onclick = () => showFolder(folder);
       sidebar.appendChild(item);
     });
+  }
+
+  // ✅ Presentación inicial con todas las carpetas
+  async function renderPresentation(){
+    const snapshot = await db.collection("folders").get();
+    if (snapshot.empty){
+      videoSection.innerHTML = "<p>No hay carpetas creadas todavía</p>";
+      return;
+    }
+
+    let grid = "";
+    for (const doc of snapshot.docs){
+      const folder = doc.id;
+      const data = doc.data();
+      const videos = data.videos || [];
+      let preview = videos.length > 0 ? videos[0].url : "";
+
+      grid += `
+        <div class="video-card" onclick="showFolder('${folder}')">
+          ${preview ? 
+            `<video class="preview" src="${preview}" muted preload="metadata"></video>` : 
+            `<div style="height:90px;display:flex;align-items:center;justify-content:center;background:#222;color:#aaa;">
+               Sin videos
+             </div>`}
+          <h3>${folder}</h3>
+        </div>
+      `;
+    }
+    videoSection.innerHTML = `<h2>📂 Todas las carpetas</h2><div class="video-grid">${grid}</div>`;
   }
 
   // ✅ Mostrar videos de una carpeta
@@ -203,20 +252,57 @@
     data.videos[idx] = v;
     await folderRef.update({ videos: data.videos });
 
-    // 🎬 Renderizar video + reacciones
     videoSection.innerHTML = `
       <div class="video-player">
-        <video id="videoPlayer" controls controlslist="nodownload" autoplay>
+        <video id="videoPlayer" controls autoplay controlsList="nodownload">
           <source src="${v.url}" type="video/mp4">
         </video>
-        <p id="views">👁️ ${v.views} vistas</p>
+      </div>
+      <p id="views" style="text-align:center;">👁️ ${v.views} vistas</p>
 
-        <div class="reactions">
-          <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 (<span id="likeCount">${v.reactions.like}</span>)</button>
-          <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
-        </div>
+      <div class="reactions">
+        <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 (<span id="likeCount">${v.reactions.like}</span>)</button>
+        <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
       </div>
     `;
+
+    const videoPlayer = document.getElementById("videoPlayer");
+
+    // 🔒 Bloqueo para que no adelanten
+    videoPlayer.addEventListener("seeking", () => {
+      if(videoPlayer.currentTime > (videoPlayer.lastTime || 0)){
+        videoPlayer.currentTime = videoPlayer.lastTime; 
+      }
+    });
+    videoPlayer.addEventListener("timeupdate", () => {
+      videoPlayer.lastTime = videoPlayer.currentTime; 
+    });
+
+    /* 📺 Anuncios */
+    let adsShown = { start:false, mid:false, end:false };
+
+    videoPlayer.addEventListener("play", () => {
+      if(!adsShown.start){
+        videoPlayer.pause();
+        adsShown.start = true;
+        showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
+      }
+    });
+
+    videoPlayer.addEventListener("timeupdate", () => {
+      if(videoPlayer.currentTime >= 50 && !adsShown.mid){
+        adsShown.mid = true;
+        videoPlayer.pause();
+        showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
+      }
+    });
+
+    videoPlayer.addEventListener("ended", () => {
+      if(!adsShown.end){
+        adsShown.end = true;
+        showAd("https://overplantovervaluetwine.com/2061965", videoPlayer, true);
+      }
+    });
   }
 
   /* -------- REACCIONES -------- */
@@ -228,7 +314,10 @@
     const data = docSnap.data();
     const v = data.videos[idx];
 
+    if (v.reacted) return; // evitar múltiples reacciones
+
     v.reactions[type]++;
+    v.reacted = true;
     data.videos[idx] = v;
 
     await folderRef.update({ videos: data.videos });
@@ -237,6 +326,7 @@
   }
 
   renderSidebar();
+  renderPresentation();
   </script>
 </body>
 </html>
