@@ -2,7 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <title>Plataforma de Videos</title>
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
@@ -19,10 +22,12 @@
     .title{ font-family:"Archivo Black", sans-serif; font-size:2.5rem;
       background:linear-gradient(to right, #ff4444 50%, #ffffff 50%);
       -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    main{ margin-top:74px; flex:1; display:flex; }
+    main{ margin-top:74px; flex:1; display:flex; justify-content:center; }
+
     .sidebar{ width:240px; background:#1f1f1f; padding:14px; height:calc(100vh - 74px);
       position:fixed; top:74px; left:0; overflow-y:auto; border-right:1px solid #222; }
     .content{ margin-left:240px; flex:1; padding:20px; }
+
     .folder{ margin-bottom:14px; cursor:pointer; }
     .folder h3 {
       color:#ff4444;
@@ -45,7 +50,6 @@
       border: 1px solid #242424;
       border-radius: 10px;
       padding: 6px;
-      cursor:pointer;
     }
 
     video.preview {
@@ -54,24 +58,29 @@
       object-fit: cover;
     }
 
+    /* 🎬 Centrado de video */
+    .video-player {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin: 20px auto;
+      width: 100%;
+    }
     .video-player video#videoPlayer {
-      width: 80%;
+      width: 90%;
       max-width: 600px;
-      height: auto;
       border-radius: 12px;
       background: #000;
-      display: block;
-      margin: 0 auto;
     }
 
     /* 🔥 Modal anuncios */
     #adModal {
       display:none; 
       position:fixed; 
-      top:0; 
-      left:0;
-      width:100%; 
-      height:100%; 
+      top:0; left:0;
+      width:100%; height:100%; 
       background:rgba(0,0,0,0.9);
       z-index:999; 
       justify-content:center; 
@@ -91,7 +100,6 @@
       gap: 15px;
       justify-content: center;
     }
-
     .reactions button {
       display: flex;
       align-items: center;
@@ -106,17 +114,47 @@
       cursor: pointer;
       transition: all 0.2s ease-in-out;
     }
-
     .reactions button:hover {
       background: #ff4444;
       transform: scale(1.1);
+    }
+
+    /* 📱 Ajustes para tablets */
+    @media (max-width: 900px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #222;
+      }
+      .content {
+        margin-left: 0;
+        padding: 15px;
+      }
+      .video-player video#videoPlayer {
+        max-width: 100%;
+      }
+    }
+
+    /* 📱 Ajustes móviles */
+    @media (max-width: 600px) {
+      .title { font-size: 1.6rem; text-align: center; }
+      .video-grid { flex-direction: column; gap: 12px; }
+      .video-card { width: 100%; max-width: 100%; }
+      video.preview { height: auto; }
+      .reactions { flex-direction: column; gap: 10px; }
+      .reactions button { width: 100%; font-size: 1rem; padding: 12px; }
     }
   </style>
 </head>
 <body>
   <!-- Header -->
   <header>
-    <h1 class="title">HubPorn</h1>
+    <h1 class="title">Mi Nueva Plataforma</h1>
   </header>
 
   <!-- Sidebar -->
@@ -124,7 +162,7 @@
 
   <!-- Contenido -->
   <main class="content">
-    <div id="videoSection"></div>
+    <div id="videoSection"><p>Selecciona una carpeta para ver sus videos</p></div>
   </main>
 
   <!-- Modal anuncios -->
@@ -150,22 +188,7 @@
   const sidebar = document.getElementById("sidebar");
   const videoSection = document.getElementById("videoSection");
 
-  // ✅ Mostrar anuncio en modal
-  function showAd(url, videoPlayer, stopAfter=false){
-    const modal = document.getElementById("adModal");
-    const frame = document.getElementById("adFrame");
-    modal.style.display = "flex";
-    frame.src = url;
-    setTimeout(() => {
-      modal.style.display = "none";
-      frame.src = "";
-      if (!stopAfter) {
-        videoPlayer.play(); // solo reanuda si no es el anuncio final
-      }
-    }, 2000);
-  }
-
-  // ✅ Renderizar carpetas en el sidebar
+  // ✅ Renderizar carpetas
   async function renderSidebar(){
     sidebar.innerHTML = "";
     const snapshot = await db.collection("folders").get();
@@ -177,40 +200,6 @@
       item.onclick = () => showFolder(folder);
       sidebar.appendChild(item);
     });
-  }
-
-  // ✅ Render presentación inicial con todas las carpetas
-  async function renderPresentation(){
-    const snapshot = await db.collection("folders").get();
-    
-    if (snapshot.empty){
-      videoSection.innerHTML = "<p>No hay carpetas creadas todavía</p>";
-      return;
-    }
-
-    let grid = "";
-
-    for (const doc of snapshot.docs){
-      const folder = doc.id;
-      const data = doc.data();
-      const videos = data.videos || [];
-
-      // Tomamos el primer video como preview
-      let preview = videos.length > 0 ? videos[0].url : "";
-      
-      grid += `
-        <div class="video-card" onclick="showFolder('${folder}')">
-          ${preview ? 
-            `<video class="preview" src="${preview}" muted preload="metadata"></video>` : 
-            `<div style="height:90px;display:flex;align-items:center;justify-content:center;background:#222;color:#aaa;">
-               Sin videos
-             </div>`}
-          <h3 style="color:#fff; font-size:0.9rem; text-align:center; margin-top:6px;">${folder}</h3>
-        </div>
-      `;
-    }
-
-    videoSection.innerHTML = `<h2>📂 Todas las carpetas</h2><div class="video-grid">${grid}</div>`;
   }
 
   // ✅ Mostrar videos de una carpeta
@@ -244,10 +233,10 @@
     data.videos[idx] = v;
     await folderRef.update({ videos: data.videos });
 
-    // 🎬 Renderizar video + reacciones
+    // 🎬 Renderizar video
     videoSection.innerHTML = `
       <div class="video-player">
-        <video id="videoPlayer" controls autoplay>
+        <video id="videoPlayer" controls controlsList="nodownload" disablePictureInPicture autoplay>
           <source src="${v.url}" type="video/mp4">
         </video>
         <p id="views">👁️ ${v.views} vistas</p>
@@ -258,37 +247,6 @@
         </div>
       </div>
     `;
-
-    const videoPlayer = document.getElementById("videoPlayer");
-
-    /* 📺 Anuncios */
-    let adsShown = { start:false, mid:false, end:false };
-
-    // Al iniciar
-    videoPlayer.addEventListener("play", () => {
-      if(!adsShown.start){
-        videoPlayer.pause();
-        adsShown.start = true;
-        showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
-      }
-    });
-
-    // A los 50s
-    videoPlayer.addEventListener("timeupdate", () => {
-      if(videoPlayer.currentTime >= 50 && !adsShown.mid){
-        adsShown.mid = true;
-        videoPlayer.pause();
-        showAd("https://overplantovervaluetwine.com/2061965", videoPlayer);
-      }
-    });
-
-    // Al final → no reanuda
-    videoPlayer.addEventListener("ended", () => {
-      if(!adsShown.end){
-        adsShown.end = true;
-        showAd("https://overplantovervaluetwine.com/2061965", videoPlayer, true);
-      }
-    });
   }
 
   /* -------- REACCIONES -------- */
@@ -300,7 +258,6 @@
     const data = docSnap.data();
     const v = data.videos[idx];
 
-    // 🔒 Evitar múltiples reacciones
     if (v.reacted) {
       alert("Ya reaccionaste a este video 👍");
       return;
@@ -312,14 +269,10 @@
 
     await folderRef.update({ videos: data.videos });
 
-    // ✅ Actualizar solo contador
     document.getElementById(type + "Count").textContent = v.reactions[type];
   }
 
-  // 🔥 Inicialización
   renderSidebar();
-  renderPresentation(); // 👈 muestra presentación inicial
-
   </script>
 </body>
 </html>
