@@ -177,6 +177,18 @@
       }
     }, 2000);
   }
+async function registerVisit(){
+  const counterRef = db.collection("stats").doc("visits");
+  const docSnap = await counterRef.get();
+
+  if (docSnap.exists){
+    let current = docSnap.data().count || 0;
+    await counterRef.update({ count: current + 1 });
+  } else {
+    await counterRef.set({ count: 1 });
+  }
+}
+registerVisit();
 
   // ✅ Renderizar carpetas en sidebar
   async function renderSidebar(){
