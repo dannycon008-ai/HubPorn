@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>Plataforma de Videos</title>
+  <title>Hub Porn</title>
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
   <!-- Firebase SDK -->
@@ -16,7 +16,7 @@
 
     header { position:fixed; top:0; left:0; right:0; background:#1f1f1f;
       display:flex; justify-content:center; align-items:center; padding:12px 18px; z-index:100; }
-    .title{ font-family:"Archivo Black", sans-serif; font-size:2rem;
+    .title{ font-family:"Archivo Black", sans-serif; font-size:3rem;
       background:linear-gradient(to right, #ff4444 50%, #ffffff 50%);
       -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
@@ -108,24 +108,30 @@
       transform: scale(1.1);
     }
 
-    /* 📱 Responsive */
-    @media (max-width: 900px) {
-      .sidebar { position:relative; width:100%; height:auto; border-right:none; display:flex; flex-wrap:wrap; justify-content:center; }
-      .content { margin-left:0; padding:10px; }
-      .video-grid { justify-content:center; }
-    }
-    @media (max-width: 600px) {
-      .title { font-size:1.4rem; }
-      .video-card { width:100%; max-width:300px; }
-      .reactions { flex-direction:column; }
-      .reactions button { width:100%; }
+   /* 📱 Ajuste para carpetas en móviles */
+@media (max-width: 600px) {
+  .video-grid {
+    flex-direction: column;
+    gap: 15px;
+     .title {
+    font-size: 1.8rem;
+  }
+  .video-card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .video-card h3 {
+    font-size: 1.2rem;  /* texto más grande para móvil */
+  }
+}
+
     }
   </style>
 </head>
 <body>
   <!-- Header -->
   <header>
-    <h1 class="title">Mi Plataforma</h1>
+    <h1 class="title">Hub Porn</h1>
   </header>
 
   <!-- Sidebar -->
