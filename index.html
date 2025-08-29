@@ -292,6 +292,41 @@
   }
 
   renderSidebar();
+
+    // ✅ Mostrar presentación inicial con todas las carpetas
+async function renderPresentation(){
+  const snapshot = await db.collection("folders").get();
+  
+  if (snapshot.empty){
+    videoSection.innerHTML = "<p>No hay carpetas creadas todavía</p>";
+    return;
+  }
+
+  let grid = "";
+
+  for (const doc of snapshot.docs){
+    const folder = doc.id;
+    const data = doc.data();
+    const videos = data.videos || [];
+
+    // Tomamos el primer video como preview, si existe
+    let preview = videos.length > 0 ? videos[0].url : "";
+    
+    grid += `
+      <div class="video-card" onclick="showFolder('${folder}')">
+        ${preview ? 
+          `<video class="preview" src="${preview}" muted preload="metadata"></video>` : 
+          `<div style="height:90px;display:flex;align-items:center;justify-content:center;background:#222;color:#aaa;">
+             Sin videos
+           </div>`}
+        <h3 style="color:#fff; font-size:0.9rem; text-align:center; margin-top:6px;">${folder}</h3>
+      </div>
+    `;
+  }
+
+  videoSection.innerHTML = `<h2>📂 Todas las carpetas</h2><div class="video-grid">${grid}</div>`;
+}
+
 </script>
 
 </body>
