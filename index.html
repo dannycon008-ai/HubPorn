@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HubPorn</title>
 
-  <!-- Fuente del título -->
+  <!-- Fuente -->
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
-  <!-- Firebase (compat) -->
+  <!-- Firebase -->
   <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -24,28 +24,24 @@
     *{margin:0; padding:0; box-sizing:border-box}
     body{background:var(--bg); color:var(--txt); font-family:"Segoe UI", Tahoma, sans-serif;}
 
-    /* Header */
     header{
       position:sticky; top:0; z-index:100;
       display:flex; align-items:center; justify-content:center;
       padding:14px 20px;
       background:linear-gradient(90deg,#161616,#0f0f0f);
       border-bottom:1px solid var(--border);
-      box-shadow:0 4px 14px rgba(0,0,0,.35);
       cursor:pointer;
     }
     .title{
       font-family:"Archivo Black", sans-serif;
-      font-size:2rem; line-height:1;
+      font-size:2rem;
       background:linear-gradient(90deg, var(--accent), #ffa045);
       -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-      letter-spacing:.5px;
-      user-select:none;
       transition:transform .2s;
     }
     .title:hover{ transform:scale(1.05); }
 
-    /* Layout de 3 columnas */
+    /* Layout */
     .layout{
       display:grid;
       grid-template-columns: 200px 1fr 220px;
@@ -60,13 +56,11 @@
       border:1px solid var(--border);
       border-radius:10px;
       padding:10px;
-      min-height:400px;
     }
 
-    /* Banner superior */
     .top-banner{
       font-family:"Archivo Black", sans-serif;
-      font-size:1.4rem;
+      font-size:1.3rem;
       text-align:center;
       background:linear-gradient(90deg, #ff4444, #ffa045);
       -webkit-background-clip:text;
@@ -86,48 +80,52 @@
       border-radius:12px;
       overflow:hidden;
       cursor:pointer;
-      transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+      transition:.2s;
     }
     .card:hover{
-      transform:translateY(-6px) scale(1.04);
+      transform:translateY(-5px) scale(1.03);
       border-color:#3a3a3a;
-      box-shadow:0 12px 26px rgba(0,0,0,.45), 0 0 18px rgba(255,68,68,.25);
+      box-shadow:0 6px 14px rgba(0,0,0,.4);
     }
-    .card-video{ width:100%; height:100px; object-fit:cover; display:block; background:#000; }
+    .card-video{ width:100%; height:100px; object-fit:cover; }
     .card-title{ text-align:center; font-size:.9rem; padding:8px; }
 
-    /* Previews vertical */
-    .preview-item{
-      margin-bottom:12px;
-      cursor:pointer;
-    }
-    .preview-item video{
-      width:100%; 
-      height:70px;   /* 🔹 más pequeño */
-      object-fit:cover; 
-      border-radius:8px;
-    }
-    .preview-title{
-      font-size:.8rem; margin-top:4px; text-align:center; color:#ccc;
-    }
+    /* Previews */
+    .preview-item{ margin-bottom:12px; cursor:pointer; }
+    .preview-item video{ width:100%; height:90px; object-fit:cover; border-radius:6px; }
+    .preview-title{ font-size:.8rem; margin-top:4px; text-align:center; color:#ccc; }
 
     /* Video player */
-    .video-player{
-      text-align:center;
-    }
+    .video-player{ text-align:center; }
     .video-player video{
-      width:60%; max-width:500px; border-radius:10px; background:#000;
+      width:300px; height:350px; border-radius:10px; background:#000;
     }
-    #adContainer{
-      margin-top:12px;
-      text-align:center;
-    }
+    #adContainer{ margin-top:12px; text-align:center; }
+    #adContainer iframe{ max-width:100%; height:auto; }
 
-    /* Responsive */
+    /* Reactions */
+    .reactions{
+      margin:12px 0;
+      display:flex;
+      justify-content:center;
+      gap:12px;
+    }
+    .reactions button{
+      background:#222;
+      border:none;
+      padding:8px 14px;
+      border-radius:20px;
+      color:#fff;
+      cursor:pointer;
+      transition:.2s;
+    }
+    .reactions button.active{ background:var(--accent); }
+    .reactions button:hover{ transform:scale(1.05); }
+
     @media(max-width: 900px){
       .layout{ grid-template-columns:1fr; }
       .ads-left, .previews-right{ display:none; }
-      .video-player video{ width:100%; }
+      .video-player video{ width:100%; height:auto; }
     }
   </style>
 </head>
@@ -141,6 +139,7 @@
     <!-- Ads izquierda -->
     <aside class="ads-left">
       <div class="top-banner">Publicidad</div>
+      <!-- 👇 Banner lateral -->
       <script type="text/javascript">
         atOptions = {
           'key' : 'de13ddc2442e4144561bcec2fa1af174',
@@ -155,14 +154,14 @@
 
     <!-- Centro -->
     <main>
-      <h2 class="top-banner">Lo mejor del 2025</h2>
+      <h2 class="top-banner">📂 Todas las carpetas</h2>
       <div id="folderGrid" class="grid"></div>
       <div id="videoSection"></div>
     </main>
 
     <!-- Previews derecha -->
     <aside class="previews-right">
-      <div class="top-banner">Lo mas visto </div>
+      <div class="top-banner">🎬 Previews</div>
       <div id="previewList"></div>
     </aside>
   </div>
@@ -186,7 +185,6 @@
 
     // Render carpetas
     function renderFolders(docs){
-      if (!docs.length){ folderGrid.innerHTML = "<p>No hay carpetas</p>"; return; }
       folderGrid.innerHTML = docs.map(doc=>{
         const folder = doc.id;
         const data = doc.data(); const videos = data.videos||[];
@@ -215,28 +213,25 @@
         </div>`).join("");
     }
 
-   // Mostrar carpeta (solo la seleccionada)
-window.showFolder = async(folder)=>{
-  const docSnap = await db.collection("folders").doc(folder).get();
-  if (!docSnap.exists){ videoSection.innerHTML = "<p>No hay videos</p>"; return; }
-  const data = docSnap.data();
+    // Mostrar carpeta
+    window.showFolder = async(folder)=>{
+      const docSnap = await db.collection("folders").doc(folder).get();
+      if (!docSnap.exists){ videoSection.innerHTML = "<p>No hay videos</p>"; return; }
+      const data = docSnap.data();
+      folderGrid.innerHTML = ""; // Limpia otras carpetas
+      videoSection.innerHTML = `
+        <h2 class="top-banner">${folder}</h2>
+        <div class="grid">
+          ${data.videos.map((v,idx)=>`
+            <div class="card" onclick="playVideo('${folder}', ${idx})">
+              <video class="card-video" src="${v.url}" muted playsinline></video>
+              <div class="card-title">Video ${idx+1}</div>
+            </div>`).join("")}
+        </div>
+      `;
+    };
 
-  // 🔹 REEMPLAZA todo el contenido central por la carpeta seleccionada
-  document.querySelector("main").innerHTML = `
-    <h2 class="top-banner">${folder}</h2>
-    <div class="grid">
-      ${data.videos.map((v,idx)=>`
-        <div class="card" onclick="playVideo('${folder}', ${idx})">
-          <video class="card-video" src="${v.url}" muted playsinline></video>
-          <div class="card-title">Video ${idx+1}</div>
-        </div>`).join("")}
-    </div>
-    <div id="videoSection"></div>
-  `;
-};
-
-
-    // Reproducir video con anuncios
+    // Reproducir video
     window.playVideo = async(folder, idx)=>{
       const folderRef = db.collection("folders").doc(folder);
       const docSnap = await folderRef.get();
@@ -244,19 +239,22 @@ window.showFolder = async(folder)=>{
 
       const data = docSnap.data();
       const v = data.videos[idx];
-
-      // Aumentar vistas
       v.views++;
       data.videos[idx] = v;
       await folderRef.update({ videos: data.videos });
 
-      // Render video + contenedor anuncios
       videoSection.innerHTML = `
         <div class="video-player">
-          <video id="videoPlayer" controls autoplay>
+          <video id="videoPlayer" controls autoplay width="300" height="350">
             <source src="${v.url}" type="video/mp4">
           </video>
-          <p id="views">👁️ ${v.views} vistas</p>
+          <p>👁️ ${v.views} vistas</p>
+
+          <div class="reactions">
+            <button id="likeBtn" onclick="toggleReaction('${folder}', ${idx}, 'like')">👍 (<span id="likeCount">${v.reactions.like}</span>)</button>
+            <button id="dislikeBtn" onclick="toggleReaction('${folder}', ${idx}, 'dislike')">👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+          </div>
+
           <div id="adContainer"></div>
         </div>
       `;
@@ -264,51 +262,61 @@ window.showFolder = async(folder)=>{
       const videoPlayer = document.getElementById("videoPlayer");
       let adsShown = {start:false, mid:false, end:false};
 
-      // Eventos de anuncios
-      videoPlayer.addEventListener("play", ()=>{
-        if(!adsShown.start){ adsShown.start=true; showAdBanner(); }
-      });
-      videoPlayer.addEventListener("timeupdate", ()=>{
-        if(videoPlayer.currentTime>=50 && !adsShown.mid){
-          adsShown.mid=true; showAdBanner();
-        }
-      });
-      videoPlayer.addEventListener("ended", ()=>{
-        if(!adsShown.end){ adsShown.end=true; showAdBanner(); }
-      });
-    }
+      function showAdBanner(){
+        document.getElementById("adContainer").innerHTML = `
+          <script type="text/javascript">
+            atOptions = {
+              'key' : 'de13ddc2442e4144561bcec2fa1af174',
+              'format' : 'iframe',
+              'height' : 50,
+              'width' : 320,
+              'params' : {}
+            };
+          <\/script>
+          <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"><\/script>
+        `;
+      }
 
-    // Función para cargar banner dinámico
-    function showAdBanner(){
-      const container = document.getElementById("adContainer");
-      container.innerHTML = "";
-      let s1 = document.createElement("script");
-      s1.type = "text/javascript";
-      s1.innerHTML = `
-        atOptions = {
-          'key' : 'de13ddc2442e4144561bcec2fa1af174',
-          'format' : 'iframe',
-          'height' : 50,
-          'width' : 320,
-          'params' : {}
-        };
-      `;
-      let s2 = document.createElement("script");
-      s2.type = "text/javascript";
-      s2.src = "//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js";
-      container.appendChild(s1);
-      container.appendChild(s2);
-    }
+      videoPlayer.addEventListener("play", ()=>{ if(!adsShown.start){ adsShown.start=true; showAdBanner(); }});
+      videoPlayer.addEventListener("timeupdate", ()=>{ if(videoPlayer.currentTime>=50 && !adsShown.mid){ adsShown.mid=true; showAdBanner(); }});
+      videoPlayer.addEventListener("ended", ()=>{ if(!adsShown.end){ adsShown.end=true; showAdBanner(); }});
+    };
 
-    // Render inicial
+    // Toggle reacciones
+    window.toggleReaction = async(folder, idx, type)=>{
+      const folderRef = db.collection("folders").doc(folder);
+      const docSnap = await folderRef.get();
+      if (!docSnap.exists) return;
+      const data = docSnap.data();
+      const v = data.videos[idx];
+
+      if (!v.userReaction) v.userReaction = null;
+
+      if (v.userReaction === type){
+        v.reactions[type]--;
+        v.userReaction = null;
+      } else {
+        if (v.userReaction){ v.reactions[v.userReaction]--; }
+        v.reactions[type]++;
+        v.userReaction = type;
+      }
+
+      data.videos[idx] = v;
+      await folderRef.update({ videos: data.videos });
+
+      document.getElementById("likeCount").textContent = v.reactions.like;
+      document.getElementById("dislikeCount").textContent = v.reactions.dislike;
+
+      document.getElementById("likeBtn").classList.toggle("active", v.userReaction==="like");
+      document.getElementById("dislikeBtn").classList.toggle("active", v.userReaction==="dislike");
+    };
+
     db.collection("folders").onSnapshot(snap=>{
       renderFolders(snap.docs);
       renderPreviews(snap.docs);
     });
 
-    window.renderPresentation = ()=>{ 
-      db.collection("folders").get().then(snap=>renderFolders(snap.docs)); 
-    }
+    window.renderPresentation = ()=>{ db.collection("folders").get().then(snap=>renderFolders(snap.docs)); }
   });
   </script>
 </body>
