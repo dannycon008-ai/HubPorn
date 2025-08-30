@@ -104,6 +104,16 @@
     .video-player{ text-align:center; }
     .video-player video{
       width:300px; height:350px; border-radius:10px; background:#000;
+      
+      /* 📱 En móviles (Android/iOS) */
+@media (max-width: 600px) {
+  .video-player video {
+    width: 300px;   /* ancho fijo */
+    height: 350px;  /* alto fijo */
+  }
+}
+
+      
     }
     #adContainer{ margin-top:12px; text-align:center; }
     #adContainer iframe{ max-width:100%; height:auto; }
@@ -145,18 +155,12 @@
     <!-- Ads izquierda -->
     <aside class="ads-left">
       <div class="top-banner">Publicidad</div>
-      <!-- Banner lateral 160x600 -->
-      <script type="text/javascript">
-        atOptions = {
-          'key' : 'de13ddc2442e4144561bcec2fa1af174',
-          'format' : 'iframe',
-          'height' : 600,
-          'width' : 160,
-          'params' : {}
-        };
-      </script>
-      <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
-    </aside>
+       <!-- Imagen publicitaria -->
+  <img src="https://s11.erome.com/2497/nZMW9sgy/ZhsREn5s.jpeg?v=1714070792" 
+       alt="Publicidad" 
+       style="width:100%; border-radius:8px; cursor:pointer;"
+       onclick="showAd('https://overplantovervaluetwine.com/2061965')">
+</aside>
 
     <!-- Centro -->
     <main>
