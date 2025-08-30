@@ -6,205 +6,210 @@
   <title>HubPorn</title>
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
-  <!-- Firebase SDK -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:"Segoe UI", Tahoma, sans-serif; background:#0d0d0d; color:#fff; }
+    body { font-family:"Segoe UI", sans-serif; background:#121212; color:#fff; }
 
-    header { 
-      position:fixed; top:0; left:0; right:0; z-index:100;
-      display:flex; justify-content:space-between; align-items:center;
-      padding:16px 24px; 
-      background:linear-gradient(to right, #1a1a1a, #111);
-      box-shadow:0 2px 10px rgba(0,0,0,.6);
+    header { position:fixed; top:0; left:0; right:0; background:#1f1f1f;
+      text-align:center; padding:15px; z-index:100; }
+    .title{ font-family:"Archivo Black", sans-serif; font-size:2.2rem;
+      background:linear-gradient(to right, #ff4444, #ffffff);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+
+    main{ margin-top:80px; padding:20px; }
+
+    /* Banner bonito */
+    .banner {
+      background: linear-gradient(45deg, #ff4444, #222);
+      padding: 25px;
+      text-align:center;
+      border-radius:12px;
+      margin-bottom:20px;
+      color:#fff;
+      font-size:1.2rem;
+      font-weight:bold;
     }
-    .title{
-      font-family:"Archivo Black", sans-serif;
-      font-size:2.2rem;
-      background:linear-gradient(to right, #ff4444, #ff9900);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-    }
 
-    #searchBar {
-      background:#222; border:none; padding:8px 14px; border-radius:8px; color:white;
-      width:200px; font-size:0.95rem;
-    }
-
-    main{ margin-top:90px; display:flex; }
-    .sidebar{ width:240px; background:#141414; padding:14px; height:calc(100vh - 90px);
-      position:fixed; top:90px; left:0; overflow-y:auto; border-right:1px solid #222; }
-    .content{ margin-left:240px; flex:1; padding:20px; }
-
-    /* 📂 Carpetas */
-    .folder-grid {
+    /* Grid de carpetas */
+    .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 18px;
-      padding: 20px;
     }
-    .folder-card {
+
+    .card {
       background:#1b1b1b;
+      border:1px solid #333;
       border-radius:12px;
       overflow:hidden;
       cursor:pointer;
-      transition:transform .25s, box-shadow .25s;
+      transition: transform 0.3s, box-shadow 0.3s;
     }
-    .folder-card:hover {
-      transform:scale(1.08);
-      box-shadow:0 0 18px rgba(255,68,68,.6);
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.6);
     }
-    .folder-card video { width:100%; height:100px; object-fit:cover; }
-    .folder-card h3 { padding:8px; font-size:1rem; text-align:center; color:#fff; }
-
-    /* 🎬 Videos */
-    .video-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap:18px; }
-    .video-card { background:#1c1c1c; border-radius:12px; overflow:hidden; cursor:pointer;
-      transition:transform .25s, box-shadow .25s; }
-    .video-card:hover { transform:scale(1.07); box-shadow:0 0 15px rgba(255,68,68,.6); }
-    .video-card video { width:100%; height:100px; object-fit:cover; }
-
-    /* 📺 Video Player centrado */
-    .video-wrapper { display:flex; justify-content:center; align-items:flex-start; gap:20px; margin-top:20px; }
-    .video-player video#videoPlayer {
-      width:80%; max-width:700px; border-radius:12px; background:#000;
-      box-shadow:0 0 20px rgba(0,0,0,.8);
+    .card video, .card .placeholder {
+      width:100%; height:100px; object-fit:cover;
     }
-    .side-ad { width:140px; height:600px; border-radius:10px; overflow:hidden; background:#222; }
-    .side-ad img { width:100%; height:100%; object-fit:cover; }
+    .card h3 {
+      text-align:center;
+      padding:10px;
+      font-size:0.95rem;
+      color:#fff;
+    }
 
-    /* Banner publicitario */
-    #videoBanner { margin:15px auto; text-align:center; }
+    /* Video centrado con anuncios */
+    .video-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 15px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .video-player {
+      flex: 1 1 600px;
+      text-align: center;
+    }
+    .video-player video {
+      width:100%; max-width:600px; border-radius:12px;
+      background:#000;
+    }
+    .side-ad {
+      flex: 0 0 150px;
+    }
+    .side-ad img {
+      width:100%; border-radius:8px; margin-bottom:12px;
+    }
+
+    /* Banner publicitario arriba del video */
+    .video-banner {
+      margin-bottom:12px;
+      text-align:center;
+    }
 
     /* Responsive */
-    @media (max-width:900px){
-      .sidebar { width:100%; position:relative; height:auto; border-right:none; }
-      .content { margin-left:0; }
-      .video-wrapper { flex-direction:column; align-items:center; }
-      .side-ad { width:100%; height:140px; }
-      .video-player video#videoPlayer { width:100%; }
+    @media (max-width:768px){
+      .video-container { flex-direction:column; align-items:center; }
+      .side-ad { order:2; display:flex; justify-content:center; gap:10px; }
+      .side-ad img { width:45%; }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
   <header>
     <h1 class="title">HubPorn</h1>
-    <input id="searchBar" type="text" placeholder="Buscar carpeta...">
   </header>
 
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <!-- Banner bonito -->
+    <div class="banner">Los mejores videos porno y exclusivo</div>
 
-  <!-- Contenido -->
-  <main class="content">
+    <!-- Aquí se renderizan las carpetas -->
     <div id="videoSection"><p>Cargando carpetas...</p></div>
   </main>
 
   <script>
+  // Configuración Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
     authDomain: "minitinder-f6314.firebaseapp.com",
     projectId: "minitinder-f6314",
     storageBucket: "minitinder-f6314.appspot.com",
     messagingSenderId: "659347167496",
-    appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd",
-    measurementId: "G-L0E0Y4ZLK6"
+    appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd"
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-
-  const sidebar = document.getElementById("sidebar");
   const videoSection = document.getElementById("videoSection");
-  const searchBar = document.getElementById("searchBar");
 
-  async function renderSidebar(filter=""){
-    sidebar.innerHTML = "";
-    const snapshot = await db.collection("folders").get();
-    snapshot.forEach(doc => {
-      const folder = doc.id;
-      if(filter && !folder.toLowerCase().includes(filter.toLowerCase())) return;
-      const item = document.createElement("div");
-      item.className = "folder";
-      item.innerHTML = `<h3>${folder}</h3>`;
-      item.onclick = () => showFolder(folder);
-      sidebar.appendChild(item);
-    });
-  }
-
-  searchBar.addEventListener("input", (e) => renderSidebar(e.target.value));
-
+  // Mostrar carpetas iniciales
   async function renderPresentation(){
     const snapshot = await db.collection("folders").get();
-    if (snapshot.empty){
-      videoSection.innerHTML = "<p>No hay carpetas creadas todavía</p>";
+    if(snapshot.empty){
+      videoSection.innerHTML = "<p>No hay carpetas creadas aún.</p>";
       return;
     }
     let grid = "";
-    snapshot.forEach(doc => {
+    snapshot.forEach(doc=>{
       const folder = doc.id;
       const data = doc.data();
-      const videos = data.videos || [];
-      const preview = videos.length > 0 ? videos[0].url : "";
+      const preview = data.videos && data.videos.length>0 ? data.videos[0].url : "";
       grid += `
-        <div class="folder-card" onclick="showFolder('${folder}')">
-          ${preview 
-            ? `<video class="preview" src="${preview}" muted preload="metadata"></video>`
-            : `<div style="height:100px;display:flex;align-items:center;justify-content:center;background:#222;color:#aaa;">Sin videos</div>`}
+        <div class="card" onclick="showFolder('${folder}')">
+          ${preview ? `<video src="${preview}" muted preload="metadata"></video>` 
+          : `<div class="placeholder" style="background:#333;display:flex;align-items:center;justify-content:center;color:#aaa;">Sin videos</div>`}
           <h3>${folder}</h3>
         </div>`;
     });
-    videoSection.innerHTML = `<h2 style="margin:10px 0;">📂 Todas las carpetas</h2>
-      <div class="folder-grid">${grid}</div>`;
+    videoSection.innerHTML = `<h2>Tus carpetas</h2><div class="grid">${grid}</div>`;
   }
 
+  // Mostrar los videos de una carpeta
   async function showFolder(folder){
     const docSnap = await db.collection("folders").doc(folder).get();
-    if (!docSnap.exists){
-      videoSection.innerHTML = `<h2>${folder}</h2><p>No hay videos aquí todavía.</p>`;
+    if(!docSnap.exists){
+      videoSection.innerHTML = `<p>Carpeta vacía.</p>`;
       return;
     }
     const data = docSnap.data();
-    const grid = data.videos.map((v, idx) => `
-      <div class="video-card" onclick="playVideo('${folder}', ${idx})">
-        <video class="preview" src="${v.url}" muted preload="metadata"></video>
-        <div style="padding:6px;">${v.views} vistas</div>
+    let grid = data.videos.map((v,idx)=>`
+      <div class="card" onclick="playVideo('${folder}',${idx})">
+        <video src="${v.url}" muted preload="metadata"></video>
+        <h3>Video ${idx+1} - ${v.views} vistas</h3>
       </div>
     `).join("");
-    videoSection.innerHTML = `<h2>${folder}</h2><div class="video-grid">${grid}</div>`;
+    videoSection.innerHTML = `<h2>${folder}</h2><div class="grid">${grid}</div>`;
   }
 
+  // Reproducir video en el centro con anuncios
   async function playVideo(folder, idx){
     const folderRef = db.collection("folders").doc(folder);
     const docSnap = await folderRef.get();
-    if (!docSnap.exists) return;
+    if(!docSnap.exists) return;
     const data = docSnap.data();
     const v = data.videos[idx];
     v.views++;
-    data.videos[idx] = v;
-    await folderRef.update({ videos: data.videos });
+    data.videos[idx]=v;
+    await folderRef.update({videos:data.videos});
 
     videoSection.innerHTML = `
-      <div id="videoBanner">
-        <!-- Aquí tu banner script -->
-      </div>
-      <div class="video-wrapper">
-        <div class="side-ad"><img src="https://via.placeholder.com/140x600?text=Ad+Izquierda"></div>
+      <div class="video-container">
+        <div class="side-ad">
+          <img src="https://via.placeholder.com/150x600?text=Anuncio+1">
+          <img src="https://via.placeholder.com/150x600?text=Anuncio+2">
+        </div>
         <div class="video-player">
-          <video id="videoPlayer" controls autoplay controlslist="nodownload" disablePictureInPicture>
+          <div class="video-banner">
+            <!-- Tu banner script -->
+            <script type="text/javascript">
+              atOptions = {
+                'key' : 'de13ddc2442e4144561bcec2fa1af174',
+                'format' : 'iframe',
+                'height' : 60,
+                'width' : 468,
+                'params' : {}
+              };
+            </script>
+            <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
+          </div>
+          <video controls autoplay>
             <source src="${v.url}" type="video/mp4">
           </video>
-          <p style="text-align:center;">👁️ ${v.views} vistas</p>
+          <p>👁️ ${v.views} vistas</p>
         </div>
-        <div class="side-ad"><img src="https://via.placeholder.com/140x600?text=Ad+Derecha"></div>
-      </div>
-    `;
+        <div class="side-ad">
+          <img src="https://via.placeholder.com/150x600?text=Anuncio+3">
+          <img src="https://via.placeholder.com/150x600?text=Anuncio+4">
+        </div>
+      </div>`;
   }
 
-  renderSidebar();
   renderPresentation();
   </script>
 </body>
