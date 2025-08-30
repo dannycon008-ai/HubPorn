@@ -163,20 +163,26 @@
   const sidebar = document.getElementById("sidebar");
   const videoSection = document.getElementById("videoSection");
 
-  // ✅ Mostrar anuncio en modal
-  function showAd(url, videoPlayer, stopAfter=false){
-    const modal = document.getElementById("adModal");
-    const frame = document.getElementById("adFrame");
-    modal.style.display = "flex";
-    frame.src = url;
-    setTimeout(() => {
-      modal.style.display = "none";
-      frame.src = "";
-      if (!stopAfter) {
-        videoPlayer.play();
-      }
-    }, 2000);
-  }
+ // ✅ Mostrar anuncio
+function showAd(url, videoPlayer, stopAfter=false){
+  // Pausar el video
+  videoPlayer.pause();
+
+  // Abrir anuncio en la misma ventana
+  const currentUrl = window.location.href; // guarda tu sitio
+
+  window.location.href = url;
+
+  // Después de 5 segundos, regresar a tu sitio y seguir con el video
+  setTimeout(() => {
+    window.location.href = currentUrl;
+
+    if (!stopAfter) {
+      videoPlayer.play(); // reanuda si no es el anuncio final
+    }
+  }, 5000);
+}
+
 async function registerVisit(){
   const counterRef = db.collection("stats").doc("visits");
   const docSnap = await counterRef.get();
