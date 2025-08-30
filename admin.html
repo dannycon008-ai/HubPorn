@@ -276,6 +276,32 @@
         deleteVideoFolderSelect.appendChild(opt3);
       });
     }
+
+    // Contador de visitas (arranca en 4025)
+async function incrementSiteViews(){
+  const ref = db.collection("stats").doc("siteViews");
+  const snap = await ref.get();
+
+  if(snap.exists){
+    const current = snap.data().count || 0;
+    await ref.update({ count: current + 1 });
+  } else {
+    await ref.set({ count: 4025 }); // arranca en 4025 si no existía
+  }
+}
+
+// Mostrar en el panel
+async function renderSiteViews(){
+  const ref = db.collection("stats").doc("siteViews");
+  const snap = await ref.get();
+  const count = snap.exists ? snap.data().count : 4025;
+  document.getElementById("siteViewsCounter").textContent = count;
+}
+
+// Cada vez que alguien entra al sitio
+incrementSiteViews();
+renderSiteViews();
+
     renderSidebar();
   </script>
 </body>
