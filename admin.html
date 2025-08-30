@@ -4,9 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Panel de Administración</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
-  <!-- Firebase SDK -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -16,68 +17,59 @@
       background: #121212;
       color: #fff;
       margin: 0;
+      padding: 0;
       display: flex;
+      justify-content: center;
+      align-items: flex-start;
       min-height: 100vh;
     }
-
-    /* 📊 Panel lateral para visitas */
-    .stats-panel {
-      width: 200px;
-      background: #1b1b1b;
-      border-right: 1px solid #333;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .stats-panel h2 {
-      font-size: 1.2rem;
-      margin-bottom: 15px;
-      color: #ff4444;
-      font-family: "Archivo Black", sans-serif;
-    }
-    .visit-counter {
-      font-size: 2rem;
-      font-weight: bold;
-      background: #2a2a2a;
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-      width: 100%;
-      border: 1px solid #333;
-    }
-
-    /* 📋 Panel principal */
     .panel {
-      flex: 1;
+      margin-top: 40px;
+      background: #1e1e1e;
       padding: 20px;
+      border-radius: 14px;
+      width: 95%;
+      max-width: 650px;
+      border: 1px solid #333;
+      box-shadow: 0 8px 20px rgba(0,0,0,.5);
     }
     h1 {
       font-family: "Archivo Black", sans-serif;
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
       font-size: 2rem;
-      background: linear-gradient(to right, #ff4444, #ffffff);
+      background: linear-gradient(to right, #ff4444, #ffa045);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    input, select, button {
+    h3 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #ffa045;
+    }
+    input, select, textarea, button {
       width: 100%;
       margin: 8px 0;
       padding: 10px;
-      border-radius: 6px;
+      border-radius: 8px;
       border: none;
       font-size: 1rem;
     }
-    input, select {
+    input, select, textarea {
       background: #2a2a2a;
       color: #fff;
+    }
+    textarea {
+      min-height: 100px;
+      resize: vertical;
     }
     button {
       background: #ff4444;
       color: #fff;
       cursor: pointer;
       font-weight: bold;
+      transition: .2s;
     }
     button:hover {
       background: #ff2222;
@@ -87,8 +79,7 @@
       border-top: 1px solid #333;
       margin: 20px 0;
     }
-
-    /* estilos de las miniaturas */
+    /* Miniaturas para eliminar videos */
     #deleteVideoList {
       display: flex;
       flex-wrap: wrap;
@@ -106,7 +97,7 @@
     #deleteVideoList video {
       width: 120px;
       height: 70px;
-      border-radius: 4px;
+      border-radius: 6px;
     }
     #deleteVideoList button {
       margin-top: 6px;
@@ -123,73 +114,52 @@
   </style>
 </head>
 <body>
-  <!-- Panel lateral de visitas -->
-  <aside class="stats-panel">
-    <h2>👁️ Visitas</h2>
-    <div class="visit-counter" id="visitCounter">0</div>
-  </aside>
-
-  <!-- Panel principal -->
   <div class="panel">
-    <h1>Panel de Admin</h1>
+    <h1>📂 Panel de Admin</h1>
 
-    <!-- Agregar carpeta -->
-    <h3>📁 Crear Carpeta</h3>
+    <!-- Crear Carpeta -->
+    <h3>➕ Crear Carpeta</h3>
     <input type="text" id="folderName" placeholder="Nombre de carpeta">
-    <button onclick="addFolder()">Agregar Carpeta</button>
+    <button onclick="addFolder()">Crear Carpeta</button>
     <hr>
 
-    <!-- Agregar video -->
-    <h3>🎬 Agregar Video</h3>
-    <input type="text" id="videoURL" placeholder="URL del video (mp4)">
+    <!-- Agregar Videos -->
+    <h3>🎬 Agregar Videos</h3>
+    <textarea id="videoURLs" placeholder="Pega aquí varias URLs de videos (una por línea)"></textarea>
     <select id="folderSelect"></select>
-    <button onclick="addVideo()">Agregar Video</button>
+    <button onclick="addVideos()">Agregar Videos</button>
     <hr>
 
-    <!-- Eliminar carpeta -->
+    <!-- Eliminar Carpeta -->
     <h3>🗑️ Eliminar Carpeta</h3>
     <select id="deleteFolderSelect"></select>
     <button onclick="deleteFolder()">Eliminar Carpeta</button>
     <hr>
 
-    <!-- Eliminar video -->
+    <!-- Eliminar Video -->
     <h3>🗑️ Eliminar Video</h3>
     <select id="deleteVideoFolderSelect" onchange="populateVideosToDelete()"></select>
     <div id="deleteVideoList"></div>
   </div>
 
   <script>
-    // Configuración Firebase
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
       authDomain: "minitinder-f6314.firebaseapp.com",
       projectId: "minitinder-f6314",
       storageBucket: "minitinder-f6314.appspot.com",
       messagingSenderId: "659347167496",
-      appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd",
-      measurementId: "G-L0E0Y4ZLK6"
+      appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     const folderSelect = document.getElementById("folderSelect");
     const deleteFolderSelect = document.getElementById("deleteFolderSelect");
     const deleteVideoFolderSelect = document.getElementById("deleteVideoFolderSelect");
-    const visitCounter = document.getElementById("visitCounter");
 
-    /* -------- MOSTRAR VISITAS -------- */
-    async function loadVisits(){
-      const counterRef = db.collection("stats").doc("visits");
-      const docSnap = await counterRef.get();
-      if (docSnap.exists){
-        visitCounter.textContent = docSnap.data().count || 0;
-      } else {
-        visitCounter.textContent = 0;
-      }
-    }
-
-    /* -------- AGREGAR CARPETA -------- */
+    // Crear Carpeta
     async function addFolder(){
       const name = document.getElementById("folderName").value.trim();
       if (!name) return alert("Debes escribir un nombre.");
@@ -199,11 +169,11 @@
       alert("Carpeta creada ✅");
     }
 
-    /* -------- AGREGAR VIDEO -------- */
-    async function addVideo(){
-      const url = document.getElementById("videoURL").value.trim();
+    // Agregar varios videos
+    async function addVideos(){
+      const urls = document.getElementById("videoURLs").value.trim().split("\n").map(u=>u.trim()).filter(u=>u);
       const folder = folderSelect.value;
-      if (!url || !folder) return alert("Debes seleccionar carpeta y poner un URL.");
+      if (!urls.length || !folder) return alert("Debes pegar URLs y seleccionar carpeta.");
 
       const folderRef = db.collection("folders").doc(folder);
       const folderDoc = await folderRef.get();
@@ -211,24 +181,25 @@
       if (folderDoc.exists){
         const data = folderDoc.data();
         const videos = data.videos || [];
-        if (videos.length >= 30) return alert("Máximo 30 videos por carpeta.");
 
-       videos.push({
-  url,
-  poster: url + "#t=5",  // 👈 screenshot en el segundo 5 (los navegadores lo aceptan como thumbnail)
-  views: 0,
-  reactions: { like:0, dislike:0 },
-  userReaction: null,
-  comments: []
-});
+        urls.forEach(url=>{
+          videos.push({
+            url,
+            poster: url + "#t=5", // preview en el segundo 5
+            views: 0,
+            reactions: { like:0, dislike:0 },
+            userReaction: null,
+            comments: []
+          });
+        });
 
         await folderRef.update({ videos });
-        document.getElementById("videoURL").value = "";
-        alert("Video agregado ✅");
+        document.getElementById("videoURLs").value = "";
+        alert("Videos agregados ✅");
       }
     }
 
-    /* -------- ELIMINAR CARPETA -------- */
+    // Eliminar Carpeta
     async function deleteFolder(){
       const folder = deleteFolderSelect.value;
       if (!folder) return;
@@ -239,7 +210,7 @@
       }
     }
 
-    /* -------- MOSTRAR VIDEOS A ELIMINAR -------- */
+    // Mostrar videos a eliminar
     async function populateVideosToDelete(){
       const folder = deleteVideoFolderSelect.value;
       const container = document.getElementById("deleteVideoList");
@@ -252,7 +223,6 @@
 
       if (docSnap.exists){
         const data = docSnap.data();
-
         data.videos.forEach((v, idx) => {
           const videoItem = document.createElement("div");
           videoItem.innerHTML = `
@@ -265,7 +235,7 @@
       }
     }
 
-    /* -------- ELIMINAR VIDEO -------- */
+    // Eliminar video
     async function deleteVideo(folder, idx){
       if (!folder || idx === "") return;
       if (confirm("¿Seguro que quieres eliminar este video?")) {
@@ -276,7 +246,6 @@
           const data = docSnap.data();
           data.videos.splice(idx, 1);
           await folderRef.update({ videos: data.videos });
-
           populateVideosToDelete();
           renderSidebar();
           alert("Video eliminado ✅");
@@ -284,7 +253,7 @@
       }
     }
 
-    /* -------- RENDER -------- */
+    // Render selectores
     async function renderSidebar(){
       folderSelect.innerHTML = "";
       deleteFolderSelect.innerHTML = "";
@@ -307,10 +276,7 @@
         deleteVideoFolderSelect.appendChild(opt3);
       });
     }
-
-    // 🚀 Ejecutar
     renderSidebar();
-    loadVisits();
   </script>
 </body>
 </html>
