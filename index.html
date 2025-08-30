@@ -227,6 +227,42 @@ body {
   color: #fff;
   letter-spacing: .5px;
 }
+.ads-mobile{
+  display:none;
+  padding:10px;
+  text-align:center;
+}
+.ads-mobile img{
+  max-width:100%;
+  height:auto;
+}
+
+/* SOLO en móvil */
+@media(max-width:900px){
+  .ads-left{ display:none; }   /* oculta la columna izquierda */
+  .ads-mobile{ display:block; } /* muestra la publicidad arriba */
+}
+/* Previews debajo del video en móvil */
+@media(max-width:900px){
+  .previews-right{ display:none; } /* oculta columna derecha */
+  .mobile-previews{ 
+    display:grid; 
+    grid-template-columns:repeat(2,1fr); 
+    gap:10px; 
+    margin-top:15px;
+  }
+  .mobile-previews video{
+    width:100%; 
+    height:100px; 
+    object-fit:cover; 
+    border-radius:6px;
+  }
+  .mobile-previews .preview-title{
+    font-size:.8rem; 
+    text-align:center; 
+    color:#ccc;
+  }
+}
 
   </style>
 </head>
@@ -422,8 +458,25 @@ body {
           <!-- Banner inferior -->
           <div id="adContainer"></div>
         </div>
+        
+         let mobilePreviews = "";
+  data.videos.forEach((vid, i)=>{
+    if(i !== idx){ // no mostrar el mismo video en previews
+      mobilePreviews += `
+        <div onclick="playVideo('${folder}', ${i})">
+          <video src="${vid.url}" muted playsinline></video>
+          <div class="preview-title">Video ${i+1}</div>
+        </div>
       `;
+    }
+  });
 
+  videoSection.innerHTML += `
+    <div class="mobile-previews">
+      ${mobilePreviews}
+    </div>
+      `;
+     }
       // Mostrar banner en los 3 momentos
       const player = document.getElementById("videoPlayer");
       let adsShown = { start:false, mid:false, end:false };
