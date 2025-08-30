@@ -246,11 +246,15 @@
       `;
     }
 
-    // Reproducir video
+    // Reproducir video con anuncios y contador
     async function playVideo(folder,idx){
       const ref=db.collection("folders").doc(folder);
       const snap=await ref.get(); if(!snap.exists) return;
       const data=snap.data(); const v=data.videos[idx];
+
+      v.views=(v.views||0)+1; 
+      data.videos[idx]=v; 
+      await ref.update({videos:data.videos});
 
       sectionTitle.textContent=`▶ ${folder}`;
       folderGrid.style.display="none";
@@ -260,7 +264,52 @@
           <video id="videoPlayer" controls autoplay controlsList="nodownload" poster="${v.poster||v.url}">
             <source src="${v.url}" type="video/mp4">
           </video>
+          <p>👁️ ${v.views} vistas</p>
+          <div id="adContainer"></div>
+          <!-- Banner debajo del video -->
+          <div id="bottomBanner">
+            <script type="text/javascript">
+              atOptions = {
+                'key' : 'de13ddc2442e4144561bcec2fa1af174',
+                'format' : 'iframe',
+                'height' : 60,
+                'width' : 468,
+                'params' : {}
+              };
+            </script>
+            <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
+          </div>
         </div>
+      `;
+
+      const player=document.getElementById("videoPlayer");
+      let ads={start:false,mid:false,end:false};
+
+      player.addEventListener("play",()=>{
+        if(!ads.start){ ads.start=true; showAd(); }
+      });
+      player.addEventListener("timeupdate",()=>{
+        if(player.currentTime>=50 && !ads.mid){ ads.mid=true; showAd(); }
+      });
+      player.addEventListener("ended",()=>{
+        if(!ads.end){ ads.end=true; showAd(); }
+      });
+    }
+
+    // Inyectar anuncio
+    function showAd(){
+      const ad=document.getElementById("adContainer");
+      ad.innerHTML=`
+        <script type="text/javascript">
+          atOptions = {
+            'key' : 'de13ddc2442e4144561bcec2fa1af174',
+            'format' : 'iframe',
+            'height' : 60,
+            'width' : 468,
+            'params' : {}
+          };
+        </script>
+        <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
       `;
     }
 
