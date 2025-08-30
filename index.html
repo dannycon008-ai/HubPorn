@@ -3,214 +3,263 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HubPorn</title>
+  <title>Plataforma de Videos</title>
+
+  <!-- Fuente del título -->
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- Firebase (compat) -->
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:"Segoe UI", sans-serif; background:#121212; color:#fff; }
+    :root{
+      --bg:#0d0d0d;
+      --panel:#141414;
+      --card:#1b1b1b;
+      --border:#2a2a2a;
+      --txt:#ffffff;
+      --accent:#ff4444;
+    }
+    *{margin:0; padding:0; box-sizing:border-box}
+    body{background:var(--bg); color:var(--txt); font-family: "Segoe UI", Tahoma, sans-serif;}
 
-    header { position:fixed; top:0; left:0; right:0; background:#1f1f1f;
-      text-align:center; padding:15px; z-index:100; }
-    .title{ font-family:"Archivo Black", sans-serif; font-size:2.2rem;
-      background:linear-gradient(to right, #ff4444, #ffffff);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-
-    main{ margin-top:80px; padding:20px; }
-
-    /* Banner bonito */
-    .banner {
-      background: linear-gradient(45deg, #ff4444, #222);
-      padding: 25px;
-      text-align:center;
-      border-radius:12px;
-      margin-bottom:20px;
-      color:#fff;
-      font-size:1.2rem;
-      font-weight:bold;
+    /* Header */
+    header{
+      position:sticky; top:0; z-index:100;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 20px;
+      background:linear-gradient(90deg,#161616,#0f0f0f);
+      border-bottom:1px solid var(--border);
+      box-shadow:0 4px 14px rgba(0,0,0,.35);
+    }
+    .title{
+      font-family:"Archivo Black", sans-serif;
+      font-size:2rem; line-height:1;
+      background:linear-gradient(90deg, var(--accent), #ffa045);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      letter-spacing:.5px;
+      user-select:none;
     }
 
-    /* Grid de carpetas */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 18px;
+    main{padding:18px 20px; max-width:1200px; margin:0 auto;}
+
+    /* Sección de presentación */
+    .section-title{
+      font-size:1.2rem; opacity:.9; margin:6px 2px 12px;
     }
 
-    .card {
-      background:#1b1b1b;
-      border:1px solid #333;
+    /* GRID tipo Netflix */
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+      gap:18px;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
       border-radius:12px;
       overflow:hidden;
       cursor:pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
+      transform:translateZ(0);
+      transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+      will-change:transform;
     }
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.6);
-    }
-    .card video, .card .placeholder {
-      width:100%; height:100px; object-fit:cover;
-    }
-    .card h3 {
-      text-align:center;
-      padding:10px;
-      font-size:0.95rem;
-      color:#fff;
+    .card:hover{
+      transform:translateY(-6px) scale(1.04);
+      border-color:#3a3a3a;
+      box-shadow:0 12px 26px rgba(0,0,0,.45), 0 0 18px rgba(255,68,68,.25);
     }
 
-    /* Video centrado con anuncios */
-    .video-container {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 15px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-    .video-player {
-      flex: 1 1 600px;
-      text-align: center;
-    }
-    .video-player video {
-      width:100%; max-width:600px; border-radius:12px;
-      background:#000;
-    }
-    .side-ad {
-      flex: 0 0 150px;
-    }
-    .side-ad img {
-      width:100%; border-radius:8px; margin-bottom:12px;
+    .card-video,
+    .card-placeholder{
+      width:100%; height:100px; object-fit:cover; display:block; background:#000;
     }
 
-    /* Banner publicitario arriba del video */
-    .video-banner {
-      margin-bottom:12px;
-      text-align:center;
+    .card-title{
+      text-align:center; font-size:.95rem; padding:10px; color:#fff;
+      overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+      line-height:1.5;
+    }
+
+    /* Estado vacío / mensajes */
+    .empty{
+      padding:26px; text-align:center; opacity:.75; border:1px dashed var(--border);
+      border-radius:12px; background:#111;
     }
 
     /* Responsive */
-    @media (max-width:768px){
-      .video-container { flex-direction:column; align-items:center; }
-      .side-ad { order:2; display:flex; justify-content:center; gap:10px; }
-      .side-ad img { width:45%; }
+    @media (max-width: 900px){
+      .title{ font-size:1.6rem; }
+      main{ padding:14px 14px; }
+      .grid{ gap:14px; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); }
+    }
+    @media (max-width: 600px){
+      .grid{ gap:12px; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1 class="title">HubPorn</h1>
+    <h1 class="title">Mi Plataforma</h1>
+    <!-- (Opcional) buscador en vivo:
+    <input id="search" placeholder="Buscar carpeta..." style="background:#1f1f1f;border:1px solid #2a2a2a;border-radius:8px;color:#fff;padding:8px 10px;width:220px;">
+    -->
   </header>
 
   <main>
-    <!-- Banner bonito -->
-    <div class="banner">Los mejores videos porno y exclusivo</div>
-
-    <!-- Aquí se renderizan las carpetas -->
-    <div id="videoSection"><p>Cargando carpetas...</p></div>
+    <h2 class="section-title">📂 Todas las carpetas</h2>
+    <div id="folderGrid" class="grid">
+      <div class="empty">Cargando carpetas…</div>
+    </div>
   </main>
 
   <script>
-  // Configuración Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
-    authDomain: "minitinder-f6314.firebaseapp.com",
-    projectId: "minitinder-f6314",
-    storageBucket: "minitinder-f6314.appspot.com",
-    messagingSenderId: "659347167496",
-    appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const videoSection = document.getElementById("videoSection");
-
-  // Mostrar carpetas iniciales
-  async function renderPresentation(){
-    const snapshot = await db.collection("folders").get();
-    if(snapshot.empty){
-      videoSection.innerHTML = "<p>No hay carpetas creadas aún.</p>";
-      return;
+  // Esperar a que carguen los SDKs de Firebase (defer)
+  window.addEventListener('DOMContentLoaded', () => {
+    // 1) Inicializa Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
+      authDomain: "minitinder-f6314.firebaseapp.com",
+      projectId: "minitinder-f6314",
+      storageBucket: "minitinder-f6314.appspot.com",
+      messagingSenderId: "659347167496",
+      appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd"
+    };
+    try{
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    }catch(err){
+      console.error("Error inicializando Firebase:", err);
     }
-    let grid = "";
-    snapshot.forEach(doc=>{
-      const folder = doc.id;
-      const data = doc.data();
-      const preview = data.videos && data.videos.length>0 ? data.videos[0].url : "";
-      grid += `
-        <div class="card" onclick="showFolder('${folder}')">
-          ${preview ? `<video src="${preview}" muted preload="metadata"></video>` 
-          : `<div class="placeholder" style="background:#333;display:flex;align-items:center;justify-content:center;color:#aaa;">Sin videos</div>`}
-          <h3>${folder}</h3>
-        </div>`;
-    });
-    videoSection.innerHTML = `<h2>Tus carpetas</h2><div class="grid">${grid}</div>`;
-  }
+    const db = firebase.firestore();
 
-  // Mostrar los videos de una carpeta
-  async function showFolder(folder){
-    const docSnap = await db.collection("folders").doc(folder).get();
-    if(!docSnap.exists){
-      videoSection.innerHTML = `<p>Carpeta vacía.</p>`;
-      return;
-    }
-    const data = docSnap.data();
-    let grid = data.videos.map((v,idx)=>`
-      <div class="card" onclick="playVideo('${folder}',${idx})">
-        <video src="${v.url}" muted preload="metadata"></video>
-        <h3>Video ${idx+1} - ${v.views} vistas</h3>
-      </div>
-    `).join("");
-    videoSection.innerHTML = `<h2>${folder}</h2><div class="grid">${grid}</div>`;
-  }
+    const folderGrid = document.getElementById('folderGrid');
 
-  // Reproducir video en el centro con anuncios
-  async function playVideo(folder, idx){
-    const folderRef = db.collection("folders").doc(folder);
-    const docSnap = await folderRef.get();
-    if(!docSnap.exists) return;
-    const data = docSnap.data();
-    const v = data.videos[idx];
-    v.views++;
-    data.videos[idx]=v;
-    await folderRef.update({videos:data.videos});
+    // 2) Render en tiempo real con onSnapshot (si agregas/eliminas, se actualiza solo)
+    function renderFolders(docs){
+      if (!docs.length){
+        folderGrid.innerHTML = `<div class="empty">No hay carpetas creadas aún.</div>`;
+        return;
+      }
+      const cards = docs.map(doc => {
+        const folder = doc.id;
+        const data = doc.data() || {};
+        const videos = Array.isArray(data.videos) ? data.videos : [];
+        const preview = videos.length ? videos[0].url : null;
 
-    videoSection.innerHTML = `
-      <div class="video-container">
-        <div class="side-ad">
-          <img src="https://via.placeholder.com/150x600?text=Anuncio+1">
-          <img src="https://via.placeholder.com/150x600?text=Anuncio+2">
-        </div>
-        <div class="video-player">
-          <div class="video-banner">
-            <!-- Tu banner script -->
-            <script type="text/javascript">
-              atOptions = {
-                'key' : 'de13ddc2442e4144561bcec2fa1af174',
-                'format' : 'iframe',
-                'height' : 60,
-                'width' : 468,
-                'params' : {}
-              };
-            </script>
-            <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
+        // Video muted + playsinline + loop para "hover preview" (autoplay silenciado)
+        const media = preview
+          ? `<video class="card-video" src="${preview}" muted playsinline preload="metadata"
+                     onmouseenter="this.play()" onmouseleave="this.pause(); this.currentTime=0;"></video>`
+          : `<div class="card-placeholder" style="display:flex;align-items:center;justify-content:center;color:#aaa;background:#1f1f1f;">Sin videos</div>`;
+
+        return `
+          <div class="card" onclick="showFolder('${folder}')">
+            ${media}
+            <div class="card-title">${folder}</div>
           </div>
-          <video controls autoplay>
-            <source src="${v.url}" type="video/mp4">
-          </video>
-          <p>👁️ ${v.views} vistas</p>
-        </div>
-        <div class="side-ad">
-          <img src="https://via.placeholder.com/150x600?text=Anuncio+3">
-          <img src="https://via.placeholder.com/150x600?text=Anuncio+4">
-        </div>
-      </div>`;
-  }
+        `;
+      }).join('');
+      folderGrid.innerHTML = cards;
+    }
 
-  renderPresentation();
+    // Escucha en tiempo real
+    db.collection('folders').onSnapshot(
+      (snap) => {
+        const docs = snap.docs;
+        renderFolders(docs);
+      },
+      (err) => {
+        console.error("Error leyendo 'folders':", err);
+        folderGrid.innerHTML = `<div class="empty">No se pudieron cargar las carpetas (ver consola).</div>`;
+      }
+    );
+
+    // 3) Navegación a carpeta (pinta grid de videos)
+    window.showFolder = async (folderName) => {
+      try{
+        const ref = db.collection('folders').doc(folderName);
+        const doc = await ref.get();
+        if (!doc.exists){
+          folderGrid.innerHTML = `<div class="empty">La carpeta "${folderName}" no existe.</div>`;
+          return;
+        }
+        const data = doc.data() || {};
+        const videos = Array.isArray(data.videos) ? data.videos : [];
+
+        if (!videos.length){
+          folderGrid.innerHTML = `
+            <h2 class="section-title">📁 ${folderName}</h2>
+            <div class="empty">No hay videos aquí todavía.</div>`;
+          return;
+        }
+
+        const grid = videos.map((v, idx) => `
+          <div class="card" onclick="playVideo('${folderName}', ${idx})">
+            <video class="card-video" src="${v.url}" muted playsinline preload="metadata"
+                   onmouseenter="this.play()" onmouseleave="this.pause(); this.currentTime=0;"></video>
+            <div class="card-title">Video ${idx+1} · ${v.views||0} vistas</div>
+          </div>
+        `).join('');
+
+        folderGrid.innerHTML = `
+          <h2 class="section-title">📁 ${folderName}</h2>
+          <div class="grid">${grid}</div>`;
+      }catch(e){
+        console.error(e);
+        folderGrid.innerHTML = `<div class="empty">Error al abrir carpeta.</div>`;
+      }
+    };
+
+    // 4) Pantalla de reproducción (básica, centrada a pantalla completa)
+    window.playVideo = async (folderName, idx) => {
+      try{
+        const ref = db.collection('folders').doc(folderName);
+        const snap = await ref.get();
+        if (!snap.exists) return;
+        const data = snap.data() || {};
+        const videos = Array.isArray(data.videos) ? data.videos : [];
+        const v = videos[idx];
+        if (!v) return;
+
+        // sumar vista
+        v.views = (v.views || 0) + 1;
+        videos[idx] = v;
+        await ref.update({ videos });
+
+        // vista de reproducción (sencilla y centrada)
+        folderGrid.innerHTML = `
+          <div style="display:flex; justify-content:center; align-items:center; min-height:60vh;">
+            <video controls autoplay controlslist="nodownload" disablepictureinpicture
+                   style="width:min(92vw, 900px); border-radius:12px; background:#000; box-shadow:0 8px 24px rgba(0,0,0,.6);">
+              <source src="${v.url}" type="video/mp4">
+            </video>
+          </div>
+          <p style="text-align:center; margin-top:8px; opacity:.85;">👁️ ${v.views} vistas</p>
+          <div style="text-align:center; margin-top:14px;">
+            <button onclick="showFolder('${folderName}')" 
+                    style="background:#222;border:1px solid #333;color:#fff;padding:10px 14px;border-radius:8px;cursor:pointer;">
+              ← Volver a ${folderName}
+            </button>
+          </div>
+        `;
+      }catch(e){
+        console.error(e);
+        folderGrid.innerHTML = `<div class="empty">No se pudo reproducir el video.</div>`;
+      }
+    };
+
+    // (Opcional) Buscador en vivo
+    // const search = document.getElementById('search');
+    // if (search) {
+    //   search.addEventListener('input', async (e) => {
+    //     const term = e.target.value.trim().toLowerCase();
+    //     const snap = await db.collection('folders').get();
+    //     const filtered = snap.docs.filter(d => d.id.toLowerCase().includes(term));
+    //     renderFolders(filtered);
+    //   });
+    // }
+  });
   </script>
 </body>
 </html>
