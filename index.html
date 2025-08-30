@@ -264,21 +264,6 @@
       `).join("");
     }
   });
-</script>
-
-    // Home
-    function goHome(){db.collection("folders").get().then(s=>renderHome(s.docs));}
-
-    window.openFolder=openFolder; 
-    window.playVideo=()=>{}; // placeholder
-    window.goHome=goHome;
-
-    // 🔹 Aquí está el cambio importante
-    db.collection("folders").onSnapshot(snapshot => {
-      renderHome(snapshot.docs);
-      renderPreviews(snapshot.docs);
-    });
-  });
   </script>
 </body>
 </html>
