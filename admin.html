@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ajustes HubPorn</title>
-
+  <title>Panel de Administración</title>
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
-  <!-- Firebase -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
   <style>
     body {
@@ -18,153 +16,180 @@
       background: #121212;
       color: #fff;
       margin: 0;
-      padding: 0;
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
       min-height: 100vh;
     }
-    .panel {
-      margin-top: 40px;
-      background: #1e1e1e;
+
+    /* 📊 Panel lateral para visitas */
+    .stats-panel {
+      width: 200px;
+      background: #1b1b1b;
+      border-right: 1px solid #333;
       padding: 20px;
-      border-radius: 14px;
-      width: 95%;
-      max-width: 650px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .stats-panel h2 {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      color: #ff4444;
+      font-family: "Archivo Black", sans-serif;
+    }
+    .visit-counter {
+      font-size: 2rem;
+      font-weight: bold;
+      background: #2a2a2a;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      width: 100%;
       border: 1px solid #333;
-      box-shadow: 0 8px 20px rgba(0,0,0,.5);
+    }
+
+    /* 📋 Panel principal */
+    .panel {
+      flex: 1;
+      padding: 20px;
     }
     h1 {
       font-family: "Archivo Black", sans-serif;
       text-align: center;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       font-size: 2rem;
-      background: linear-gradient(to right, #ff4444, #ffa045);
+      background: linear-gradient(to right, #ff4444, #ffffff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    h3 {
-      margin-top: 20px;
-      margin-bottom: 10px;
-      font-weight: bold;
-      color: #ffa045;
-    }
-    input, select, textarea, button {
+    input, select, button {
       width: 100%;
       margin: 8px 0;
       padding: 10px;
-      border-radius: 8px;
+      border-radius: 6px;
       border: none;
       font-size: 1rem;
     }
-    input, select, textarea {
+    input, select {
       background: #2a2a2a;
       color: #fff;
-    }
-    textarea {
-      min-height: 100px;
-      resize: vertical;
     }
     button {
       background: #ff4444;
       color: #fff;
       cursor: pointer;
       font-weight: bold;
-      transition: .2s;
     }
-    button:hover { background: #ff2222; }
-    hr { border: 0; border-top: 1px solid #333; margin: 20px 0; }
+    button:hover {
+      background: #ff2222;
+    }
+    hr {
+      border: 0;
+      border-top: 1px solid #333;
+      margin: 20px 0;
+    }
 
+    /* estilos de las miniaturas */
     #deleteVideoList {
-      display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 10px;
     }
     #deleteVideoList div {
-      width: 140px; background: #1b1b1b;
-      border: 1px solid #333; border-radius: 8px;
-      text-align: center; padding: 8px;
+      width: 140px;
+      background: #1b1b1b;
+      border: 1px solid #333;
+      border-radius: 8px;
+      text-align: center;
+      padding: 8px;
     }
     #deleteVideoList video {
-      width: 120px; height: 70px; border-radius: 6px;
+      width: 120px;
+      height: 70px;
+      border-radius: 4px;
     }
-
-    .poster-dropzone {
-      margin-top:6px; padding:10px;
-      border:2px dashed #444; border-radius:6px;
-      text-align:center; color:#aaa; font-size:.9rem;
+    #deleteVideoList button {
+      margin-top: 6px;
+      padding: 6px 10px;
+      background: #ff4444;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
     }
-    .poster-dropzone.dragover { border-color:#ff4444; color:#fff; }
-
-    .stat-card {
-      background:#2a2a2a;
-      padding:12px;
-      border-radius:8px;
-      margin-top:20px;
-      text-align:center;
+    #deleteVideoList button:hover {
+      background: #ff2222;
     }
-    .stat-card h3 { margin:0 0 8px; }
-    .stat-card p { font-size:1.4rem; font-weight:bold; }
   </style>
 </head>
 <body>
+  <!-- Panel lateral de visitas -->
+  <aside class="stats-panel">
+    <h2>👁️ Visitas</h2>
+    <div class="visit-counter" id="visitCounter">0</div>
+  </aside>
+
+  <!-- Panel principal -->
   <div class="panel">
-    <h1>📂 Panel de Admin</h1>
+    <h1>Panel de Admin</h1>
 
-    <!-- Crear Carpeta -->
-    <h3>➕ Crear Carpeta</h3>
+    <!-- Agregar carpeta -->
+    <h3>📁 Crear Carpeta</h3>
     <input type="text" id="folderName" placeholder="Nombre de carpeta">
-    <button onclick="addFolder()">Crear Carpeta</button>
+    <button onclick="addFolder()">Agregar Carpeta</button>
     <hr>
 
-    <!-- Agregar Videos -->
-    <h3>🎬 Agregar Videos</h3>
-    <textarea id="videoURLs" placeholder="Pega aquí varias URLs de videos (una por línea)"></textarea>
-    <textarea id="posterURLs" placeholder="Pega aquí varias URLs de posters (una por línea, opcional, mismo orden que los videos)"></textarea>
- <div class="poster-dropzone" id="posterDrop">
-  📷 Suelta o pega (Ctrl+V) imágenes aquí — o haz clic para buscar
-</div>
-<input type="file" id="posterInput" accept="image/*" multiple hidden>
-
+    <!-- Agregar video -->
+    <h3>🎬 Agregar Video</h3>
+    <input type="text" id="videoURL" placeholder="URL del video (mp4)">
     <select id="folderSelect"></select>
-    <button onclick="addVideos()">Agregar Videos</button>
+    <button onclick="addVideo()">Agregar Video</button>
     <hr>
 
-    <!-- Eliminar Carpeta -->
+    <!-- Eliminar carpeta -->
     <h3>🗑️ Eliminar Carpeta</h3>
     <select id="deleteFolderSelect"></select>
     <button onclick="deleteFolder()">Eliminar Carpeta</button>
     <hr>
 
-    <!-- Eliminar Video -->
+    <!-- Eliminar video -->
     <h3>🗑️ Eliminar Video</h3>
     <select id="deleteVideoFolderSelect" onchange="populateVideosToDelete()"></select>
     <div id="deleteVideoList"></div>
-
-    <!-- Vistas -->
-    <div class="stat-card">
-      <h3>👁️ Visitas al sitio</h3>
-      <p id="siteViewsCounter">0</p>
-    </div>
   </div>
 
   <script>
-    // Firebase Config
+    // Configuración Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
       authDomain: "minitinder-f6314.firebaseapp.com",
       projectId: "minitinder-f6314",
       storageBucket: "minitinder-f6314.appspot.com",
       messagingSenderId: "659347167496",
-      appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd"
+      appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd",
+      measurementId: "G-L0E0Y4ZLK6"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const storage = firebase.storage();
 
     const folderSelect = document.getElementById("folderSelect");
     const deleteFolderSelect = document.getElementById("deleteFolderSelect");
     const deleteVideoFolderSelect = document.getElementById("deleteVideoFolderSelect");
+    const visitCounter = document.getElementById("visitCounter");
 
-    // Crear Carpeta
+    /* -------- MOSTRAR VISITAS -------- */
+    async function loadVisits(){
+      const counterRef = db.collection("stats").doc("visits");
+      const docSnap = await counterRef.get();
+      if (docSnap.exists){
+        visitCounter.textContent = docSnap.data().count || 0;
+      } else {
+        visitCounter.textContent = 0;
+      }
+    }
+
+    /* -------- AGREGAR CARPETA -------- */
     async function addFolder(){
       const name = document.getElementById("folderName").value.trim();
       if (!name) return alert("Debes escribir un nombre.");
@@ -173,127 +198,36 @@
       document.getElementById("folderName").value = "";
       alert("Carpeta creada ✅");
     }
-  // --- Referencias a elementos ---
-  const posterDrop  = document.getElementById('posterDrop');
-  const posterInput = document.getElementById('posterInput');
 
-  // --- Efecto visual al arrastrar sobre la zona ---
-  ['dragenter','dragover'].forEach(ev => {
-    posterDrop.addEventListener(ev, e => {
-      e.preventDefault(); e.stopPropagation();
-      posterDrop.classList.add('dragover');
-    });
-  });
-  ['dragleave','dragend','drop'].forEach(ev => {
-    posterDrop.addEventListener(ev, e => {
-      e.preventDefault(); e.stopPropagation();
-      posterDrop.classList.remove('dragover');
-    });
-  });
-
-  // --- Drop (soltar imágenes) ---
-  posterDrop.addEventListener('drop', async e => {
-    const files = [...(e.dataTransfer?.files || [])].filter(f => f.type.startsWith('image/'));
-    if(!files.length){ posterDrop.textContent = 'No se detectaron imágenes…'; return; }
-
-    posterDrop.textContent = 'Subiendo…';
-    for(const f of files){
-      const url = await uploadPosterFile(f);
-      appendPosterURL(url);
-    }
-    posterDrop.textContent = `¡Listo! Añadidas ${files.length} imagen(es).`;
-  });
-
-  // --- Clic → abrir selector de archivos ---
-  posterDrop.addEventListener('click', () => posterInput.click());
-
-  posterInput.addEventListener('change', async e => {
-    const files = [...e.target.files];
-    if(!files.length) return;
-
-    posterDrop.textContent = 'Subiendo…';
-    for(const f of files){
-      const url = await uploadPosterFile(f);
-      appendPosterURL(url);
-    }
-    posterDrop.textContent = `¡Listo! Añadidas ${files.length} imagen(es).`;
-    posterInput.value = ''; // limpia el input
-  });
-
-  // --- Pegar (Ctrl+V) cuando el foco está en la zona ---
-  posterDrop.addEventListener('paste', async e => {
-    const items = [...(e.clipboardData?.items || [])].filter(it => it.type.indexOf('image') === 0);
-    if(!items.length) return;
-
-    posterDrop.textContent = 'Subiendo…';
-    for(const it of items){
-      const file = it.getAsFile();
-      const url = await uploadPosterFile(file);
-      appendPosterURL(url);
-    }
-    posterDrop.textContent = 'Imagen(es) pegada(s) ✔';
-  });
-
-    
-  // Sube un archivo a Storage y devuelve su URL pública
-  async function uploadPosterFile(file){
-    const safeName = file.name.replace(/\s+/g,'-').toLowerCase();
-    const ref = storage.ref('posters/' + Date.now() + '-' + Math.random().toString(36).slice(2) + '-' + safeName);
-    await ref.put(file);
-    return await ref.getDownloadURL();
-  }
-
-  // Añade la URL al textarea de posters (una por línea)
-  function appendPosterURL(url){
-    const ta = document.getElementById('posterURLs');
-    ta.value += (ta.value ? '\n' : '') + url;
-  }
-
-    // Agregar varios videos con poster opcional
-    async function addVideos(){
-      const urls = document.getElementById("videoURLs").value.trim().split("\n").map(u=>u.trim()).filter(u=>u);
-      const posters = document.getElementById("posterURLs").value.trim().split("\n").map(u=>u.trim());
+    /* -------- AGREGAR VIDEO -------- */
+    async function addVideo(){
+      const url = document.getElementById("videoURL").value.trim();
       const folder = folderSelect.value;
-      if (!urls.length || !folder) return alert("Debes pegar URLs y seleccionar carpeta.");
+      if (!url || !folder) return alert("Debes seleccionar carpeta y poner un URL.");
 
       const folderRef = db.collection("folders").doc(folder);
       const folderDoc = await folderRef.get();
-      const data = folderDoc.exists ? folderDoc.data() : {videos:[]};
-      const videos = data.videos || [];
 
-      urls.forEach((url, i)=>{
+      if (folderDoc.exists){
+        const data = folderDoc.data();
+        const videos = data.videos || [];
+        if (videos.length >= 30) return alert("Máximo 30 videos por carpeta.");
+
         videos.push({
           url,
-          poster: posters[i] || url + "#t=5",
           views: 0,
           reactions: { like:0, dislike:0 },
-          userReaction: null,
+          reacted: false,
           comments: []
         });
-      });
 
-      await folderRef.set({ videos });
-      document.getElementById("videoURLs").value = "";
-      document.getElementById("posterURLs").value = "";
-      alert("Videos agregados ✅");
+        await folderRef.update({ videos });
+        document.getElementById("videoURL").value = "";
+        alert("Video agregado ✅");
+      }
     }
 
-    // Pegar imagen desde portapapeles
-    document.getElementById("pasteDropzone").addEventListener("paste", async (e)=>{
-      const items = e.clipboardData.items;
-      for(let i=0;i<items.length;i++){
-        if(items[i].type.indexOf("image")===0){
-          const file = items[i].getAsFile();
-          const ref = storage.ref("posters/" + Date.now() + ".jpg");
-          await ref.put(file);
-          const url = await ref.getDownloadURL();
-          document.getElementById("posterURLs").value += (document.getElementById("posterURLs").value?"\n":"") + url;
-          document.getElementById("pasteDropzone").textContent = "Imagen subida ✔";
-        }
-      }
-    });
-
-    // Eliminar Carpeta
+    /* -------- ELIMINAR CARPETA -------- */
     async function deleteFolder(){
       const folder = deleteFolderSelect.value;
       if (!folder) return;
@@ -304,69 +238,78 @@
       }
     }
 
-    // Mostrar videos a eliminar
+    /* -------- MOSTRAR VIDEOS A ELIMINAR -------- */
     async function populateVideosToDelete(){
       const folder = deleteVideoFolderSelect.value;
       const container = document.getElementById("deleteVideoList");
       container.innerHTML = "";
+
       if (!folder) return;
 
-      const docSnap = await db.collection("folders").doc(folder).get();
+      const folderRef = db.collection("folders").doc(folder);
+      const docSnap = await folderRef.get();
+
       if (docSnap.exists){
-        docSnap.data().videos.forEach((v, idx)=>{
-          const div = document.createElement("div");
-          div.innerHTML = `
+        const data = docSnap.data();
+
+        data.videos.forEach((v, idx) => {
+          const videoItem = document.createElement("div");
+          videoItem.innerHTML = `
             <video src="${v.url}" muted></video>
             <p>Video ${idx+1}</p>
-            <button onclick="deleteVideo('${folder}',${idx})">Eliminar</button>
+            <button onclick="deleteVideo('${folder}', ${idx})">Eliminar</button>
           `;
-          container.appendChild(div);
+          container.appendChild(videoItem);
         });
       }
     }
 
+    /* -------- ELIMINAR VIDEO -------- */
     async function deleteVideo(folder, idx){
-      if (!folder) return;
-      const docSnap = await db.collection("folders").doc(folder).get();
-      if (!docSnap.exists) return;
-      const data = docSnap.data();
-      data.videos.splice(idx,1);
-      await db.collection("folders").doc(folder).update({videos:data.videos});
-      populateVideosToDelete();
+      if (!folder || idx === "") return;
+      if (confirm("¿Seguro que quieres eliminar este video?")) {
+        const folderRef = db.collection("folders").doc(folder);
+        const docSnap = await folderRef.get();
+
+        if (docSnap.exists){
+          const data = docSnap.data();
+          data.videos.splice(idx, 1);
+          await folderRef.update({ videos: data.videos });
+
+          populateVideosToDelete();
+          renderSidebar();
+          alert("Video eliminado ✅");
+        }
+      }
     }
 
+    /* -------- RENDER -------- */
     async function renderSidebar(){
       folderSelect.innerHTML = "";
       deleteFolderSelect.innerHTML = "";
       deleteVideoFolderSelect.innerHTML = "";
+
       const snapshot = await db.collection("folders").get();
-      snapshot.forEach(doc=>{
-        [folderSelect, deleteFolderSelect, deleteVideoFolderSelect].forEach(sel=>{
-          const opt=document.createElement("option");
-          opt.value=doc.id; opt.textContent=doc.id;
-          sel.appendChild(opt);
-        });
+      snapshot.forEach(doc => {
+        const folder = doc.id;
+
+        let opt1 = document.createElement("option");
+        opt1.value = folder; opt1.textContent = folder;
+        folderSelect.appendChild(opt1);
+
+        let opt2 = document.createElement("option");
+        opt2.value = folder; opt2.textContent = folder;
+        deleteFolderSelect.appendChild(opt2);
+
+        let opt3 = document.createElement("option");
+        opt3.value = folder; opt3.textContent = folder;
+        deleteVideoFolderSelect.appendChild(opt3);
       });
     }
 
-    // Contador de visitas (arranca en 4025)
-    async function incrementSiteViews(){
-      const ref = db.collection("stats").doc("siteViews");
-      const snap = await ref.get();
-      if(snap.exists){
-        await ref.update({ count: (snap.data().count||0) + 1 });
-      } else {
-        await ref.set({ count: 4025 });
-      }
-    }
-    async function renderSiteViews(){
-      const snap = await db.collection("stats").doc("siteViews").get();
-      document.getElementById("siteViewsCounter").textContent = snap.exists ? snap.data().count : 4025;
-    }
-
-    incrementSiteViews();
-    renderSiteViews();
+    // 🚀 Ejecutar
     renderSidebar();
+    loadVisits();
   </script>
 </body>
 </html>
