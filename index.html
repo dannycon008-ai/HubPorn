@@ -241,9 +241,6 @@
         <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>`;
     }
 
-    function goHome(){db.collection("folders").get().then(s=>renderHome(s.docs));}
-    window.openFolder=openFolder;window.playVideo=playVideo;window.goHome=goHome;
-    db.collection("folders").onSnapshot(s=>renderHome(s.docs));
   });
   </script>
 </body>
