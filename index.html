@@ -143,6 +143,34 @@
       .ads-left, .previews-right{ display:none; }
       .video-player video{ width:100%; height:auto; }
     }
+    /* 🔹 PC: anuncio lateral */
+.ad-desktop {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.ad-mobile-wrapper {
+  display: none; /* oculto en PC */
+}
+
+/* 🔹 SOLO en móviles/tablets */
+@media (max-width: 900px) {
+  .ads-left { display: none; } /* ocultamos el lateral */
+  .ad-mobile-wrapper { 
+    display: flex; 
+    justify-content: center; 
+    margin: 10px 0;
+  }
+  .ad-mobile {
+    width: 320px;   /* horizontal */
+    height: 100px;  /* proporción banner */
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -152,15 +180,23 @@
   </header>
 
   <div class="layout">
-    <!-- Ads izquierda -->
-    <aside class="ads-left">
-      <div class="top-banner">Publicidad</div>
-       <!-- Imagen publicitaria -->
-  <img src="https://s11.erome.com/2497/nZMW9sgy/ZhsREn5s.jpeg?v=1714070792" 
-       alt="Publicidad" 
-       style="width:100%; border-radius:8px; cursor:pointer;"
-       onclick="showAd('https://overplantovervaluetwine.com/2061965')">
+  <!-- Ads izquierda (solo PC) -->
+<aside class="ads-left">
+  <div class="top-banner">Publicidad</div>
+  <img src="https://tuservidor.com/publicidad.jpg" 
+       alt="Publicidad"
+       class="ad-desktop"
+       onclick="showAd('https://s11.erome.com/2497/nZMW9sgy/ZhsREn5s.jpeg?v=1714070792')">
 </aside>
+
+<!-- Ads superior horizontal (solo móvil) -->
+<div class="ad-mobile-wrapper">
+  <img src="https://tuservidor.com/publicidad.jpg" 
+       alt="Publicidad"
+       class="ad-mobile"
+       onclick="showAd('https://s11.erome.com/2497/nZMW9sgy/GEJPGxVJ.jpeg?v=1714070791')">
+</div>
+
 
     <!-- Centro -->
     <main>
