@@ -119,7 +119,11 @@
     <h3>🎬 Agregar Videos</h3>
     <textarea id="videoURLs" placeholder="Pega aquí varias URLs de videos (una por línea)"></textarea>
     <textarea id="posterURLs" placeholder="Pega aquí varias URLs de posters (una por línea, opcional, mismo orden que los videos)"></textarea>
-    <div class="poster-dropzone" id="pasteDropzone">📋 Pega aquí una imagen (Ctrl+V)</div>
+ <div class="poster-dropzone" id="posterDrop">
+  📷 Suelta o pega (Ctrl+V) imágenes aquí — o haz clic para buscar
+</div>
+<input type="file" id="posterInput" accept="image/*" multiple hidden>
+
     <select id="folderSelect"></select>
     <button onclick="addVideos()">Agregar Videos</button>
     <hr>
@@ -169,6 +173,81 @@
       document.getElementById("folderName").value = "";
       alert("Carpeta creada ✅");
     }
+  // --- Referencias a elementos ---
+  const posterDrop  = document.getElementById('posterDrop');
+  const posterInput = document.getElementById('posterInput');
+
+  // --- Efecto visual al arrastrar sobre la zona ---
+  ['dragenter','dragover'].forEach(ev => {
+    posterDrop.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation();
+      posterDrop.classList.add('dragover');
+    });
+  });
+  ['dragleave','dragend','drop'].forEach(ev => {
+    posterDrop.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation();
+      posterDrop.classList.remove('dragover');
+    });
+  });
+
+  // --- Drop (soltar imágenes) ---
+  posterDrop.addEventListener('drop', async e => {
+    const files = [...(e.dataTransfer?.files || [])].filter(f => f.type.startsWith('image/'));
+    if(!files.length){ posterDrop.textContent = 'No se detectaron imágenes…'; return; }
+
+    posterDrop.textContent = 'Subiendo…';
+    for(const f of files){
+      const url = await uploadPosterFile(f);
+      appendPosterURL(url);
+    }
+    posterDrop.textContent = `¡Listo! Añadidas ${files.length} imagen(es).`;
+  });
+
+  // --- Clic → abrir selector de archivos ---
+  posterDrop.addEventListener('click', () => posterInput.click());
+
+  posterInput.addEventListener('change', async e => {
+    const files = [...e.target.files];
+    if(!files.length) return;
+
+    posterDrop.textContent = 'Subiendo…';
+    for(const f of files){
+      const url = await uploadPosterFile(f);
+      appendPosterURL(url);
+    }
+    posterDrop.textContent = `¡Listo! Añadidas ${files.length} imagen(es).`;
+    posterInput.value = ''; // limpia el input
+  });
+
+  // --- Pegar (Ctrl+V) cuando el foco está en la zona ---
+  posterDrop.addEventListener('paste', async e => {
+    const items = [...(e.clipboardData?.items || [])].filter(it => it.type.indexOf('image') === 0);
+    if(!items.length) return;
+
+    posterDrop.textContent = 'Subiendo…';
+    for(const it of items){
+      const file = it.getAsFile();
+      const url = await uploadPosterFile(file);
+      appendPosterURL(url);
+    }
+    posterDrop.textContent = 'Imagen(es) pegada(s) ✔';
+  });
+
+    
+  // Sube un archivo a Storage y devuelve su URL pública
+  async function uploadPosterFile(file){
+    const safeName = file.name.replace(/\s+/g,'-').toLowerCase();
+    const ref = storage.ref('posters/' + Date.now() + '-' + Math.random().toString(36).slice(2) + '-' + safeName);
+    await ref.put(file);
+    return await ref.getDownloadURL();
+  }
+
+  // Añade la URL al textarea de posters (una por línea)
+  function appendPosterURL(url){
+    const ta = document.getElementById('posterURLs');
+    ta.value += (ta.value ? '\n' : '') + url;
+  }
 
     // Agregar varios videos con poster opcional
     async function addVideos(){
