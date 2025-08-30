@@ -24,7 +24,6 @@
     * {margin:0; padding:0; box-sizing:border-box}
     body {background:var(--bg); color:var(--txt); font-family:'Poppins', sans-serif;}
 
-    /* Header */
     header {
       position:sticky; top:0; z-index:100;
       display:flex; justify-content:center; align-items:center;
@@ -44,7 +43,6 @@
     }
     .title:hover {transform:scale(1.05);}
 
-    /* Layout */
     .layout {
       display:grid;
       grid-template-columns:200px 1fr 220px;
@@ -60,7 +58,6 @@
       padding:10px;
     }
 
-    /* Banner */
     .top-banner {
       font-family:"Archivo Black", sans-serif;
       font-size:1.3rem;
@@ -71,7 +68,6 @@
       margin-bottom:14px;
     }
 
-    /* Grid Netflix */
     .grid {
       display:grid;
       grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
@@ -85,13 +81,10 @@
       transition:transform .25s ease, box-shadow .25s ease;
       box-shadow:0 4px 12px rgba(0,0,0,.3);
     }
-    .card:hover {
-      transform:scale(1.05);
-      box-shadow:0 10px 24px rgba(0,0,0,.45);
-    }
+    .card:hover {transform:scale(1.05);}
     .card-thumb {
       width:100%;
-      height:120px;
+      aspect-ratio:1/1;     /* 🔹 miniaturas cuadradas */
       object-fit:cover;
       background:#000;
       display:block;
@@ -103,118 +96,59 @@
       padding:8px;
     }
 
-    /* Previews */
     .preview-item {margin-bottom:12px; cursor:pointer;}
-    .preview-item video {
-      width:100%; height:90px; object-fit:cover;
+    .preview-item img {
+      width:100%; aspect-ratio:1/1; object-fit:cover;
       border-radius:8px;
       display:block;
     }
     .preview-title {font-size:.85rem; margin-top:4px; text-align:center; color:#ccc;}
 
-    /* Video player */
-    .video-container {
-      display:flex;
-      flex-direction:row;
-      gap:15px;
-      justify-content:center;
-      align-items:flex-start;
-    }
-    .video-player {
-      flex:2;
-      text-align:center;
-    }
+    .video-player {text-align:center;}
     .video-player video {
       width:100%;
-      max-width:480px;  /* 🔹 más pequeño que antes */
-      border-radius:10px;
-      background:#000;
+      max-width:480px;
+      aspect-ratio:1/1;     /* 🔹 relación 1:1 */
+      border-radius:10px; background:#000;
     }
-    .most-viewed {
-      flex:1;
+    #adContainer {margin-top:12px; text-align:center;}
+
+    /* SOLO mostrar “Los más vistos” en móvil */
+    .most-viewed-mobile {
+      display:none;
+      margin-top:20px;
       background:var(--panel);
       border:1px solid var(--border);
       border-radius:10px;
       padding:10px;
-      max-height:480px;
-      overflow-y:auto;
     }
-    .most-viewed h3 {
-      font-size:1rem;
-      margin-bottom:10px;
-      text-align:center;
-      color:var(--accent);
+    .most-viewed-mobile h3 {
+      text-align:center; color:var(--accent); margin-bottom:10px;
     }
-    .most-viewed .mv-item {
-      margin-bottom:10px;
-      cursor:pointer;
+    .most-viewed-mobile .mv-item {margin-bottom:10px; cursor:pointer;}
+    .most-viewed-mobile .mv-item img {
+      width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:8px;
     }
-    .most-viewed .mv-item video {
-      width:100%;
-      height:100px;
-      object-fit:cover;
-      border-radius:8px;
-    }
-    .most-viewed .mv-title {
-      font-size:.8rem;
-      margin-top:4px;
-      text-align:center;
-      color:#ccc;
-    }
+    .most-viewed-mobile .mv-title {font-size:.8rem; text-align:center; color:#ccc;}
 
-    #adContainer {margin-top:12px; text-align:center;}
-
-    /* Ads */
-    .ads-left img, .ads-mobile img {
-      max-width:100%; height:auto;
-      border-radius:8px; display:block;
-    }
-    .ads-mobile {display:none; text-align:center; margin:10px 0;}
-
-    /* Responsive */
     @media(max-width:900px){
       .layout {grid-template-columns:1fr;}
       .ads-left, .previews-right {display:none;}
       .ads-mobile {display:block;}
-      .video-container {flex-direction:column;}
-      .most-viewed {width:100%; max-height:none; margin-top:15px;}
+      .most-viewed-mobile {display:block;} /* 🔹 solo aparece en móvil */
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header onclick="goHome()">
-    <h1 class="title">HubPorn</h1>
-  </header>
-
-  <!-- Publicidad móvil -->
-  <div class="ads-mobile">
-      <a href="https://overplantovervaluetwine.com/2061965" target="_blank">
-      <img src="https://s11.erome.com/2497/nZMW9sgy/GEJPGxVJ.jpeg?v=1714070791" alt="Publicidad">
-    </a>
-  </div>
+  <header onclick="goHome()"><h1 class="title">HubPorn</h1></header>
 
   <div class="layout">
-    <!-- Ads izquierda (solo PC) -->
-    <aside class="ads-left">
-      <div class="top-banner">👇Chat en vivo👇</div>
-      <a href="https://overplantovervaluetwine.com/2061965" target="_blank">
-        <img src="https://s11.erome.com/2497/nZMW9sgy/BxCKl0pg.jpeg" alt="Publicidad">
-      </a>
-    </aside>
-
-    <!-- Centro -->
     <main>
-      <h2 class="top-banner" id="sectionTitle">VIDEOS PORNO GRATIS</h2>
+      <h2 class="top-banner" id="sectionTitle">VIDEOS GRATIS</h2>
       <div id="folderGrid" class="grid"></div>
       <div id="videoSection"></div>
+      <div id="mostViewedMobile" class="most-viewed-mobile"></div>
     </main>
-
-    <!-- Previews derecha -->
-    <aside class="previews-right">
-      <div class="top-banner">Videos mas vistos</div>
-      <div id="previewList"></div>
-    </aside>
   </div>
 
   <script>
@@ -230,151 +164,86 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const folderGrid   = document.getElementById("folderGrid");
-    const previewList  = document.getElementById("previewList");
-    const videoSection = document.getElementById("videoSection");
-    const sectionTitle = document.getElementById("sectionTitle");
+    const folderGrid=document.getElementById("folderGrid");
+    const previewList=document.getElementById("previewList");
+    const videoSection=document.getElementById("videoSection");
+    const sectionTitle=document.getElementById("sectionTitle");
+    const mostViewedMobile=document.getElementById("mostViewedMobile");
 
     function renderHome(docs){
-      sectionTitle.textContent = "VIDEOS PORNO GRATIS";
-      videoSection.innerHTML = "";
+      sectionTitle.textContent = "VIDEOS GRATIS";
+      videoSection.innerHTML = ""; mostViewedMobile.innerHTML="";
       folderGrid.style.display = "grid";
-
-      if (!docs.length){
-        folderGrid.innerHTML = "<p>No hay carpetas</p>";
-        return;
-      }
-
       folderGrid.innerHTML = docs.map(doc=>{
-        const folder = doc.id;
-        const data = doc.data(); 
-        const videos = data.videos || [];
-        const preview = videos[0]?.poster || videos[0]?.url || "";
+        const folder=doc.id, data=doc.data(), videos=data.videos||[];
+        const preview=videos[0]?.poster||videos[0]?.url||"";
         return `
           <div class="card" onclick="openFolder('${folder}')">
-            ${preview ? `<video class="card-thumb" src="${preview}" muted playsinline></video>` 
-                      : `<div style="height:100px;background:#222"></div>`}
+            ${preview ? `<img class="card-thumb" src="${preview}" loading="lazy"/>` 
+                      : `<div style="aspect-ratio:1/1;background:#222"></div>`}
             <div class="card-title">${folder}</div>
-          </div>
-        `;
+          </div>`;
       }).join("");
     }
 
     async function openFolder(folder){
-      const snap = await db.collection("folders").doc(folder).get();
-      if (!snap.exists){ 
-        sectionTitle.textContent = folder;
-        folderGrid.innerHTML = "";
-        videoSection.innerHTML = "<p>No hay videos</p>"; 
-        return;
-      }
-      sectionTitle.textContent = folder;
-      folderGrid.style.display = "none";
-
-      const data = snap.data();
-      videoSection.innerHTML = `
-        <div class="grid">
-          ${data.videos.map((v,idx)=>`
-            <div class="card" onclick="playVideo('${folder}', ${idx})">
-              <video class="card-thumb" src="${v.poster||v.url}" muted playsinline></video>
-              <div class="card-title">Video ${idx+1}</div>
-            </div>
-          `).join("")}
-        </div>
-      `;
+      const snap=await db.collection("folders").doc(folder).get();
+      if (!snap.exists){sectionTitle.textContent=folder;folderGrid.innerHTML="";videoSection.innerHTML="<p>No hay videos</p>";return;}
+      sectionTitle.textContent=folder; folderGrid.style.display="none";
+      const data=snap.data();
+      videoSection.innerHTML=`<div class="grid">${
+        data.videos.map((v,i)=>`
+          <div class="card" onclick="playVideo('${folder}',${i})">
+            <img class="card-thumb" src="${v.poster||v.url}" loading="lazy"/>
+            <div class="card-title">Video ${i+1}</div>
+          </div>`).join("")
+      }</div>`;
     }
 
     async function playVideo(folder,idx){
-      const ref=db.collection("folders").doc(folder);
-      const snap=await ref.get(); if(!snap.exists) return;
+      const ref=db.collection("folders").doc(folder),snap=await ref.get(); if(!snap.exists) return;
       const data=snap.data(); const v=data.videos[idx];
+      v.views=(v.views||0)+1; data.videos[idx]=v; await ref.update({videos:data.videos});
 
-      v.views=(v.views||0)+1; 
-      data.videos[idx]=v; 
-      await ref.update({videos:data.videos});
-
-      sectionTitle.textContent=`▶ ${folder}`;
-      folderGrid.style.display="none";
-
-      // obtener los más vistos
-      const sorted = [...data.videos].sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
+      sectionTitle.textContent=`▶ ${folder}`; folderGrid.style.display="none";
 
       videoSection.innerHTML=`
-        <div class="video-container">
-          <div class="video-player">
-            <video id="videoPlayer" controls autoplay poster="${v.poster||v.url}" controlsList="nodownload">
-              <source src="${v.url}" type="video/mp4">
-            </video>
-            <p>👁️ ${v.views} vistas</p>
-            <div id="adContainer"></div>
-          </div>
-          <div class="most-viewed">
-            <h3>Los más vistos</h3>
-            ${sorted.map(mv=>`
-              <div class="mv-item" onclick="playVideo('${folder}', ${data.videos.indexOf(mv)})">
-                <video src="${mv.url}" muted playsinline></video>
-                <div class="mv-title">${mv.views||0} vistas</div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-      `;
+        <div class="video-player">
+          <video id="videoPlayer" controls autoplay poster="${v.poster||v.url}" 
+            controlsList="nodownload" oncontextmenu="return false;">
+            <source src="${v.url}" type="video/mp4">
+          </video>
+          <p>👁️ ${v.views} vistas</p>
+          <div id="adContainer"></div>
+        </div>`;
+
+      // “Los más vistos” SOLO móvil
+      const sorted=[...data.videos].sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
+      mostViewedMobile.innerHTML=`
+        <h3>Los más vistos</h3>
+        ${sorted.map(mv=>`
+          <div class="mv-item" onclick="playVideo('${folder}',${data.videos.indexOf(mv)})">
+            <img src="${mv.poster||mv.url}" loading="lazy"/>
+            <div class="mv-title">${mv.views||0} vistas</div>
+          </div>`).join("")}`;
 
       const player=document.getElementById("videoPlayer");
       let ads={start:false,mid:false,end:false};
-
-      player.addEventListener("play",()=>{ if(!ads.start){ ads.start=true; showAd(); } });
-      player.addEventListener("timeupdate",()=>{ if(player.currentTime>=50 && !ads.mid){ ads.mid=true; showAd(); } });
-      player.addEventListener("ended",()=>{ if(!ads.end){ ads.end=true; showAd(); } });
+      player.addEventListener("play",()=>{if(!ads.start){ads.start=true;showAd();}});
+      player.addEventListener("timeupdate",()=>{if(player.currentTime>=50&&!ads.mid){ads.mid=true;showAd();}});
+      player.addEventListener("ended",()=>{if(!ads.end){ads.end=true;showAd();}});
     }
 
     function showAd(){
-      const ad=document.getElementById("adContainer");
-      if(!ad) return;
-      ad.innerHTML="";
-      const s1=document.createElement("script");
-      s1.type="text/javascript";
-      s1.text=`
-        atOptions = {
-          'key' : 'de13ddc2442e4144561bcec2fa1af174',
-          'format' : 'iframe',
-          'height' : 60,
-          'width' : 468,
-          'params' : {}
-        };
-      `;
-      const s2=document.createElement("script");
-      s2.type="text/javascript";
-      s2.src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js";
-      ad.appendChild(s1);
-      ad.appendChild(s2);
-    }
-
-    function renderPreviews(docs){
-      let previews = [];
-      docs.forEach(doc=>{
-        const data = doc.data(); 
-        const videos = data.videos||[];
-        if(videos.length>0){
-          const randomIndex = Math.floor(Math.random()*videos.length);
-          previews.push({folder:doc.id, url:videos[randomIndex].url});
-        }
-      });
-      previewList.innerHTML = previews.map(p=>`
-        <div class="preview-item" onclick="playVideo('${p.folder}', 0)">
-          <video src="${p.url}" muted playsinline></video>
-          <div class="preview-title">${p.folder}</div>
-        </div>
-      `).join("");
+      const ad=document.getElementById("adContainer"); if(!ad) return;
+      ad.innerHTML=`<script type="text/javascript">
+        atOptions={'key':'de13ddc2442e4144561bcec2fa1af174','format':'iframe','height':60,'width':468,'params':{}};</script>
+        <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>`;
     }
 
     function goHome(){db.collection("folders").get().then(s=>renderHome(s.docs));}
-
-    window.openFolder=openFolder; 
-    window.playVideo=playVideo; 
-    window.goHome=goHome;
-
-    db.collection("folders").onSnapshot(s=>{ renderHome(s.docs); renderPreviews(s.docs); });
+    window.openFolder=openFolder;window.playVideo=playVideo;window.goHome=goHome;
+    db.collection("folders").onSnapshot(s=>renderHome(s.docs));
   });
   </script>
 </body>
