@@ -36,7 +36,7 @@
     .folder h3 { color:#ff4444; font-size:1rem; font-family:"Archivo Black", sans-serif; padding:6px; }
 
     .video-grid { display:flex; flex-wrap:wrap; gap:12px; padding:10px; justify-content:flex-start; }
-    .video-card { flex:0 0 auto; width:160px; background:#1b1b1b; border:1px solid #242424; border-radius:10px; padding:6px; transition:transform .2s; }
+    .video-card { flex:0 0 auto; width:160px; background:#1b1b1b; border:1px solid #242424; border-radius:10px; padding:6px; transition:transform .2s; cursor:pointer; }
     .video-card:hover { transform:scale(1.05); }
     video.preview { width:100%; height:90px; object-fit:cover; }
 
@@ -81,7 +81,7 @@
 
   <!-- Contenido -->
   <main class="content">
-    <div id="videoSection"><p>Selecciona una carpeta para ver sus videos</p></div>
+    <div id="videoSection"><p>Cargando carpetas...</p></div>
   </main>
 
   <script>
@@ -102,7 +102,7 @@
   const videoSection = document.getElementById("videoSection");
   const searchBar = document.getElementById("searchBar");
 
-  // ✅ Renderizar carpetas
+  // ✅ Renderizar carpetas en el sidebar
   async function renderSidebar(filter=""){
     sidebar.innerHTML = "";
     const snapshot = await db.collection("folders").get();
@@ -119,6 +119,34 @@
 
   // ✅ Buscador en vivo
   searchBar.addEventListener("input", (e) => renderSidebar(e.target.value));
+
+  // ✅ Vista previa inicial con TODAS las carpetas
+  async function renderPresentation(){
+    const snapshot = await db.collection("folders").get();
+    if (snapshot.empty){
+      videoSection.innerHTML = "<p>No hay carpetas creadas todavía</p>";
+      return;
+    }
+
+    let grid = "";
+    snapshot.forEach(doc => {
+      const folder = doc.id;
+      const data = doc.data();
+      const videos = data.videos || [];
+      const preview = videos.length > 0 ? videos[0].url : "";
+
+      grid += `
+        <div class="video-card" onclick="showFolder('${folder}')">
+          ${preview 
+            ? `<video class="preview" src="${preview}" muted preload="metadata"></video>`
+            : `<div style="height:90px;display:flex;align-items:center;justify-content:center;background:#222;color:#aaa;">Sin videos</div>`}
+          <h3 style="color:#fff; font-size:0.9rem; text-align:center; margin-top:6px;">${folder}</h3>
+        </div>
+      `;
+    });
+
+    videoSection.innerHTML = `<h2>📂 Todas las carpetas</h2><div class="video-grid">${grid}</div>`;
+  }
 
   // ✅ Mostrar videos de una carpeta
   async function showFolder(folder){
@@ -151,73 +179,24 @@
     data.videos[idx] = v;
     await folderRef.update({ videos: data.videos });
 
-    // 🎬 Renderizar video con anuncios laterales y banner arriba
+    // 🎬 Renderizar video centrado con anuncios
     videoSection.innerHTML = `
       <div id="videoBanner"></div>
       <div class="video-wrapper">
-        <div class="side-ad"><img src="https://via.placeholder.com/120x600?text=Ad+Izquierda" alt="ad izquierda"></div>
+        <div class="side-ad"><img src="https://via.placeholder.com/120x600?text=Ad+Izquierda"></div>
         <div class="video-player">
           <video id="videoPlayer" controls autoplay>
             <source src="${v.url}" type="video/mp4">
           </video>
           <p>👁️ ${v.views} vistas</p>
-          <div class="reactions">
-            <button id="likeBtn" onclick="toggleReaction('${folder}',${idx},'like')">👍 (<span id="likeCount">${v.reactions.like}</span>)</button>
-            <button id="dislikeBtn" onclick="toggleReaction('${folder}',${idx},'dislike')">👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
-          </div>
         </div>
-        <div class="side-ad"><img src="https://via.placeholder.com/120x600?text=Ad+Derecha" alt="ad derecha"></div>
+        <div class="side-ad"><img src="https://via.placeholder.com/120x600?text=Ad+Derecha"></div>
       </div>
     `;
-
-    // ✅ Inyectar script del banner dinámicamente
-    const bannerDiv = document.getElementById("videoBanner");
-    const script1 = document.createElement("script");
-    script1.type = "text/javascript";
-    script1.innerHTML = `
-      atOptions = {
-        'key' : 'de13ddc2442e4144561bcec2fa1af174',
-        'format' : 'iframe',
-        'height' : 60,
-        'width' : 468,
-        'params' : {}
-      };
-    `;
-    const script2 = document.createElement("script");
-    script2.type = "text/javascript";
-    script2.src = "//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js";
-    bannerDiv.appendChild(script1);
-    bannerDiv.appendChild(script2);
-  }
-
-  /* -------- REACCIONES (toggle) -------- */
-  async function toggleReaction(folder, idx, type){
-    const folderRef = db.collection("folders").doc(folder);
-    const docSnap = await folderRef.get();
-    if (!docSnap.exists) return;
-
-    const data = docSnap.data();
-    const v = data.videos[idx];
-
-    if (!v.userReaction){ v.userReaction = null; }
-
-    if (v.userReaction === type){
-      v.reactions[type]--;
-      v.userReaction = null;
-    } else {
-      if (v.userReaction){ v.reactions[v.userReaction]--; }
-      v.reactions[type]++;
-      v.userReaction = type;
-    }
-
-    data.videos[idx] = v;
-    await folderRef.update({ videos: data.videos });
-
-    document.getElementById("likeCount").textContent = v.reactions.like;
-    document.getElementById("dislikeCount").textContent = v.reactions.dislike;
   }
 
   renderSidebar();
+  renderPresentation(); // 👈 carga vista previa al inicio
   </script>
 </body>
 </html>
