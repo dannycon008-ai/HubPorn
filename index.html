@@ -13,16 +13,6 @@
   <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
   <style>
-  :root {
-    --card:#1b1b1b;
-    --accent:#ff4444;
-  }
-  body {
-    background:#0d0d0d;
-    color:#fff;
-    font-family:'Poppins', sans-serif;
-  }
-
   /* Ajuste de cards de carpetas */
   .grid {
     display: grid;
@@ -77,13 +67,7 @@
   .reactions button:hover {
     transform: scale(1.05);
   }
-  </style>
-</head>
-<body>
-  <h2 id="sectionTitle">📂 Todas las carpetas</h2>
-  <div id="folderGrid" class="grid"></div>
-  <div id="videoSection"></div>
-  <div id="previewList"></div>
+</style>
 
 <script>
   window.addEventListener('DOMContentLoaded', () => {
@@ -281,5 +265,20 @@
     }
   });
 </script>
+
+    // Home
+    function goHome(){db.collection("folders").get().then(s=>renderHome(s.docs));}
+
+    window.openFolder=openFolder; 
+    window.playVideo=()=>{}; // placeholder
+    window.goHome=goHome;
+
+    // 🔹 Aquí está el cambio importante
+    db.collection("folders").onSnapshot(snapshot => {
+      renderHome(snapshot.docs);
+      renderPreviews(snapshot.docs);
+    });
+  });
+  </script>
 </body>
 </html>
