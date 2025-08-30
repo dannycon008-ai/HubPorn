@@ -48,7 +48,7 @@
     /* Layout de 3 columnas */
     .layout{
       display:grid;
-      grid-template-columns: 200px 1fr 220px;
+      grid-template-columns: 200px 1fr 240px;
       gap:15px;
       max-width:1400px;
       margin:20px auto;
@@ -63,7 +63,7 @@
       min-height:400px;
     }
 
-    /* Banner superior */
+    /* Banner superior de secciones */
     .top-banner{
       font-family:"Archivo Black", sans-serif;
       font-size:1.4rem;
@@ -74,7 +74,7 @@
       margin-bottom:14px;
     }
 
-    /* Grid Netflix */
+    /* Grid Netflix (carpetas o videos) */
     .grid{
       display:grid;
       grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
@@ -93,69 +93,82 @@
       border-color:#3a3a3a;
       box-shadow:0 12px 26px rgba(0,0,0,.45), 0 0 18px rgba(255,68,68,.25);
     }
-    .card-video{ width:100%; height:100px; object-fit:cover; display:block; background:#000; }
+    .thumb{ width:100%; height:100px; object-fit:cover; display:block; background:#000; }
     .card-title{ text-align:center; font-size:.9rem; padding:8px; }
 
-    /* Previews vertical */
-    .preview-item{
-      margin-bottom:12px;
-      cursor:pointer;
+    /* Previews derecha (vertical) */
+    .preview-item{ margin-bottom:12px; cursor:pointer; }
+    .preview-item video{ width:100%; height:110px; object-fit:cover; border-radius:8px; background:#000; }
+    .preview-title{ font-size:.85rem; margin-top:6px; text-align:center; color:#ccc; }
+
+    /* Reproductor centrado */
+    .player-wrap{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:14px;
     }
-    .preview-item video{
-      width:100%; height:100px; object-fit:cover; border-radius:8px;
+    .player{
+      width:100%;
+      display:flex;
+      justify-content:center;
     }
-    .preview-title{
-      font-size:.8rem; margin-top:4px; text-align:center; color:#ccc;
+    .player video{
+      width:78%;
+      max-width:820px;
+      height:auto;
+      border-radius:12px;
+      background:#000;
     }
+    .meta{ text-align:center; color:#bbb; margin-top:8px; font-size:.9rem; }
 
     /* Responsive */
     @media(max-width: 900px){
       .layout{ grid-template-columns:1fr; }
       .ads-left, .previews-right{ display:none; }
+      .player video{ width:100%; max-width:100%; }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header onclick="renderPresentation()">
+  <!-- Header (click = Home) -->
+  <header onclick="renderHome()">
     <h1 class="title">HubPorn</h1>
   </header>
 
   <div class="layout">
-    <!-- Ads izquierda -->
+    <!-- Izquierda: tu banner ad -->
     <aside class="ads-left">
       <div class="top-banner">Publicidad</div>
-     <script type="text/javascript">
- atOptions = {
-  'key' : 'de13ddc2442e4144561bcec2fa1af174',
-  'format' : 'iframe',
-  'height' : 60,
-  'width' : 468,
-  'params' : {}
- };
-</script>
-<script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
-          };
-        </script>
-        <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
-      </div>
+      <!-- 👇 Tu script de banner (limpio y funcional) -->
+      <script type="text/javascript">
+        atOptions = {
+          'key' : 'de13ddc2442e4144561bcec2fa1af174',
+          'format' : 'iframe',
+          'height' : 60,
+          'width' : 468,
+          'params' : {}
+        };
+      </script>
+      <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
     </aside>
 
-    <!-- Centro -->
+    <!-- Centro: grilla -->
     <main>
-      <h2 class="top-banner">📂 Todas las carpetas</h2>
-      <div id="folderGrid" class="grid"></div>
+      <h2 id="centerTitle" class="top-banner">📂 Todas las carpetas</h2>
+      <div id="centerArea" class="grid"></div>
     </main>
 
-    <!-- Previews derecha -->
+    <!-- Derecha: previews -->
     <aside class="previews-right">
-      <div class="top-banner">🎬 Previews</div>
+      <div id="rightTitle" class="top-banner">🎬 Previews</div>
       <div id="previewList"></div>
     </aside>
   </div>
 
   <script>
   window.addEventListener('DOMContentLoaded', () => {
+    /* ===== Firebase ===== */
     const firebaseConfig = {
       apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
       authDomain: "minitinder-f6314.firebaseapp.com",
@@ -167,48 +180,124 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const folderGrid = document.getElementById("folderGrid");
-    const previewList = document.getElementById("previewList");
+    /* ===== DOM refs ===== */
+    const centerTitle = document.getElementById('centerTitle');
+    const centerArea  = document.getElementById('centerArea');
+    const previewList = document.getElementById('previewList');
+    const rightTitle  = document.getElementById('rightTitle');
 
-    function renderFolders(docs){
-      if (!docs.length){ folderGrid.innerHTML = "<p>No hay carpetas</p>"; return; }
-      folderGrid.innerHTML = docs.map(doc=>{
-        const folder = doc.id;
-        const data = doc.data(); const videos = data.videos||[];
-        const preview = videos[0]?.url;
-        return `
-          <div class="card" onclick="showFolder('${folder}')">
-            ${preview ? `<video class="card-video" src="${preview}" muted playsinline></video>` : `<div style="height:100px;background:#222"></div>`}
-            <div class="card-title">${folder}</div>
-          </div>`;
+    /* ===== Helpers ===== */
+    function cardFolderHTML(folderName, previewUrl){
+      return `
+        <div class="card" onclick="showFolder('${folderName}')">
+          ${previewUrl ? `<video class="thumb" src="${previewUrl}" muted playsinline preload="metadata"></video>` : `<div class="thumb"></div>`}
+          <div class="card-title">${folderName}</div>
+        </div>`;
+    }
+    function cardVideoHTML(folderName, videoUrl, idx){
+      return `
+        <div class="card" onclick="playVideo('${folderName}', ${idx})">
+          <video class="thumb" src="${videoUrl}" muted playsinline preload="metadata"></video>
+          <div class="card-title">Ver video</div>
+        </div>`;
+    }
+    function previewItemHTML(folderName, videoUrl, idx){
+      return `
+        <div class="preview-item" onclick="playVideo('${folderName}', ${idx})">
+          <video src="${videoUrl}" muted playsinline preload="metadata"></video>
+          <div class="preview-title">${folderName}</div>
+        </div>`;
+    }
+
+    /* ===== HOME: todas las carpetas ===== */
+    async function renderHome(){
+      centerTitle.textContent = "📂 Todas las carpetas";
+      rightTitle.textContent  = "🎬 Previews";
+
+      const snap = await db.collection("folders").get();
+      const docs = snap.docs;
+
+      // Centro: tarjetas de carpetas (con preview del primer video si hay)
+      if (!docs.length){
+        centerArea.innerHTML = `<p style="opacity:.7">No hay carpetas</p>`;
+      } else {
+        centerArea.className = "grid";
+        centerArea.innerHTML = docs.map(doc=>{
+          const data = doc.data(); const v = (data.videos||[])[0];
+          return cardFolderHTML(doc.id, v?.url);
+        }).join("");
+      }
+
+      // Derecha: un preview por carpeta (si hay)
+      previewList.innerHTML = docs.map(doc=>{
+        const data = doc.data(); const v = (data.videos||[])[0];
+        return v ? previewItemHTML(doc.id, v.url, 0) : "";
       }).join("");
     }
 
-    // render previews derecha
-    function renderPreviews(docs){
-      let previews = [];
-      docs.forEach(doc=>{
-        const data = doc.data(); const videos = data.videos||[];
-        videos.slice(0,1).forEach((v,idx)=>{
-          previews.push({folder:doc.id, url:v.url, idx});
-        });
-      });
-      previewList.innerHTML = previews.map(p=>`
-        <div class="preview-item" onclick="playVideo('${p.folder}', ${p.idx})">
-          <video src="${p.url}" muted playsinline></video>
-          <div class="preview-title">${p.folder}</div>
-        </div>`).join("");
+    /* ===== Carpeta: muestra videos de esa carpeta ===== */
+    async function showFolder(folderName){
+      centerTitle.textContent = `📁 ${folderName}`;
+      rightTitle.textContent  = `🎬 Previews de ${folderName}`;
+
+      const ref = db.collection("folders").doc(folderName);
+      const doc = await ref.get();
+      if(!doc.exists){
+        centerArea.innerHTML = `<p style="opacity:.7">Esta carpeta no existe</p>`;
+        previewList.innerHTML = "";
+        return;
+      }
+      const data = doc.data();
+      const videos = data.videos || [];
+
+      // Centro: tarjetas de videos de esa carpeta
+      centerArea.className = "grid";
+      if(!videos.length){
+        centerArea.innerHTML = `<p style="opacity:.7">No hay videos en esta carpeta</p>`;
+      }else{
+        centerArea.innerHTML = videos.map((v, idx)=> cardVideoHTML(folderName, v.url, idx)).join("");
+      }
+
+      // Derecha: lista vertical (toda la carpeta)
+      previewList.innerHTML = videos.map((v, idx)=> previewItemHTML(folderName, v.url, idx)).join("");
     }
 
-    db.collection("folders").onSnapshot(snap=>{
-      renderFolders(snap.docs);
-      renderPreviews(snap.docs);
-    });
+    /* ===== Player: reproduce video al centro y mantiene previews a la derecha ===== */
+    async function playVideo(folderName, idx){
+      const ref = db.collection("folders").doc(folderName);
+      const doc = await ref.get();
+      if(!doc.exists) return;
 
-    window.showFolder = async(folder)=>{ /* ... tu función de abrir carpeta */ }
-    window.playVideo = async(folder,idx)=>{ /* ... tu función de reproducir */ }
+      const data = doc.data();
+      const videos = data.videos || [];
+      const v = videos[idx]; if(!v) return;
 
-    window.renderPresentation = ()=>{ db.collection("folders").get().then(snap=>renderFolders(snap.docs)); }
+      centerTitle.textContent = `▶ Reproduciendo`;
+      // Player centrado
+      centerArea.className = "";
+      centerArea.innerHTML = `
+        <div class="player-wrap">
+          <div class="player">
+            <video id="videoPlayer" controls controlsList="nodownload noplaybackrate" oncontextmenu="return false;" autoplay playsinline>
+              <source src="${v.url}" type="video/mp4">
+            </video>
+          </div>
+          <div class="meta">Carpeta: ${folderName} • Video ${idx+1}</div>
+        </div>
+      `;
+
+      // Derecha: aseguramos que se vea la carpeta actual
+      rightTitle.textContent = `🎬 Previews de ${folderName}`;
+      previewList.innerHTML = videos.map((item, i)=> previewItemHTML(folderName, item.url, i)).join("");
+    }
+
+    /* Exponer funciones para los onclick */
+    window.renderHome = renderHome;
+    window.showFolder = showFolder;
+    window.playVideo  = playVideo;
+
+    /* Primera carga -> Home */
+    renderHome();
   });
   </script>
 </body>
