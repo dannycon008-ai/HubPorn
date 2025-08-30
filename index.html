@@ -116,7 +116,7 @@
       text-align:center;
     }
     .video-player video{
-      width:80%; max-width:700px; border-radius:10px; background:#000;
+      width:60%; max-width:500px; border-radius:10px; background:#000;
     }
     #adContainer{
       margin-top:12px;
@@ -215,22 +215,26 @@
         </div>`).join("");
     }
 
-    // Mostrar carpeta (solo la seleccionada)
-    window.showFolder = async(folder)=>{
-      const docSnap = await db.collection("folders").doc(folder).get();
-      if (!docSnap.exists){ videoSection.innerHTML = "<p>No hay videos</p>"; return; }
-      const data = docSnap.data();
-      videoSection.innerHTML = `
-        <h2 class="top-banner">${folder}</h2>
-        <div class="grid">
-          ${data.videos.map((v,idx)=>`
-            <div class="card" onclick="playVideo('${folder}', ${idx})">
-              <video class="card-video" src="${v.url}" muted playsinline></video>
-              <div class="card-title">Video ${idx+1}</div>
-            </div>`).join("")}
-        </div>
-      `;
-    };
+   // Mostrar carpeta (solo la seleccionada)
+window.showFolder = async(folder)=>{
+  const docSnap = await db.collection("folders").doc(folder).get();
+  if (!docSnap.exists){ videoSection.innerHTML = "<p>No hay videos</p>"; return; }
+  const data = docSnap.data();
+
+  // 🔹 REEMPLAZA todo el contenido central por la carpeta seleccionada
+  document.querySelector("main").innerHTML = `
+    <h2 class="top-banner">${folder}</h2>
+    <div class="grid">
+      ${data.videos.map((v,idx)=>`
+        <div class="card" onclick="playVideo('${folder}', ${idx})">
+          <video class="card-video" src="${v.url}" muted playsinline></video>
+          <div class="card-title">Video ${idx+1}</div>
+        </div>`).join("")}
+    </div>
+    <div id="videoSection"></div>
+  `;
+};
+
 
     // Reproducir video con anuncios
     window.playVideo = async(folder, idx)=>{
