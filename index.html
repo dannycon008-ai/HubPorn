@@ -214,10 +214,7 @@
   container.appendChild(s1);
   container.appendChild(s2);
 }
-  // Render Home (todas las carpetas)
 function renderHome(docs){
-  state.view = 'home';
-  state.folder = null;
   sectionTitle.textContent = "📂 Todas las carpetas";
   videoSection.innerHTML = "";
   folderGrid.style.display = "grid";
@@ -231,7 +228,7 @@ function renderHome(docs){
     const folder = doc.id;
     const data = doc.data(); 
     const videos = data.videos || [];
-    const preview = videos[0]?.poster || videos[0]?.url || ""; // preview o screenshot
+    const preview = videos[0]?.poster || videos[0]?.url || "";
     return `
       <div class="card" onclick="openFolder('${folder}')">
         ${preview ? `<video class="card-video" src="${preview}" muted playsinline></video>` 
@@ -241,7 +238,6 @@ function renderHome(docs){
     `;
   }).join("");
 }
-
 
     // Reproducir video
     async function playVideo(folder,idx){
