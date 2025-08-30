@@ -326,24 +326,42 @@ registerVisit();
   }
 
   /* -------- REACCIONES -------- */
-  async function addReaction(folder, idx, type){
-    const folderRef = db.collection("folders").doc(folder);
-    const docSnap = await folderRef.get();
-    if (!docSnap.exists) return;
+async function addReaction(folder, idx, type){
+  const folderRef = db.collection("folders").doc(folder);
+  const docSnap = await folderRef.get();
+  if (!docSnap.exists) return;
 
-    const data = docSnap.data();
-    const v = data.videos[idx];
+  const data = docSnap.data();
+  const v = data.videos[idx];
 
-    if (v.reacted) return; // evitar múltiples reacciones
-
-    v.reactions[type]++;
-    v.reacted = true;
-    data.videos[idx] = v;
-
-    await folderRef.update({ videos: data.videos });
-
-    document.getElementById(type + "Count").textContent = v.reactions[type];
+  // 🔹 Inicializar campo si no existe
+  if (!v.userReaction) {
+    v.userReaction = null;
   }
+
+  // ✅ Caso 1: si ya reaccionó con el mismo tipo → quitar la reacción
+  if (v.userReaction === type) {
+    v.reactions[type]--;         // quitar un punto
+    v.userReaction = null;       // quitar estado de reacción
+  }
+  // ✅ Caso 2: si no ha reaccionado todavía → añadir reacción
+  else if (v.userReaction === null) {
+    v.reactions[type]++;
+    v.userReaction = type;       // guardar que reaccionó con este tipo
+  }
+  // ✅ Caso 3: ya había reaccionado con otro botón
+  else {
+    alert("Ya reaccionaste a este video 👍👎");
+    return;
+  }
+
+  // Guardar cambios en Firestore
+  data.videos[idx] = v;
+  await folderRef.update({ videos: data.videos });
+
+  // 🔄 Actualizar contadores en pantalla sin recargar todo el video
+  document.getElementById(type + "Count").textContent = v.reactions[type];
+}
 
   renderSidebar();
   renderPresentation();
