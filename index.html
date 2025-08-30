@@ -9,8 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
   <!-- Firebase (compat) -->
-  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
   <style>
     :root{
@@ -63,17 +63,6 @@
       min-height:400px;
     }
 
-    /* Banner superior */
-    .top-banner{
-      font-family:"Archivo Black", sans-serif;
-      font-size:1.4rem;
-      text-align:center;
-      background:linear-gradient(90deg, #ff4444, #ffa045);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      margin-bottom:14px;
-    }
-
     /* Grid Netflix */
     .grid{
       display:grid;
@@ -96,33 +85,13 @@
     .card-video{ width:100%; height:100px; object-fit:cover; display:block; background:#000; }
     .card-title{ text-align:center; font-size:.9rem; padding:8px; }
 
-    /* Previews vertical */
-    .preview-item{
-      margin-bottom:12px;
-      cursor:pointer;
-    }
-    .preview-item video{
-      width:100%; height:100px; object-fit:cover; border-radius:8px;
-    }
-    .preview-title{
-      font-size:.8rem; margin-top:4px; text-align:center; color:#ccc;
-    }
-
     /* Video player */
-    .video-player{
-      text-align:center;
-    }
-    .video-player video{
-      width:80%; max-width:700px; border-radius:10px; background:#000;
-    }
-    #adContainer{
-      margin-top:12px;
-      text-align:center;
-    }
-    #adContainer iframe{
-      max-width:100%;
-      height:auto;
-    }
+    .video-player{ text-align:center; }
+    .video-player video{ width:80%; max-width:700px; border-radius:10px; background:#000; }
+
+    /* Banner inferior */
+    #adContainer{ margin-top:12px; text-align:center; }
+    #adContainer iframe{ max-width:100%; height:auto; }
 
     /* Responsive */
     @media(max-width: 900px){
@@ -141,7 +110,7 @@
   <div class="layout">
     <!-- Ads izquierda -->
     <aside class="ads-left">
-      <div class="top-banner">Publicidad</div>
+      <h3 style="text-align:center;">Publicidad</h3>
       <script type="text/javascript">
         atOptions = {
           'key' : 'de13ddc2442e4144561bcec2fa1af174',
@@ -156,216 +125,127 @@
 
     <!-- Centro -->
     <main>
-      <h2 class="top-banner">📂 Todas las carpetas</h2>
+      <h2 style="text-align:center;">Lo mejor del 2025</h2>
       <div id="folderGrid" class="grid"></div>
       <div id="videoSection"></div>
     </main>
 
     <!-- Previews derecha -->
     <aside class="previews-right">
-      <div class="top-banner">🎬 Previews</div>
+      <h3 style="text-align:center;">Los mas vistos</h3>
       <div id="previewList"></div>
     </aside>
   </div>
 
   <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const firebaseConfig = {
-      apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
-      authDomain: "minitinder-f6314.firebaseapp.com",
-      projectId: "minitinder-f6314",
-      storageBucket: "minitinder-f6314.appspot.com",
-      messagingSenderId: "659347167496",
-      appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd"
-    };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+  const firebaseConfig = {
+    apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
+    authDomain: "minitinder-f6314.firebaseapp.com",
+    projectId: "minitinder-f6314",
+    storageBucket: "minitinder-f6314.appspot.com",
+    messagingSenderId: "659347167496",
+    appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-    const folderGrid = document.getElementById("folderGrid");
-    const previewList = document.getElementById("previewList");
-    const videoSection = document.getElementById("videoSection");
+  const folderGrid = document.getElementById("folderGrid");
+  const previewList = document.getElementById("previewList");
+  const videoSection = document.getElementById("videoSection");
 
-    // Render carpetas
-    function renderFolders(docs){
-      if (!docs.length){ folderGrid.innerHTML = "<p>No hay carpetas</p>"; return; }
-      folderGrid.innerHTML = docs.map(doc=>{
-        const folder = doc.id;
-        const data = doc.data(); const videos = data.videos||[];
-        const preview = videos[0]?.url;
-        return `
-          <div class="card" onclick="showFolder('${folder}')">
-            ${preview ? `<video class="card-video" src="${preview}" muted playsinline></video>` : `<div style="height:100px;background:#222"></div>`}
-            <div class="card-title">${folder}</div>
-          </div>`;
-      }).join("");
-    }
-
-    // Render previews derecha
-    function renderPreviews(docs){
-      let previews = [];
-      docs.forEach(doc=>{
-        const data = doc.data(); const videos = data.videos||[];
-        videos.slice(0,1).forEach((v,idx)=>{
-          previews.push({folder:doc.id, url:v.url, idx});
-        });
-      });
-      previewList.innerHTML = previews.map(p=>`
-        <div class="preview-item" onclick="playVideo('${p.folder}', ${p.idx})">
-          <video src="${p.url}" muted playsinline></video>
-          <div class="preview-title">${p.folder}</div>
-        </div>`).join("");
-    }
-
-    // Mostrar carpeta
-    window.showFolder = async(folder)=>{
-      const docSnap = await db.collection("folders").doc(folder).get();
-      if (!docSnap.exists){ videoSection.innerHTML = "<p>No hay videos</p>"; return; }
-      const data = docSnap.data();
-      videoSection.innerHTML = `
-        <h2 class="top-banner">${folder}</h2>
-        <div class="grid">
-          ${data.videos.map((v,idx)=>`
-            <div class="card" onclick="playVideo('${folder}', ${idx})">
-              <video class="card-video" src="${v.url}" muted playsinline></video>
-              <div class="card-title">Video ${idx+1}</div>
-            </div>`).join("")}
-        </div>
-      `;
-    };
-
-    // Reproducir video con banners
-   /* -------- REPRODUCIR VIDEO -------- */
-async function playVideo(folder, idx){
-  const folderRef = db.collection("folders").doc(folder);
-  const docSnap = await folderRef.get();
-  if (!docSnap.exists) return;
-
-  const data = docSnap.data();
-  const v = data.videos[idx];
-
-  // 📈 Aumentar vistas
-  v.views++;
-  data.videos[idx] = v;
-  await folderRef.update({ videos: data.videos });
-
-  // 🎬 Renderizar video + reacciones + contenedor de anuncio
-  videoSection.innerHTML = `
-    <div class="video-player" style="text-align:center;">
-      <video id="videoPlayer" controls autoplay>
-        <source src="${v.url}" type="video/mp4">
-      </video>
-      <p id="views">👁️ ${v.views} vistas</p>
-
-      <div class="reactions">
-        <button onclick="addReaction('${folder}', ${idx}, 'like')">
-          👍 (<span id="likeCount">${v.reactions.like}</span>)
-        </button>
-        <button onclick="addReaction('${folder}', ${idx}, 'dislike')">
-          👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)
-        </button>
-      </div>
-
-      <!-- 📢 Contenedor para el banner -->
-      <div id="adContainer" style="margin-top:15px; text-align:center;"></div>
-    </div>
-  `;
-
-  const videoPlayer = document.getElementById("videoPlayer");
-
-  /* 📺 Anuncios */
-  let adsShown = { start:false, mid:false, end:false };
-
-  // Al iniciar
-  videoPlayer.addEventListener("play", ()=>{
-    if(!adsShown.start){
-      adsShown.start = true;
-      showAdBanner();
-    }
-  });
-
-  // A los 50s
-  videoPlayer.addEventListener("timeupdate", ()=>{
-    if(videoPlayer.currentTime >= 50 && !adsShown.mid){
-      adsShown.mid = true;
-      showAdBanner();
-    }
-  });
-
-  // Al final
-  videoPlayer.addEventListener("ended", ()=>{
-    if(!adsShown.end){
-      adsShown.end = true;
-      showAdBanner();
-    }
-  });
-}
-
-/* -------- FUNCIÓN DE BANNER -------- */
-function showAdBanner(){
-  const container = document.getElementById("adContainer");
-  if(!container) return;
-
-  container.innerHTML = `
-    <script type="text/javascript">
-      atOptions = {
-        'key' : 'de13ddc2442e4144561bcec2fa1af174',
-        'format' : 'iframe',
-        'height' : 50,
-        'width' : 320,
-        'params' : {}
-      };
-    <\/script>
-    <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"><\/script>
-  `;
-}
-      videoSection.innerHTML = `
-        <div class="video-player">
-          <video id="videoPlayer" controls autoplay>
-            <source src="${v.url}" type="video/mp4">
-          </video>
-          <div id="adContainer"></div>
-        </div>
-      `;
-
-      const videoPlayer = document.getElementById("videoPlayer");
-      let adsShown = {start:false, mid:false, end:false};
-
-      function showAdBanner(){
-        document.getElementById("adContainer").innerHTML = `
-          <script type="text/javascript">
-            atOptions = {
-              'key' : 'de13ddc2442e4144561bcec2fa1af174',
-              'format' : 'iframe',
-              'height' : 50,
-              'width' : 320,
-              'params' : {}
-            };
-          </script>
-          <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
-        `;
-
-    videoPlayer.addEventListener("play", ()=>{
-  if(!adsShown.start){ adsShown.start=true; showAdBanner(); }
-});
-
-videoPlayer.addEventListener("timeupdate", ()=>{
-  if(videoPlayer.currentTime>=50 && !adsShown.mid){
-    adsShown.mid=true; showAdBanner();
+  // Render carpetas
+  function renderFolders(docs){
+    folderGrid.innerHTML = docs.map(doc=>{
+      const folder = doc.id;
+      const data = doc.data(); const videos = data.videos||[];
+      const preview = videos[0]?.url;
+      return `
+        <div class="card" onclick="showFolder('${folder}')">
+          ${preview ? `<video class="card-video" src="${preview}" muted playsinline></video>` : `<div style="height:100px;background:#222"></div>`}
+          <div class="card-title">${folder}</div>
+        </div>`;
+    }).join("");
   }
-});
 
-videoPlayer.addEventListener("ended", ()=>{
-  if(!adsShown.end){ adsShown.end=true; showAdBanner(); }
-});
-
-    // Render inicial
-    db.collection("folders").onSnapshot(snap=>{
-      renderFolders(snap.docs);
-      renderPreviews(snap.docs);
+  // Render previews derecha
+  function renderPreviews(docs){
+    let previews = [];
+    docs.forEach(doc=>{
+      const data = doc.data(); const videos = data.videos||[];
+      videos.slice(0,1).forEach((v,idx)=>{
+        previews.push({folder:doc.id, url:v.url, idx});
+      });
     });
+    previewList.innerHTML = previews.map(p=>`
+      <div class="preview-item" onclick="playVideo('${p.folder}', ${p.idx})">
+        <video src="${p.url}" muted playsinline></video>
+        <div class="preview-title">${p.folder}</div>
+      </div>`).join("");
+  }
 
-    window.renderPresentation = ()=>{ db.collection("folders").get().then(snap=>renderFolders(snap.docs)); }
+  // Mostrar carpeta
+  window.showFolder = async(folder)=>{
+    const docSnap = await db.collection("folders").doc(folder).get();
+    if (!docSnap.exists){ videoSection.innerHTML = "<p>No hay videos</p>"; return; }
+    const data = docSnap.data();
+    videoSection.innerHTML = `
+      <h2>${folder}</h2>
+      <div class="grid">
+        ${data.videos.map((v,idx)=>`
+          <div class="card" onclick="playVideo('${folder}', ${idx})">
+            <video class="card-video" src="${v.url}" muted playsinline></video>
+            <div class="card-title">Video ${idx+1}</div>
+          </div>`).join("")}
+      </div>
+    `;
+  };
+
+  // Reproducir video con anuncios
+  window.playVideo = async(folder, idx)=>{
+    const folderRef = db.collection("folders").doc(folder);
+    const docSnap = await folderRef.get();
+    if (!docSnap.exists) return;
+
+    const data = docSnap.data();
+    const v = data.videos[idx];
+
+    v.views++;
+    data.videos[idx] = v;
+    await folderRef.update({ videos: data.videos });
+
+    videoSection.innerHTML = `
+      <div class="video-player">
+        <video id="videoPlayer" controls autoplay>
+          <source src="${v.url}" type="video/mp4">
+        </video>
+        <p>👁️ ${v.views} vistas</p>
+        <div id="adContainer"></div>
+      </div>
+    `;
+
+    const videoPlayer = document.getElementById("videoPlayer");
+    let adsShown = {start:false, mid:false, end:false};
+
+    function showAdBanner(){
+      const container = document.getElementById("adContainer");
+      container.innerHTML = `
+        <iframe src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js" 
+          width="320" height="50" frameborder="0" scrolling="no"></iframe>
+      `;
+    }
+
+    videoPlayer.addEventListener("play", ()=>{ if(!adsShown.start){ adsShown.start=true; showAdBanner(); } });
+    videoPlayer.addEventListener("timeupdate", ()=>{ if(videoPlayer.currentTime>=50 && !adsShown.mid){ adsShown.mid=true; showAdBanner(); } });
+    videoPlayer.addEventListener("ended", ()=>{ if(!adsShown.end){ adsShown.end=true; showAdBanner(); } });
+  };
+
+  // Render inicial
+  db.collection("folders").onSnapshot(snap=>{
+    renderFolders(snap.docs);
+    renderPreviews(snap.docs);
   });
+
+  window.renderPresentation = ()=>{ db.collection("folders").get().then(snap=>renderFolders(snap.docs)); }
   </script>
 </body>
 </html>
