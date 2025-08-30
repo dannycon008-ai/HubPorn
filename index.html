@@ -214,38 +214,34 @@
   container.appendChild(s1);
   container.appendChild(s2);
 }
-    // Render Home
-    function renderHome(docs){
-      sectionTitle.textContent="📂 Todas las carpetas";
-      folderGrid.style.display="grid";
-      videoSection.innerHTML="";
-      folderGrid.innerHTML = docs.map(doc=>{
-        const folder=doc.id, data=doc.data(), videos=data.videos||[];
-        const preview = videos[0]?.poster || videos[0]?.url;
-        return `
-          <div class="card" onclick="openFolder('${folder}')">
-            ${preview ? `<img class="card-thumb" src="${preview}" alt="preview">` : `<div style="height:140px;background:#222"></div>`}
-            <div class="card-title">${folder}</div>
-          </div>`;
-      }).join("");
-    }
+  // Render Home (todas las carpetas)
+function renderHome(docs){
+  state.view = 'home';
+  state.folder = null;
+  sectionTitle.textContent = "📂 Todas las carpetas";
+  videoSection.innerHTML = "";
+  folderGrid.style.display = "grid";
 
-        // Render Previews derecha
-    function renderPreviews(docs){
-      let previews = [];
-      docs.forEach(doc=>{
-        const data = doc.data(); 
-        const videos = data.videos||[];
-        if(videos.length > 0){
-          previews.push({folder:doc.id, url:videos[0].url, poster:videos[0].poster||videos[0].url, idx:0});
-        }
-      });
-      previewList.innerHTML = previews.map(p=>`
-        <div class="preview-item" onclick="playVideo('${p.folder}', ${p.idx})">
-          <video src="${p.url}" poster="${p.poster}" muted playsinline></video>
-          <div class="preview-title">${p.folder}</div>
-        </div>`).join("");
-    }
+  if (!docs.length){
+    folderGrid.innerHTML = "<p>No hay carpetas</p>";
+    return;
+  }
+
+  folderGrid.innerHTML = docs.map(doc=>{
+    const folder = doc.id;
+    const data = doc.data(); 
+    const videos = data.videos || [];
+    const preview = videos[0]?.poster || videos[0]?.url || ""; // preview o screenshot
+    return `
+      <div class="card" onclick="openFolder('${folder}')">
+        ${preview ? `<video class="card-video" src="${preview}" muted playsinline></video>` 
+                  : `<div style="height:100px;background:#222"></div>`}
+        <div class="card-title">${folder}</div>
+      </div>
+    `;
+  }).join("");
+}
+
 
     // Reproducir video
     async function playVideo(folder,idx){
