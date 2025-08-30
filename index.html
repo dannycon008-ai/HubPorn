@@ -272,19 +272,25 @@ registerVisit();
     data.videos[idx] = v;
     await folderRef.update({ videos: data.videos });
 
-    videoSection.innerHTML = `
-      <div class="video-player">
-        <video id="videoPlayer" controls autoplay controlsList="nodownload">
-          <source src="${v.url}" type="video/mp4">
-        </video>
-      </div>
-      <p id="views" style="text-align:center;">👁️ ${v.views} vistas</p>
+  videoSection.innerHTML = `
+  <div class="video-player">
+    <video id="videoPlayer" controls autoplay>
+      <source src="${v.url}" type="video/mp4">
+    </video>
+    <p id="views">👁️ ${v.views} vistas</p>
 
-      <div class="reactions">
-        <button onclick="addReaction('${folder}', ${idx}, 'like')">👍 (<span id="likeCount">${v.reactions.like}</span>)</button>
-        <button onclick="addReaction('${folder}', ${idx}, 'dislike')">👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
-      </div>
-    `;
+    <!-- 🔹 Aquí van los botones de reacciones -->
+    <div class="reactions">
+      <button onclick="addReaction('${folder}', ${idx}, 'like')">
+        👍 (<span id="likeCount">${v.reactions.like}</span>)
+      </button>
+      <button onclick="addReaction('${folder}', ${idx}, 'dislike')">
+        👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)
+      </button>
+    </div>
+  </div>
+`;
+
 
     const videoPlayer = document.getElementById("videoPlayer");
 
