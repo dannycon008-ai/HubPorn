@@ -213,13 +213,14 @@
         const videos = data.videos || [];
         if (videos.length >= 30) return alert("Máximo 30 videos por carpeta.");
 
-        videos.push({
-          url,
-          views: 0,
-          reactions: { like:0, dislike:0 },
-          reacted: false,
-          comments: []
-        });
+       videos.push({
+  url,
+  poster: url + "#t=5",  // 👈 screenshot en el segundo 5 (los navegadores lo aceptan como thumbnail)
+  views: 0,
+  reactions: { like:0, dislike:0 },
+  userReaction: null,
+  comments: []
+});
 
         await folderRef.update({ videos });
         document.getElementById("videoURL").value = "";
