@@ -150,10 +150,11 @@
       .ads-left, .previews-right{ display:none; }
       .video-player video{ width:100%; height:auto; }
     }
-    /* 🔹 PC: anuncio lateral */
+  /* Imagen publicidad PC */
 .ad-desktop {
-  display: block;
   width: 100%;
+  max-width: 160px;   /* ancho máximo */
+  height: auto;
   border-radius: 8px;
   cursor: pointer;
 }
@@ -245,19 +246,20 @@ body {
 
   <div class="layout">
     
-  <!-- Ads izquierda (solo PC) -->
+<!-- Ads izquierda (solo PC) -->
 <aside class="ads-left">
   <div class="top-banner">Publicidad</div>
   <a href="javascript:void(0)" onclick="showAdBanner()">
-    <img src="https://s11.erome.com/2497/nZMW9sgy/BxCKl0pg.jpeg?v=1714070507" alt="Publicidad" style="width:100%; border-radius:8px; cursor:pointer;">
+    <img src="https://s11.erome.com/2497/nZMW9sgy/BxCKl0pg.jpeg?v=1714070507" 
+         alt="Publicidad" class="ad-desktop">
   </a>
 </aside>
-
 
 <!-- Publicidad en móvil -->
 <div class="ads-mobile">
   <a href="javascript:void(0)" onclick="showAdBanner()">
-    <img src="https://s11.erome.com/2497/nZMW9sgy/GEJPGxVJ.jpeg?v=1714070791" alt="Publicidad" style="width:100%; border-radius:8px; cursor:pointer;">
+    <img src="https://s11.erome.com/2497/nZMW9sgy/GEJPGxVJ.jpeg?v=1714070791" 
+         alt="Publicidad" class="ad-mobile">
   </a>
 </div>
 
