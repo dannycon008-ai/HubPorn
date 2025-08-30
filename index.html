@@ -230,38 +230,21 @@
       }).join("");
     }
 
-    // Previews derecha (1 aleatorio por carpeta)
+        // Render Previews derecha
     function renderPreviews(docs){
-      let previews=[];
+      let previews = [];
       docs.forEach(doc=>{
-        const data=doc.data(), videos=data.videos||[];
-        if(videos.length>0){
-          const idx=Math.floor(Math.random()*videos.length);
-          previews.push({folder:doc.id,url:videos[idx].poster||videos[idx].url,idx});
+        const data = doc.data(); 
+        const videos = data.videos||[];
+        if(videos.length > 0){
+          previews.push({folder:doc.id, url:videos[0].url, poster:videos[0].poster||videos[0].url, idx:0});
         }
       });
       previewList.innerHTML = previews.map(p=>`
-        <div class="preview-item" onclick="playVideo('${p.folder}',${p.idx})">
-          <img src="${p.url}" alt="preview">
+        <div class="preview-item" onclick="playVideo('${p.folder}', ${p.idx})">
+          <video src="${p.url}" poster="${p.poster}" muted playsinline></video>
           <div class="preview-title">${p.folder}</div>
         </div>`).join("");
-    }
-
-    // Abrir carpeta
-    async function openFolder(folder){
-      const snap=await db.collection("folders").doc(folder).get();
-      if(!snap.exists){ sectionTitle.textContent=folder; folderGrid.innerHTML=""; videoSection.innerHTML="<p>No hay videos</p>"; return;}
-      const data=snap.data();
-      sectionTitle.textContent=folder;
-      folderGrid.style.display="none";
-      videoSection.innerHTML=`
-        <div class="grid">
-          ${data.videos.map((v,i)=>`
-            <div class="card" onclick="playVideo('${folder}',${i})">
-              <img class="card-thumb" src="${v.poster||v.url}" alt="preview">
-              <div class="card-title">Video ${i+1}</div>
-            </div>`).join("")}
-        </div>`;
     }
 
     // Reproducir video
@@ -269,9 +252,14 @@
       const ref=db.collection("folders").doc(folder);
       const snap=await ref.get(); if(!snap.exists) return;
       const data=snap.data(); const v=data.videos[idx];
-      v.views=(v.views||0)+1; data.videos[idx]=v; await ref.update({videos:data.videos});
+
+      v.views=(v.views||0)+1; 
+      data.videos[idx]=v; 
+      await ref.update({videos:data.videos});
+
       sectionTitle.textContent=`▶ ${folder}`;
       folderGrid.style.display="none";
+
       videoSection.innerHTML=`
         <div class="video-player">
           <video id="videoPlayer" controls autoplay width="300" height="350" poster="${v.poster||v.url}">
@@ -279,39 +267,84 @@
           </video>
           <p>👁️ ${v.views} vistas</p>
           <div class="reactions">
-            <button id="likeBtn">👍 (${v.reactions?.like||0})</button>
-            <button id="dislikeBtn">👎 (${v.reactions?.dislike||0})</button>
+            <button id="likeBtn" onclick="toggleReaction('${folder}',${idx},'like')">
+              👍 (<span id="likeCount">${v.reactions?.like||0}</span>)
+            </button>
+            <button id="dislikeBtn" onclick="toggleReaction('${folder}',${idx},'dislike')">
+              👎 (<span id="dislikeCount">${v.reactions?.dislike||0}</span>)
+            </button>
           </div>
           <div id="adContainer"></div>
-        </div>`;
-async function toggleReaction(folder, idx, type){
-  const ref = db.collection("folders").doc(folder);
-  const snap = await ref.get();
-  if(!snap.exists) return;
+        </div>
+      `;
 
-  const data = snap.data();
-  const v = data.videos[idx];
+      const player=document.getElementById("videoPlayer");
+      let ads={start:false,mid:false,end:false};
 
-  v.reactions = v.reactions || {like:0, dislike:0};
-  v.userReaction = v.userReaction || null;
+      player.addEventListener("play",()=>{
+        if(!ads.start){ ads.start=true; injectBottomBanner("adContainer"); }
+      });
+      player.addEventListener("timeupdate",()=>{
+        if(player.currentTime>=50 && !ads.mid){ ads.mid=true; injectBottomBanner("adContainer"); }
+      });
+      player.addEventListener("ended",()=>{
+        if(!ads.end){ ads.end=true; injectBottomBanner("adContainer"); }
+      });
+    }
 
-  if(v.userReaction === type){
-    // desmarcar
-    v.reactions[type] = Math.max(0, v.reactions[type]-1);
-    v.userReaction = null;
-  } else {
-    if(v.userReaction){ v.reactions[v.userReaction]--; }
-    v.reactions[type]++;
-    v.userReaction = type;
-  }
+    // Reacciones
+    async function toggleReaction(folder, idx, type){
+      const ref = db.collection("folders").doc(folder);
+      const snap = await ref.get();
+      if(!snap.exists) return;
 
-  data.videos[idx] = v;
-  await ref.update({videos:data.videos});
+      const data = snap.data();
+      const v = data.videos[idx];
 
-  // refrescar UI
-  document.getElementById("likeCount").textContent = v.reactions.like;
-  document.getElementById("dislikeCount").textContent = v.reactions.dislike;
-}
+      v.reactions = v.reactions || {like:0, dislike:0};
+      v.userReaction = v.userReaction || null;
+
+      if(v.userReaction === type){
+        v.reactions[type] = Math.max(0, v.reactions[type]-1);
+        v.userReaction = null;
+      } else {
+        if(v.userReaction){ v.reactions[v.userReaction]--; }
+        v.reactions[type]++;
+        v.userReaction = type;
+      }
+
+      data.videos[idx] = v;
+      await ref.update({videos:data.videos});
+
+      document.getElementById("likeCount").textContent = v.reactions.like;
+      document.getElementById("dislikeCount").textContent = v.reactions.dislike;
+
+      document.getElementById("likeBtn").classList.toggle("active", v.userReaction==='like');
+      document.getElementById("dislikeBtn").classList.toggle("active", v.userReaction==='dislike');
+    }
+
+    // Inyectar Banner
+    function injectBottomBanner(containerId){
+      const container=document.getElementById(containerId);
+      if(!container) return;
+      container.innerHTML="";
+      const s1=document.createElement("script");
+      s1.type="text/javascript";
+      s1.text=`
+        atOptions = {
+          'key' : 'de13ddc2442e4144561bcec2fa1af174',
+          'format' : 'iframe',
+          'height' : 50,
+          'width' : 320,
+          'params' : {}
+        };
+      `;
+      const s2=document.createElement("script");
+      s2.type="text/javascript";
+      s2.src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js";
+      container.appendChild(s1);
+      container.appendChild(s2);
+    }
 
       
       const player=document.getElementById("videoPlayer");
