@@ -39,7 +39,7 @@
     .banner h2 { font-size:2rem; margin-bottom:10px; }
     .banner p { font-size:1.1rem; color:#ddd; }
 
-    /* Grid de videos/carpeta */
+    /* Grid carpetas */
     .video-grid {
       display: flex;
       flex-wrap: wrap;
@@ -61,7 +61,6 @@
       transform: scale(1.05);
       box-shadow: 0px 4px 15px rgba(255,68,68,0.4);
     }
-
     video.preview {
       width: 100%;
       height: 90px;
@@ -72,7 +71,7 @@
       margin-top:6px; font-size:0.9rem; color:#fff; line-height:1.4;
     }
 
-    /* Reproductor centrado con ads alrededor */
+    /* Player centrado + ads */
     .player-container {
       display: flex;
       justify-content: center;
@@ -84,7 +83,8 @@
     .video-player {
       flex: 2;
       display:flex;
-      justify-content:center;
+      flex-direction:column;
+      align-items:center;
     }
     .video-player video {
       width: 100%;
@@ -105,19 +105,54 @@
       cursor:pointer;
     }
 
+    /* Reacciones */
+    .reactions {
+      margin-top: 15px;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+    .reactions button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 30px;
+      background: #222;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+    .reactions button.active {
+      background: #ff4444;
+    }
+    .reactions button:hover {
+      transform: scale(1.05);
+    }
+
+    /* Modal anuncio */
+    #adModal {
+      display:none;
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      background:rgba(0,0,0,0.9);
+      z-index:999;
+      justify-content:center;
+      align-items:center;
+    }
+    #adModal iframe {
+      width:90%; height:90%; border:none; border-radius:12px;
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
-      .player-container {
-        flex-direction: column;
-        align-items: center;
-      }
+      .player-container { flex-direction: column; align-items: center; }
       .ad-column { flex-direction: row; flex-wrap: wrap; justify-content:center; }
       .ad-column img { width: 45%; max-width:120px; }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
   <header>
     <h1 class="title">MiPlataforma</h1>
     <div class="search-bar">
@@ -125,20 +160,18 @@
     </div>
   </header>
 
-  <!-- Contenido -->
   <main>
-    <!-- Banner inicial -->
     <div class="banner">
-      <h2>Bienvenido a MiPlataforma</h2>
-      <p>Explora todas tus carpetas y videos en un solo lugar 🎬</p>
+      <h2>Bienvenido 🎬</h2>
+      <p>Explora todas tus carpetas y videos</p>
     </div>
-
-    <!-- Sección de presentación -->
     <div id="videoSection"><p>Cargando contenido...</p></div>
   </main>
 
+  <!-- Modal anuncios -->
+  <div id="adModal"><iframe id="adFrame" src=""></iframe></div>
+
   <script>
-  // Configuración Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyCvQcDPSF9u1mr2RNQClhMEQ1yDZiuLM-M",
     authDomain: "minitinder-f6314.firebaseapp.com",
@@ -151,93 +184,139 @@
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-
   const videoSection = document.getElementById("videoSection");
 
-  // ✅ Render presentación inicial con todas las carpetas
+  // 🔥 Modal anuncios
+  function showAd(url, videoPlayer, stopAfter=false){
+    const modal = document.getElementById("adModal");
+    const frame = document.getElementById("adFrame");
+    modal.style.display = "flex";
+    frame.src = url;
+    setTimeout(() => {
+      modal.style.display = "none";
+      frame.src = "";
+      if (!stopAfter) videoPlayer.play();
+    }, 5000);
+  }
+
+  // ✅ Render presentación
   async function renderPresentation(){
     const snapshot = await db.collection("folders").get();
     if (snapshot.empty){
-      videoSection.innerHTML = "<p>No hay carpetas creadas todavía</p>";
+      videoSection.innerHTML = "<p>No hay carpetas creadas</p>";
       return;
     }
-
     let grid = "";
     for (const doc of snapshot.docs){
       const folder = doc.id;
       const data = doc.data();
       const videos = data.videos || [];
-      let preview = videos.length > 0 ? videos[0].url : "";
-      
+      let preview = videos.length>0 ? videos[0].url : "";
       grid += `
         <div class="video-card" onclick="showFolder('${folder}')">
-          ${preview ? `<video class="preview" src="${preview}" muted preload="metadata"></video>` : `<div style='height:90px;display:flex;align-items:center;justify-content:center;background:#222;color:#aaa;'>Sin videos</div>`}
+          ${preview ? `<video class="preview" src="${preview}" muted></video>` : `<div style='height:90px;display:flex;align-items:center;justify-content:center;background:#222;'>Sin videos</div>`}
           <h3>${folder}</h3>
-        </div>
-      `;
+        </div>`;
     }
-    videoSection.innerHTML = `<h2 style="margin-bottom:10px;">📂 Todas las carpetas</h2><div class="video-grid">${grid}</div>`;
+    videoSection.innerHTML = `<h2>📂 Carpetas</h2><div class="video-grid">${grid}</div>`;
   }
 
-  // ✅ Mostrar videos de una carpeta
+  // ✅ Mostrar carpeta
   async function showFolder(folder){
     const docSnap = await db.collection("folders").doc(folder).get();
-    if (!docSnap.exists){
-      videoSection.innerHTML = `<h2>${folder}</h2><p>No hay videos aquí todavía.</p>`;
-      return;
-    }
+    if (!docSnap.exists){ videoSection.innerHTML=`<p>No hay videos</p>`; return; }
     const data = docSnap.data();
-    const grid = data.videos.map((v, idx) => `
-      <div class="video-card" onclick="playVideo('${folder}', ${idx})">
-        <video class="preview" src="${v.url}" muted preload="metadata"></video>
+    const grid = data.videos.map((v,i)=>`
+      <div class="video-card" onclick="playVideo('${folder}',${i})">
+        <video class="preview" src="${v.url}" muted></video>
         <div>${v.views} vistas</div>
-      </div>
-    `).join("");
+      </div>`).join("");
     videoSection.innerHTML = `<h2>${folder}</h2><div class="video-grid">${grid}</div>`;
   }
 
-  // ✅ Reproductor centrado con ads
+  // ✅ Reproducir video
   async function playVideo(folder, idx){
     const folderRef = db.collection("folders").doc(folder);
-    const docSnap = await folderRef.get();
-    if (!docSnap.exists) return;
-
-    const data = docSnap.data();
+    const snap = await folderRef.get();
+    if (!snap.exists) return;
+    const data = snap.data();
     const v = data.videos[idx];
 
     v.views++;
-    data.videos[idx] = v;
-    await folderRef.update({ videos: data.videos });
+    data.videos[idx]=v;
+    await folderRef.update({videos:data.videos});
 
     videoSection.innerHTML = `
       <div class="player-container">
         <div class="ad-column">
-          <img src="https://via.placeholder.com/160x600/ff4444/ffffff?text=Publicidad+1" alt="Ad1">
-          <img src="https://via.placeholder.com/160x600/4444ff/ffffff?text=Publicidad+2" alt="Ad2">
+          <img src="https://cdn77-pic.xnxx-cdn.com/videos/thumbs169xnxxposter/f9/e8/df/f9e8df6eea6b65bf1c4f33c62952ecfa/f9e8df6eea6b65bf1c4f33c62952ecfa.1.jpg/160x600/ff4444/fff?text=Ad1">
+          <img src="https://cdn77-pic.xnxx-cdn.com/videos/thumbs169xnxxposter/f9/e8/df/f9e8df6eea6b65bf1c4f33c62952ecfa/f9e8df6eea6b65bf1c4f33c62952ecfa.1.jpg/160x600/4444ff/fff?text=Ad2">
         </div>
 
         <div class="video-player">
           <video id="videoPlayer" controls autoplay>
             <source src="${v.url}" type="video/mp4">
           </video>
+          <p>👁️ ${v.views} vistas</p>
+          <div class="reactions">
+            <button id="likeBtn" onclick="toggleReaction('${folder}',${idx},'like')">👍 (<span id="likeCount">${v.reactions.like}</span>)</button>
+            <button id="dislikeBtn" onclick="toggleReaction('${folder}',${idx},'dislike')">👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+          </div>
         </div>
 
         <div class="ad-column">
-          <img src="https://via.placeholder.com/160x600/44ff44/ffffff?text=Publicidad+3" alt="Ad3">
-          <img src="https://via.placeholder.com/160x600/ffaa44/ffffff?text=Publicidad+4" alt="Ad4">
+          <img src="https://cdn77-pic.xnxx-cdn.com/videos/thumbs169xnxxll/73/51/15/7351157ba7a1c6891e677143206e8098/7351157ba7a1c6891e677143206e8098.21.jpg/160x600/44ff44/fff?text=Ad3">
+          <img src="https://cdn.iporntv.net/videos/thumbs169l/d1/de/cd/d1decdeaf73224a1c4a12789a99eb50e/d1decdeaf73224a1c4a12789a99eb50e.12.jpg/160x600/ffaa44/fff?text=Ad4">
         </div>
-      </div>
-      <p style="text-align:center; margin-top:10px;">👁️ ${v.views} vistas</p>
-    `;
+      </div>`;
+
+    const videoPlayer=document.getElementById("videoPlayer");
+    let adsShown={start:false,mid:false,end:false};
+
+    videoPlayer.addEventListener("play",()=>{
+      if(!adsShown.start){ videoPlayer.pause(); adsShown.start=true; showAd("https://overplantovervaluetwine.com/2061965",videoPlayer); }
+    });
+    videoPlayer.addEventListener("timeupdate",()=>{
+      if(videoPlayer.currentTime>=50 && !adsShown.mid){
+        adsShown.mid=true; videoPlayer.pause();
+        showAd("https://overplantovervaluetwine.com/2061965",videoPlayer);
+      }
+    });
+    videoPlayer.addEventListener("ended",()=>{
+      if(!adsShown.end){ adsShown.end=true;
+        showAd("https://overplantovervaluetwine.com/2061965",videoPlayer,true);
+      }
+    });
   }
 
-  // ✅ Buscador en vivo
+  // ✅ Reacciones
+  async function toggleReaction(folder, idx, type){
+    const folderRef = db.collection("folders").doc(folder);
+    const snap = await folderRef.get();
+    if (!snap.exists) return;
+    const data=snap.data(); const v=data.videos[idx];
+
+    if(v.userReaction===type){ 
+      v.reactions[type]--; v.userReaction=null; 
+    } else {
+      if(v.userReaction){ v.reactions[v.userReaction]--; }
+      v.reactions[type]++; v.userReaction=type;
+    }
+
+    data.videos[idx]=v;
+    await folderRef.update({videos:data.videos});
+    document.getElementById("likeCount").textContent=v.reactions.like;
+    document.getElementById("dislikeCount").textContent=v.reactions.dislike;
+
+    document.getElementById("likeBtn").classList.toggle("active",v.userReaction==="like");
+    document.getElementById("dislikeBtn").classList.toggle("active",v.userReaction==="dislike");
+  }
+
+  // ✅ Buscador
   function searchVideos(query){
-    query = query.toLowerCase();
-    const cards = document.querySelectorAll(".video-card");
-    cards.forEach(card => {
-      const text = card.innerText.toLowerCase();
-      card.style.display = text.includes(query) ? "block" : "none";
+    query=query.toLowerCase();
+    document.querySelectorAll(".video-card").forEach(c=>{
+      c.style.display=c.innerText.toLowerCase().includes(query)?"block":"none";
     });
   }
 
