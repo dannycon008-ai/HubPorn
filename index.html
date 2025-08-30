@@ -349,6 +349,49 @@ function renderHome(docs){
       player.addEventListener("timeupdate",()=>{if(player.currentTime>=50&&!ads.mid){ads.mid=true;injectBottomBanner("adContainer");}});
       player.addEventListener("ended",()=>{if(!ads.end){ads.end=true;injectBottomBanner("adContainer");}});
     }
+// Abrir carpeta (mostrar solo videos de esa carpeta)
+async function openFolder(folder){
+  const snap = await db.collection("folders").doc(folder).get();
+  if (!snap.exists){ 
+    sectionTitle.textContent = folder;
+    folderGrid.innerHTML = "";
+    videoSection.innerHTML = "<p>No hay videos</p>"; 
+    return;
+  }
+  sectionTitle.textContent = folder;
+  folderGrid.style.display = "none";
+
+  const data = snap.data();
+  videoSection.innerHTML = `
+    <div class="grid">
+      ${data.videos.map((v,idx)=>`
+        <div class="card" onclick="playVideo('${folder}', ${idx})">
+          <video class="card-thumb" src="${v.url}" muted playsinline></video>
+          <div class="card-title">Video ${idx+1}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+// Previews (uno aleatorio de cada carpeta)
+function renderPreviews(docs){
+  let previews = [];
+  docs.forEach(doc=>{
+    const data = doc.data(); 
+    const videos = data.videos||[];
+    if(videos.length>0){
+      const randomIndex = Math.floor(Math.random()*videos.length);
+      previews.push({folder:doc.id, url:videos[randomIndex].url});
+    }
+  });
+  previewList.innerHTML = previews.map(p=>`
+    <div class="preview-item" onclick="playVideo('${p.folder}', 0)">
+      <video src="${p.url}" muted playsinline></video>
+      <div class="preview-title">${p.folder}</div>
+    </div>
+  `).join("");
+}
 
     // Home
     function goHome(){db.collection("folders").get().then(s=>renderHome(s.docs));}
