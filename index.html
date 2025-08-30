@@ -910,8 +910,11 @@ body {
       let previews = [];
       docs.forEach(doc=>{
         const data = doc.data(); const videos = data.videos||[];
-        videos.slice(0,1).forEach((v,idx)=>{
-          previews.push({folder:doc.id, url:v.url, idx});
+        if(videos.length > 0){
+  const randomIdx = Math.floor(Math.random() * videos.length);
+  const v = videos[randomIdx];
+  previews.push({folder:doc.id, url:v.url, idx:randomIdx});
+}
         });
       });
       previewList.innerHTML = previews.map(p=>`
