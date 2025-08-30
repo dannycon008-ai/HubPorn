@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HubPorn</title>
+  <title>Plataforma de Videos</title>
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
   <!-- Firebase SDK -->
@@ -12,46 +12,57 @@
 
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:"Segoe UI", Tahoma, sans-serif; background:#121212; color:#fff; display:flex; flex-direction:column; }
+    body { font-family:"Segoe UI", Tahoma, sans-serif; background:#121212; color:#fff; }
 
-    header { position:fixed; top:0; left:0; right:0; background:#1f1f1f; display:flex;
-      justify-content:center; align-items:center; padding:12px 18px; z-index:100; }
-    .title{ font-family:"Archivo Black", sans-serif; font-size:2.5rem;
+    header { position:fixed; top:0; left:0; right:0; background:#1f1f1f;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:12px 18px; z-index:100; }
+    .title{ font-family:"Archivo Black", sans-serif; font-size:2rem;
       background:linear-gradient(to right, #ff4444 50%, #ffffff 50%);
       -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    main{ margin-top:74px; flex:1; display:flex; }
+
+    #searchBar {
+      background:#2a2a2a; border:none; padding:8px 12px; border-radius:6px; color:white;
+      width:200px;
+    }
+
+    main{ margin-top:74px; display:flex; }
     .sidebar{ width:240px; background:#1f1f1f; padding:14px; height:calc(100vh - 74px);
       position:fixed; top:74px; left:0; overflow-y:auto; border-right:1px solid #222; }
     .content{ margin-left:240px; flex:1; padding:20px; }
-    .folder{ margin-bottom:14px; cursor:pointer; }
-    .folder h3 { color:#ff4444; font-size:1rem; font-family: "Archivo Black", sans-serif; }
 
-    .video-grid { display: flex; flex-wrap: wrap; gap: 12px; padding: 10px; justify-content: flex-start; }
-    .video-card { flex: 0 0 auto; width: 160px; background: #1b1b1b; border: 1px solid #242424; border-radius: 10px; padding: 6px; }
-    video.preview { width: 100%; height: 90px; object-fit: cover; }
+    .folder{ margin-bottom:14px; cursor:pointer; transition:transform .2s, background .2s; }
+    .folder:hover { transform:scale(1.05); background:#222; border-radius:6px; }
+    .folder h3 { color:#ff4444; font-size:1rem; font-family:"Archivo Black", sans-serif; padding:6px; }
 
-    .video-player { text-align:center; }
-    .video-player video#videoPlayer {
-      width: 80%; max-width: 600px; height: auto; border-radius: 12px; background: #000;
-    }
+    .video-grid { display:flex; flex-wrap:wrap; gap:12px; padding:10px; justify-content:flex-start; }
+    .video-card { flex:0 0 auto; width:160px; background:#1b1b1b; border:1px solid #242424; border-radius:10px; padding:6px; transition:transform .2s; }
+    .video-card:hover { transform:scale(1.05); }
+    video.preview { width:100%; height:90px; object-fit:cover; }
+
+    /* 📺 Video + anuncios laterales */
+    .video-wrapper { display:flex; justify-content:center; align-items:flex-start; gap:15px; margin-top:15px; }
+    .video-player video#videoPlayer { width:80%; max-width:600px; border-radius:12px; background:#000; }
+    .side-ad { width:120px; height:600px; background:#222; border-radius:8px; overflow:hidden; }
+    .side-ad img { width:100%; height:100%; object-fit:cover; }
 
     /* Banner publicitario */
     #videoBanner { margin:10px auto; text-align:center; }
 
     /* Reacciones */
-    .reactions { margin: 15px 0; display: flex; gap: 15px; justify-content: center; }
-    .reactions button {
-      display: flex; align-items: center; justify-content: center;
-      gap: 6px; padding: 12px; border: none; border-radius: 50px;
-      background: #222; color: #fff; font-size: 1.1rem; cursor: pointer;
-      transition: all 0.2s ease-in-out;
-    }
-    .reactions button:hover { background: #ff4444; transform: scale(1.1); }
+    .reactions { margin:15px 0; display:flex; gap:15px; justify-content:center; }
+    .reactions button { display:flex; align-items:center; justify-content:center;
+      gap:6px; padding:12px; border:none; border-radius:50px;
+      background:#222; color:#fff; font-size:1.1rem; cursor:pointer;
+      transition:all 0.2s ease-in-out; }
+    .reactions button:hover { background:#ff4444; transform:scale(1.1); }
 
     /* Responsive */
-    @media (max-width: 600px){
+    @media (max-width:900px){
       .sidebar { width:100%; position:relative; height:auto; border-right:none; }
       .content { margin-left:0; }
+      .video-wrapper { flex-direction:column; align-items:center; }
+      .side-ad { width:100%; height:120px; }
       .video-player video#videoPlayer { width:100%; }
       .video-card { width:100%; }
       .video-grid { flex-direction:column; }
@@ -60,7 +71,10 @@
 </head>
 <body>
   <!-- Header -->
-  <header><h1 class="title">HubPorn</h1></header>
+  <header>
+    <h1 class="title">HubPorn</h1>
+    <input id="searchBar" type="text" placeholder="Buscar carpeta...">
+  </header>
 
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar"></aside>
@@ -86,13 +100,15 @@
 
   const sidebar = document.getElementById("sidebar");
   const videoSection = document.getElementById("videoSection");
+  const searchBar = document.getElementById("searchBar");
 
   // ✅ Renderizar carpetas
-  async function renderSidebar(){
+  async function renderSidebar(filter=""){
     sidebar.innerHTML = "";
     const snapshot = await db.collection("folders").get();
     snapshot.forEach(doc => {
       const folder = doc.id;
+      if(filter && !folder.toLowerCase().includes(filter.toLowerCase())) return;
       const item = document.createElement("div");
       item.className = "folder";
       item.innerHTML = `<h3>${folder}</h3>`;
@@ -100,6 +116,9 @@
       sidebar.appendChild(item);
     });
   }
+
+  // ✅ Buscador en vivo
+  searchBar.addEventListener("input", (e) => renderSidebar(e.target.value));
 
   // ✅ Mostrar videos de una carpeta
   async function showFolder(folder){
@@ -132,18 +151,22 @@
     data.videos[idx] = v;
     await folderRef.update({ videos: data.videos });
 
-    // 🎬 Renderizar video con banner arriba
+    // 🎬 Renderizar video con anuncios laterales y banner arriba
     videoSection.innerHTML = `
-      <div class="video-player">
-        <div id="videoBanner"></div> <!-- Aquí va el banner -->
-        <video id="videoPlayer" controls autoplay>
-          <source src="${v.url}" type="video/mp4">
-        </video>
-        <p>👁️ ${v.views} vistas</p>
-        <div class="reactions">
-          <button id="likeBtn" onclick="toggleReaction('${folder}',${idx},'like')">👍 (<span id="likeCount">${v.reactions.like}</span>)</button>
-          <button id="dislikeBtn" onclick="toggleReaction('${folder}',${idx},'dislike')">👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+      <div id="videoBanner"></div>
+      <div class="video-wrapper">
+        <div class="side-ad"><img src="https://via.placeholder.com/120x600?text=Ad+Izquierda" alt="ad izquierda"></div>
+        <div class="video-player">
+          <video id="videoPlayer" controls autoplay>
+            <source src="${v.url}" type="video/mp4">
+          </video>
+          <p>👁️ ${v.views} vistas</p>
+          <div class="reactions">
+            <button id="likeBtn" onclick="toggleReaction('${folder}',${idx},'like')">👍 (<span id="likeCount">${v.reactions.like}</span>)</button>
+            <button id="dislikeBtn" onclick="toggleReaction('${folder}',${idx},'dislike')">👎 (<span id="dislikeCount">${v.reactions.dislike}</span>)</button>
+          </div>
         </div>
+        <div class="side-ad"><img src="https://via.placeholder.com/120x600?text=Ad+Derecha" alt="ad derecha"></div>
       </div>
     `;
 
@@ -176,13 +199,13 @@
     const data = docSnap.data();
     const v = data.videos[idx];
 
-    if (!v.userReaction){ v.userReaction = null; } // inicializar
+    if (!v.userReaction){ v.userReaction = null; }
 
     if (v.userReaction === type){
-      v.reactions[type]--; // desmarcar
+      v.reactions[type]--;
       v.userReaction = null;
     } else {
-      if (v.userReaction){ v.reactions[v.userReaction]--; } // quitar reacción previa
+      if (v.userReaction){ v.reactions[v.userReaction]--; }
       v.reactions[type]++;
       v.userReaction = type;
     }
