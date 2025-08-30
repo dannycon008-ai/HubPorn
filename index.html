@@ -71,55 +71,52 @@
       margin-bottom:14px;
     }
 
-    /* Grid estilo Netflix */
+    /* Grid Netflix */
     .grid {
       display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
-      gap:15px;
+      grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+      gap:16px;
     }
     .card {
       background:var(--card);
-      border-radius:10px;
+      border-radius:12px;
       overflow:hidden;
       cursor:pointer;
       transition:transform .25s ease, box-shadow .25s ease;
-      box-shadow:0 3px 10px rgba(0,0,0,.3);
+      box-shadow:0 4px 12px rgba(0,0,0,.3);
     }
     .card:hover {
-      transform:scale(1.07);
-      box-shadow:0 10px 20px rgba(0,0,0,.45);
+      transform:scale(1.05);
+      box-shadow:0 10px 24px rgba(0,0,0,.45);
     }
     .card-thumb {
       width:100%;
-      height:100px;
+      height:120px;
       object-fit:cover;
       background:#000;
       display:block;
     }
     .card-title {
-      font-size:.9rem;
+      font-size:0.9rem;
       font-weight:600;
       text-align:center;
       padding:8px;
-      color:#fff;
     }
 
     /* Previews */
     .preview-item {margin-bottom:12px; cursor:pointer;}
     .preview-item video {
-      width:100%; height:80px; object-fit:cover;
+      width:100%; height:90px; object-fit:cover;
       border-radius:8px;
       display:block;
     }
-    .preview-title {
-      font-size:.8rem; margin-top:4px; text-align:center; color:#ccc;
-    }
+    .preview-title {font-size:.85rem; margin-top:4px; text-align:center; color:#ccc;}
 
     /* Video player */
     .video-player {text-align:center;}
     .video-player video {
       width:100%;
-      max-width:400px;
+      max-width:640px;
       border-radius:10px; background:#000;
     }
     #adContainer {margin-top:12px; text-align:center;}
@@ -195,7 +192,7 @@
     const videoSection = document.getElementById("videoSection");
     const sectionTitle = document.getElementById("sectionTitle");
 
-    // Render Home (todas las carpetas)
+    // Render Home
     function renderHome(docs){
       sectionTitle.textContent = "📂 Todas las carpetas";
       videoSection.innerHTML = "";
@@ -246,7 +243,7 @@
       `;
     }
 
-    // Reproducir video con anuncios y contador
+    // Reproducir video
     async function playVideo(folder,idx){
       const ref=db.collection("folders").doc(folder);
       const snap=await ref.get(); if(!snap.exists) return;
@@ -261,24 +258,11 @@
 
       videoSection.innerHTML=`
         <div class="video-player">
-          <video id="videoPlayer" controls autoplay controlsList="nodownload" poster="${v.poster||v.url}">
+          <video id="videoPlayer" controls autoplay poster="${v.poster||v.url}" controlsList="nodownload">
             <source src="${v.url}" type="video/mp4">
           </video>
           <p>👁️ ${v.views} vistas</p>
           <div id="adContainer"></div>
-          <!-- Banner debajo del video -->
-          <div id="bottomBanner">
-            <script type="text/javascript">
-              atOptions = {
-                'key' : 'de13ddc2442e4144561bcec2fa1af174',
-                'format' : 'iframe',
-                'height' : 60,
-                'width' : 468,
-                'params' : {}
-              };
-            </script>
-            <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
-          </div>
         </div>
       `;
 
@@ -299,21 +283,27 @@
     // Inyectar anuncio
     function showAd(){
       const ad=document.getElementById("adContainer");
-      ad.innerHTML=`
-        <script type="text/javascript">
-          atOptions = {
-            'key' : 'de13ddc2442e4144561bcec2fa1af174',
-            'format' : 'iframe',
-            'height' : 60,
-            'width' : 468,
-            'params' : {}
-          };
-        </script>
-        <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
+      if(!ad) return;
+      ad.innerHTML="";
+      const s1=document.createElement("script");
+      s1.type="text/javascript";
+      s1.text=`
+        atOptions = {
+          'key' : 'de13ddc2442e4144561bcec2fa1af174',
+          'format' : 'iframe',
+          'height' : 60,
+          'width' : 468,
+          'params' : {}
+        };
       `;
+      const s2=document.createElement("script");
+      s2.type="text/javascript";
+      s2.src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js";
+      ad.appendChild(s1);
+      ad.appendChild(s2);
     }
 
-    // Previews (uno aleatorio de cada carpeta)
+    // Previews (aleatorio de cada carpeta)
     function renderPreviews(docs){
       let previews = [];
       docs.forEach(doc=>{
@@ -339,9 +329,9 @@
     window.playVideo=playVideo; 
     window.goHome=goHome;
 
-    db.collection("folders").onSnapshot(snapshot => {
-      renderHome(snapshot.docs);
-      renderPreviews(snapshot.docs);
+    db.collection("folders").onSnapshot(s=>{
+      renderHome(s.docs); 
+      renderPreviews(s.docs);
     });
   });
   </script>
