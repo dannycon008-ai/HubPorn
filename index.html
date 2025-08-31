@@ -308,41 +308,62 @@ async function renderMostViewed(){
   `;
 }
     
+     // Reproducir video
     async function playVideo(folder,idx){
-      const ref=db.collection("folders").doc(folder);
-      const snap=await ref.get(); if(!snap.exists) return;
-      const data=snap.data(); const v=data.videos[idx];
+      const ref = db.collection("folders").doc(folder);
+      const snap = await ref.get(); 
+      if(!snap.exists) return;
+      const data = snap.data(); 
+      const v = data.videos[idx];
 
-      v.views=(v.views||0)+1; 
-      data.videos[idx]=v; 
+      v.views = (v.views||0)+1; 
+      data.videos[idx] = v; 
       await ref.update({videos:data.videos});
 
-      sectionTitle.textContent=`▶ ${folder}`;
-      folderGrid.style.display="none";
+      sectionTitle.textContent = `▶ ${folder}`;
+      folderGrid.style.display = "none";
 
-      // obtener los más vistos
-      const sorted = [...data.videos].sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
-
-      videoSection.innerHTML=`
-        <div class="video-container">
-          <div class="video-player">
-            <video id="videoPlayer" controls autoplay poster="${v.poster||v.url}" controlsList="nodownload">
-              <source src="${v.url}" type="video/mp4">
-            </video>
-            <p>👁️ ${v.views} vistas</p>
-            <div id="adContainer"></div>
-          </div>
-          <div class="most-viewed">
-            <h3>Los más vistos</h3>
-            ${sorted.map(mv=>`
-              <div class="mv-item" onclick="playVideo('${folder}', ${data.videos.indexOf(mv)})">
-                <video src="${mv.url}" muted playsinline></video>
-                <div class="mv-title">${mv.views||0} vistas</div>
-              </div>
-            `).join("")}
-          </div>
+      videoSection.innerHTML = `
+        <div class="video-player">
+          <video id="videoPlayer" controls autoplay poster="${v.poster||v.url}" controlsList="nodownload">
+            <source src="${v.url}" type="video/mp4">
+          </video>
+          <p>👁️ ${v.views} vistas</p>
+          <div id="adContainer"></div>
         </div>
       `;
+
+      const player = document.getElementById("videoPlayer");
+      let ads = {start:false, mid:false, end:false};
+
+      // Anuncio al inicio
+      player.addEventListener("play", ()=>{
+        if(!ads.start){ ads.start=true; showAd(); }
+      });
+
+      // Anuncio a los 50 segundos
+      player.addEventListener("timeupdate", ()=>{
+        if(player.currentTime>=50 && !ads.mid){ ads.mid=true; showAd(); }
+      });
+
+      // Anuncio al final
+      player.addEventListener("ended", ()=>{
+        if(!ads.end){ ads.end=true; showAd(); }
+      });
+    }
+
+    // Inyectar anuncio en adContainer
+    function showAd(){
+      const ad = document.getElementById("adContainer");
+      if(!ad) return;
+      ad.innerHTML = `
+        <a href="https://overplantovervaluetwine.com/2061965" target="_blank">
+          <img src="https://s11.erome.com/2497/nZMW9sgy/GEJPGxVJ.jpeg?v=1714070791" 
+               alt="Publicidad" style="max-width:100%;border-radius:8px;">
+        </a>
+      `;
+    }
+
 
       const player=document.getElementById("videoPlayer");
       let ads={start:false,mid:false,end:false};
