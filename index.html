@@ -226,7 +226,25 @@
       storageBucket: "minitinder-f6314.appspot.com",
       messagingSenderId: "659347167496",
       appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd"
+      
     };
+    function goHome(){
+      db.collection("folders").get().then(s=>renderHome(s.docs));
+    }
+
+    // 👇 Exportar funciones al scope global (necesario porque las usas en el HTML)
+    window.openFolder = openFolder; 
+    window.playVideo  = playVideo; 
+    window.goHome     = goHome;
+
+    // 👇 Suscripción en tiempo real a cambios en Firestore
+    db.collection("folders").onSnapshot(s=>{
+      renderHome(s.docs); 
+      renderPreviews(s.docs);
+    });
+  });
+
+
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
@@ -332,24 +350,38 @@
       player.addEventListener("ended",()=>{ if(!ads.end){ ads.end=true; showAd(); } });
     }
 
-    function showAd(){
-      const ad=document.getElementById("adContainer");
-      if(!ad) return;
-      ad.innerHTML=`
-        <script type="text/javascript">
-          atOptions = {
-            'key' : 'de13ddc2442e4144561bcec2fa1af174',
-            'format' : 'iframe',
-            'height' : 60,
-            'width' : 468,
-            'params' : {}
-          };
-        </script>
-        <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
-      `;
-    }
+   <script>
+/* ⬇️ Sustituye solo ESTA función */
+function showAd(){
+  const ad = document.getElementById("adContainer");
+  if(!ad) return;
 
-    function renderPreviews(docs){
+  // Limpia el contenedor para no acumular anuncios
+  ad.textContent = "";
+
+  // 1) Define atOptions en el scope global
+  const s1 = document.createElement("script");
+  s1.type = "text/javascript";
+  s1.text = `
+    window.atOptions = {
+      'key' : 'de13ddc2442e4144561bcec2fa1af174',
+      'format' : 'iframe',
+      'height' : 60,
+      'width'  : 468,
+      'params' : {}
+    };
+  `;
+
+  // 2) Carga el script de la red
+  const s2 = document.createElement("script");
+  s2.type = "text/javascript";
+  s2.src  = "//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js";
+
+  ad.appendChild(s1);
+  ad.appendChild(s2);
+}
+
+      function renderPreviews(docs){
       let previews = [];
       docs.forEach(doc=>{
         const data = doc.data(); 
@@ -359,7 +391,10 @@
           previews.push({folder:doc.id, url:videos[randomIndex].url});
         }
       });
-
+</script>
+        <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
+      `;
+    }
       previewList.innerHTML = previews.map(p=>`
         <div class="preview-item" onclick="playVideo('${p.folder}', 0)">
           <video src="${p.url}#t=2" muted preload="metadata" playsinline></video>
@@ -367,14 +402,6 @@
         </div>
       `).join("");
     }
-
-    function goHome(){db.collection("folders").get().then(s=>renderHome(s.docs));}
-
-    window.openFolder=openFolder; 
-    window.playVideo=playVideo; 
-    window.goHome=goHome;
-
-    db.collection("folders").onSnapshot(s=>{ renderHome(s.docs); renderPreviews(s.docs); });
   });
   </script>
 </body>
