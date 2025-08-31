@@ -9,8 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- Firebase -->
-  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
   <style>
     :root {
@@ -21,31 +21,29 @@
       --txt:#ffffff;
       --accent:#ff4444;
     }
-    * {margin:0; padding:0; box-sizing:border-box}
-    body {background:var(--bg); color:var(--txt); font-family:'Poppins', sans-serif;}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--txt);font-family:'Poppins',sans-serif}
 
-    /* Header */
-    header {
-      position:sticky; top:0; z-index:100;
-      display:flex; justify-content:center; align-items:center;
+    header{
+      position:sticky;top:0;z-index:100;
+      display:flex;justify-content:center;align-items:center;
       padding:14px 20px;
       background:linear-gradient(90deg,#161616,#0f0f0f);
       border-bottom:1px solid var(--border);
       box-shadow:0 4px 14px rgba(0,0,0,.35);
       cursor:pointer;
     }
-    .title {
-      font-family:"Archivo Black", sans-serif;
+    .title{
+      font-family:"Archivo Black",sans-serif;
       font-size:2rem;
-      background:linear-gradient(90deg, var(--accent), #ffa045);
+      background:linear-gradient(90deg,var(--accent),#ffa045);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
       transition:.2s;
     }
-    .title:hover {transform:scale(1.05);}
+    .title:hover{transform:scale(1.05)}
 
-    /* Layout */
-    .layout {
+    .layout{
       display:grid;
       grid-template-columns:200px 1fr 220px;
       gap:15px;
@@ -53,31 +51,29 @@
       margin:20px auto;
       padding:0 10px;
     }
-    .ads-left, .previews-right {
+    .ads-left,.previews-right{
       background:var(--panel);
       border:1px solid var(--border);
       border-radius:10px;
       padding:10px;
     }
 
-    /* Banner */
-    .top-banner {
-      font-family:"Archivo Black", sans-serif;
+    .top-banner{
+      font-family:"Archivo Black",sans-serif;
       font-size:1.3rem;
       text-align:center;
-      background:linear-gradient(90deg, #ff4444, #ffa045);
+      background:linear-gradient(90deg,#ff4444,#ffa045);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
       margin-bottom:14px;
     }
 
-    /* Grid Netflix */
-    .grid {
+    .grid{
       display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+      grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
       gap:16px;
     }
-    .card {
+    .card{
       background:var(--card);
       border-radius:12px;
       overflow:hidden;
@@ -85,117 +81,47 @@
       transition:transform .25s ease, box-shadow .25s ease;
       box-shadow:0 4px 12px rgba(0,0,0,.3);
     }
-    .card:hover {
-      transform:scale(1.05);
-      box-shadow:0 10px 24px rgba(0,0,0,.45);
-    }
-    .card-thumb {
-      width:100%;
-      height:120px;
-      object-fit:cover;
-      background:#000;
-      display:block;
-    }
-    .card-title {
-      font-size:0.9rem;
-      font-weight:600;
-      text-align:center;
-      padding:8px;
-    }
+    .card:hover{transform:scale(1.05);box-shadow:0 10px 24px rgba(0,0,0,.45)}
+    .card-thumb{width:100%;height:120px;object-fit:cover;background:#000;display:block}
+    .card-title{font-size:0.9rem;font-weight:600;text-align:center;padding:8px}
 
-    /* Previews */
-    .preview-item {margin-bottom:12px; cursor:pointer;}
-    .preview-item video {
-      width:100%; height:90px; object-fit:cover;
-      border-radius:8px;
-      display:block;
-    }
-    .preview-title {font-size:.85rem; margin-top:4px; text-align:center; color:#ccc;}
+    .preview-item{margin-bottom:12px;cursor:pointer}
+    .preview-item video{width:100%;height:90px;object-fit:cover;border-radius:8px;display:block}
+    .preview-title{font-size:.85rem;margin-top:4px;text-align:center;color:#ccc}
 
-    /* Video player */
-    .video-container {
-      display:flex;
-      flex-direction:row;
-      gap:15px;
-      justify-content:center;
-      align-items:flex-start;
-    }
-    .video-player {
-      flex:2;
-      text-align:center;
-    }
-    .video-player video {
-      width:100%;
-      max-width:480px;
-      border-radius:10px;
-      background:#000;
-    }
-    .most-viewed {
-      flex:1;
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:10px;
-      max-height:480px;
-      overflow-y:auto;
-    }
-    .most-viewed h3 {
-      font-size:1rem;
-      margin-bottom:10px;
-      text-align:center;
-      color:var(--accent);
-    }
-    .most-viewed .mv-item {
-      margin-bottom:10px;
-      cursor:pointer;
-    }
-    .most-viewed .mv-item video {
-      width:100%;
-      height:100px;
-      object-fit:cover;
-      border-radius:8px;
-    }
-    .most-viewed .mv-title {
-      font-size:.8rem;
-      margin-top:4px;
-      text-align:center;
-      color:#ccc;
-    }
+    .video-container{display:flex;flex-direction:row;gap:15px;justify-content:center;align-items:flex-start}
+    .video-player{flex:2;text-align:center}
+    .video-player video{width:100%;max-width:480px;border-radius:10px;background:#000}
+    .most-viewed{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px;max-height:480px;overflow-y:auto}
+    .most-viewed h3{font-size:1rem;margin-bottom:10px;text-align:center;color:var(--accent)}
+    .most-viewed .mv-item{margin-bottom:10px;cursor:pointer}
+    .most-viewed .mv-item video{width:100%;height:100px;object-fit:cover;border-radius:8px}
+    .most-viewed .mv-title{font-size:.8rem;margin-top:4px;text-align:center;color:#ccc}
 
-    #adContainer {margin-top:12px; text-align:center;}
+    #adContainer{margin-top:12px;text-align:center}
 
-    /* Ads */
-    .ads-left img, .ads-mobile img {
-      max-width:100%; height:auto;
-      border-radius:8px; display:block;
-    }
-    .ads-mobile {display:none; text-align:center; margin:10px 0;}
+    .ads-left img,.ads-mobile img{max-width:100%;height:auto;border-radius:8px;display:block}
+    .ads-mobile{display:none;text-align:center;margin:10px 0}
 
-    /* Responsive */
     @media(max-width:900px){
-      .layout {grid-template-columns:1fr;}
-      .ads-left, .previews-right {display:none;}
-      .ads-mobile {display:block;}
-      .video-container {flex-direction:column;}
-      .most-viewed {width:100%; max-height:none; margin-top:15px;}
+      .layout{grid-template-columns:1fr}
+      .ads-left,.previews-right{display:none}
+      .ads-mobile{display:block}
+      .video-container{flex-direction:column}
+      .most-viewed{width:100%;max-height:none;margin-top:15px}
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header onclick="goHome()">
-    <h1 class="title">HubPorn</h1>
-  </header>
+  <header onclick="goHome()"><h1 class="title">HubPorn</h1></header>
 
-  <!-- Publicidad móvil -->
   <div class="ads-mobile">
-      <a href="https://overplantovervaluetwine.com/2061965" target="_blank">
+    <a href="https://overplantovervaluetwine.com/2061965" target="_blank">
       <img src="https://s11.erome.com/2497/nZMW9sgy/GEJPGxVJ.jpeg?v=1714070791" alt="Publicidad">
     </a>
   </div>
 
   <div class="layout">
-    <!-- Ads izquierda (solo PC) -->
     <aside class="ads-left">
       <div class="top-banner">👇Chat en vivo👇</div>
       <a href="https://overplantovervaluetwine.com/2061965" target="_blank">
@@ -203,14 +129,12 @@
       </a>
     </aside>
 
-    <!-- Centro -->
     <main>
       <h2 class="top-banner" id="sectionTitle">VIDEOS PORNO GRATIS</h2>
       <div id="folderGrid" class="grid"></div>
       <div id="videoSection"></div>
     </main>
 
-    <!-- Previews derecha -->
     <aside class="previews-right">
       <div class="top-banner">Videos mas vistos</div>
       <div id="previewList"></div>
@@ -226,52 +150,30 @@
       storageBucket: "minitinder-f6314.appspot.com",
       messagingSenderId: "659347167496",
       appId: "1:659347167496:web:a4e76f562ffba1c4bdf4bd"
-      
     };
-    function goHome(){
-      db.collection("folders").get().then(s=>renderHome(s.docs));
-    }
-
-    // 👇 Exportar funciones al scope global (necesario porque las usas en el HTML)
-    window.openFolder = openFolder; 
-    window.playVideo  = playVideo; 
-    window.goHome     = goHome;
-
-    // 👇 Suscripción en tiempo real a cambios en Firestore
-    db.collection("folders").onSnapshot(s=>{
-      renderHome(s.docs); 
-      renderPreviews(s.docs);
-    });
-  });
-
-
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const folderGrid   = document.getElementById("folderGrid");
-    const previewList  = document.getElementById("previewList");
-    const videoSection = document.getElementById("videoSection");
-    const sectionTitle = document.getElementById("sectionTitle");
+    const folderGrid=document.getElementById("folderGrid");
+    const previewList=document.getElementById("previewList");
+    const videoSection=document.getElementById("videoSection");
+    const sectionTitle=document.getElementById("sectionTitle");
 
     function renderHome(docs){
-      sectionTitle.textContent = "VIDEOS PORNO GRATIS";
-      videoSection.innerHTML = "";
-      folderGrid.style.display = "grid";
+      sectionTitle.textContent="VIDEOS PORNO GRATIS";
+      videoSection.innerHTML="";
+      folderGrid.style.display="grid";
 
-      if (!docs.length){
-        folderGrid.innerHTML = "<p>No hay carpetas</p>";
-        return;
-      }
+      if(!docs.length){folderGrid.innerHTML="<p>No hay carpetas</p>";return;}
 
-      folderGrid.innerHTML = docs.map(doc=>{
-        const folder = doc.id;
-        const data = doc.data(); 
-        const videos = data.videos || [];
-        const preview = videos[0]?.poster || videos[0]?.url || "";
+      folderGrid.innerHTML=docs.map(doc=>{
+        const folder=doc.id;
+        const data=doc.data(); 
+        const videos=data.videos||[];
+        const preview=videos[0]?.poster||videos[0]?.url||"";
         return `
           <div class="card" onclick="openFolder('${folder}')">
-            ${preview ? `<video class="card-thumb" src="${preview}" muted playsinline></video>` 
-                      : `<div style="height:100px;background:#222"></div>`}
+            ${preview?`<video class="card-thumb" src="${preview}" muted playsinline></video>`:`<div style="height:100px;background:#222"></div>`}
             <div class="card-title">${folder}</div>
           </div>
         `;
@@ -279,18 +181,13 @@
     }
 
     async function openFolder(folder){
-      const snap = await db.collection("folders").doc(folder).get();
-      if (!snap.exists){ 
-        sectionTitle.textContent = folder;
-        folderGrid.innerHTML = "";
-        videoSection.innerHTML = "<p>No hay videos</p>"; 
-        return;
-      }
-      sectionTitle.textContent = folder;
-      folderGrid.style.display = "none";
+      const snap=await db.collection("folders").doc(folder).get();
+      if(!snap.exists){sectionTitle.textContent=folder;folderGrid.innerHTML="";videoSection.innerHTML="<p>No hay videos</p>";return;}
+      sectionTitle.textContent=folder;
+      folderGrid.style.display="none";
 
-      const data = snap.data();
-      videoSection.innerHTML = `
+      const data=snap.data();
+      videoSection.innerHTML=`
         <div class="grid">
           ${data.videos.map((v,idx)=>`
             <div class="card" onclick="playVideo('${folder}', ${idx})">
@@ -304,17 +201,17 @@
 
     async function playVideo(folder,idx){
       const ref=db.collection("folders").doc(folder);
-      const snap=await ref.get(); if(!snap.exists) return;
-      const data=snap.data(); const v=data.videos[idx];
+      const snap=await ref.get();if(!snap.exists)return;
+      const data=snap.data();const v=data.videos[idx];
 
-      v.views=(v.views||0)+1; 
-      data.videos[idx]=v; 
+      v.views=(v.views||0)+1;
+      data.videos[idx]=v;
       await ref.update({videos:data.videos});
 
       sectionTitle.textContent=`▶ ${folder}`;
       folderGrid.style.display="none";
 
-      const sorted = [...data.videos].sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
+      const sorted=[...data.videos].sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
 
       videoSection.innerHTML=`
         <div class="video-container">
@@ -340,68 +237,56 @@
       const player=document.getElementById("videoPlayer");
       let ads={start:false,mid:false,end:false};
 
-      // 🔹 anuncio al inicio
-      player.addEventListener("play",()=>{ if(!ads.start){ ads.start=true; showAd(); } });
-
-      // 🔹 anuncio a los 50 segundos
-      player.addEventListener("timeupdate",()=>{ if(player.currentTime>=50 && !ads.mid){ ads.mid=true; showAd(); } });
-
-      // 🔹 anuncio al final
-      player.addEventListener("ended",()=>{ if(!ads.end){ ads.end=true; showAd(); } });
+      player.addEventListener("play",()=>{if(!ads.start){ads.start=true;showAd();}});
+      player.addEventListener("timeupdate",()=>{if(player.currentTime>=50&&!ads.mid){ads.mid=true;showAd();}});
+      player.addEventListener("ended",()=>{if(!ads.end){ads.end=true;showAd();}});
     }
 
-   <script>
-/* ⬇️ Sustituye solo ESTA función */
-function showAd(){
-  const ad = document.getElementById("adContainer");
-  if(!ad) return;
+    function showAd(){
+      const ad=document.getElementById("adContainer");
+      if(!ad)return;
+      ad.textContent="";
+      const s1=document.createElement("script");
+      s1.type="text/javascript";
+      s1.text=`
+        window.atOptions = {
+          'key' : 'de13ddc2442e4144561bcec2fa1af174',
+          'format' : 'iframe',
+          'height' : 60,
+          'width'  : 468,
+          'params' : {}
+        };
+      `;
+      const s2=document.createElement("script");
+      s2.type="text/javascript";
+      s2.src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js";
+      ad.appendChild(s1);ad.appendChild(s2);
+    }
 
-  // Limpia el contenedor para no acumular anuncios
-  ad.textContent = "";
-
-  // 1) Define atOptions en el scope global
-  const s1 = document.createElement("script");
-  s1.type = "text/javascript";
-  s1.text = `
-    window.atOptions = {
-      'key' : 'de13ddc2442e4144561bcec2fa1af174',
-      'format' : 'iframe',
-      'height' : 60,
-      'width'  : 468,
-      'params' : {}
-    };
-  `;
-
-  // 2) Carga el script de la red
-  const s2 = document.createElement("script");
-  s2.type = "text/javascript";
-  s2.src  = "//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js";
-
-  ad.appendChild(s1);
-  ad.appendChild(s2);
-}
-
-      function renderPreviews(docs){
-      let previews = [];
+    function renderPreviews(docs){
+      let previews=[];
       docs.forEach(doc=>{
-        const data = doc.data(); 
-        const videos = data.videos || [];
-        if(videos.length > 0){
-          const randomIndex = Math.floor(Math.random()*videos.length);
-          previews.push({folder:doc.id, url:videos[randomIndex].url});
+        const data=doc.data();const videos=data.videos||[];
+        if(videos.length>0){
+          const randomIndex=Math.floor(Math.random()*videos.length);
+          previews.push({folder:doc.id,url:videos[randomIndex].url});
         }
       });
-</script>
-        <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
-      `;
-    }
-      previewList.innerHTML = previews.map(p=>`
-        <div class="preview-item" onclick="playVideo('${p.folder}', 0)">
+      previewList.innerHTML=previews.map(p=>`
+        <div class="preview-item" onclick="playVideo('${p.folder}',0)">
           <video src="${p.url}#t=2" muted preload="metadata" playsinline></video>
           <div class="preview-title">${p.folder}</div>
         </div>
       `).join("");
     }
+
+    function goHome(){db.collection("folders").get().then(s=>renderHome(s.docs));}
+
+    window.openFolder=openFolder;
+    window.playVideo=playVideo;
+    window.goHome=goHome;
+
+    db.collection("folders").onSnapshot(s=>{renderHome(s.docs);renderPreviews(s.docs);});
   });
   </script>
 </body>
