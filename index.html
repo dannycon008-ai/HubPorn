@@ -125,7 +125,7 @@
         const preview=videos[0]?.poster||videos[0]?.url||"";
         return `
           <div class="card" onclick="openFolder('${folder}')">
-            ${preview?`<video class="card-thumb" poster="${videos[0]?.poster||''}" preload="none" muted playsinline></video>`:`<div style="height:100px;background:#222"></div>`}
+            ${preview?`<video class="card-thumb" src="${preview}" muted playsinline preload="none"></video>`:`<div style="height:100px;background:#222"></div>`}
             <div class="card-title">${folder}</div>
           </div>`;
       }).join("");
@@ -140,7 +140,7 @@
         <div class="grid">
           ${data.videos.map((v,idx)=>`
             <div class="card" onclick="playVideo('${folder}',${idx})">
-              <video class="card-thumb" poster="${v.poster||''}" preload="none" muted playsinline></video>
+              <video class="card-thumb" src="${v.poster||v.url}" muted playsinline preload="none"></video>
               <div class="card-title">Video ${idx+1}</div>
             </div>`).join("")}
         </div>`;
@@ -170,15 +170,14 @@
       const spinner=document.getElementById("loadingSpinner");
       player.addEventListener("canplay",()=>{spinner.style.display="none";});
 
-      // 🔹 banner permanente bajo el video
-      document.getElementById("bannerAd").innerHTML=`
-        <script type="text/javascript">
-          atOptions = {
-            'key':'de13ddc2442e4144561bcec2fa1af174',
-            'format':'iframe','height':60,'width':468,'params':{}
-          };
-        </script>
-        <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>`;
+      // ✅ Banner fijo bajo el video
+      const banner=document.getElementById("bannerAd");
+      banner.innerHTML="";
+      const s1=document.createElement("script");
+      s1.innerHTML=`atOptions={key:'de13ddc2442e4144561bcec2fa1af174',format:'iframe',height:60,width:468,params:{}};`;
+      const s2=document.createElement("script");
+      s2.src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js";
+      banner.appendChild(s1);banner.appendChild(s2);
 
       let ads={start:false,mid:false};
       player.addEventListener("play",()=>{if(!ads.start){ads.start=true;showAd(player);}});
