@@ -178,15 +178,16 @@
     const deleteVideoFolderSelect = document.getElementById("deleteVideoFolderSelect");
     const visitCounter = document.getElementById("visitCounter");
 
-    /* -------- MOSTRAR VISITAS -------- */
-    async function loadVisits(){
+    /* -------- MOSTRAR VISITAS EN TIEMPO REAL -------- */
+    function listenVisits(){
       const counterRef = db.collection("stats").doc("visits");
-      const docSnap = await counterRef.get();
-      if (docSnap.exists){
-        visitCounter.textContent = docSnap.data().count || 0;
-      } else {
-        visitCounter.textContent = 0;
-      }
+      counterRef.onSnapshot(docSnap => {
+        if (docSnap.exists){
+          visitCounter.textContent = docSnap.data().count || 0;
+        } else {
+          visitCounter.textContent = 0;
+        }
+      });
     }
 
     /* -------- AGREGAR CARPETA -------- */
@@ -256,7 +257,7 @@
           const videoItem = document.createElement("div");
           videoItem.innerHTML = `
             <video src="${v.url}" muted></video>
-            <p>Video ${idx+1}</p>
+            <p>Video ${idx+1} 👁️ ${v.views || 0} vistas</p>
             <button onclick="deleteVideo('${folder}', ${idx})">Eliminar</button>
           `;
           container.appendChild(videoItem);
@@ -309,7 +310,7 @@
 
     // 🚀 Ejecutar
     renderSidebar();
-    loadVisits();
+    listenVisits();
   </script>
 </body>
 </html>
