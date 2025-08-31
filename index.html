@@ -126,7 +126,7 @@
     }
     .video-player video {
       width:100%;
-      max-width:480px;  /* 🔹 más pequeño que antes */
+      max-width:480px;
       border-radius:10px;
       background:#000;
     }
@@ -283,138 +283,90 @@
         </div>
       `;
     }
-// Más vistos
-async function renderMostViewed(){
-  const snap = await db.collection("folders").get();
-  let videos = [];
-  snap.forEach(doc=>{
-    const data = doc.data();
-    (data.videos||[]).forEach((v,idx)=>{
-      videos.push({...v, folder:doc.id, idx});
-    });
-  });
 
-  videos.sort((a,b)=>(b.views||0) - (a.views||0));
-  videos = videos.slice(0,5);
-
-  mostViewed.innerHTML = `
-    <div class="top-banner">🔥 Los más vistos</div>
-    ${videos.map(v=>`
-      <div class="preview-item" onclick="playVideo('${v.folder}',${v.idx})">
-        <video src="${v.url}#t=2" muted preload="metadata" playsinline></video>
-        <div class="preview-title">${v.folder} - 👁️ ${v.views||0}</div>
-      </div>
-    `).join("")}
-  `;
-}
-    
-     // Reproducir video
     async function playVideo(folder,idx){
-      const ref = db.collection("folders").doc(folder);
-      const snap = await ref.get(); 
-      if(!snap.exists) return;
-      const data = snap.data(); 
-      const v = data.videos[idx];
+      const ref=db.collection("folders").doc(folder);
+      const snap=await ref.get(); if(!snap.exists) return;
+      const data=snap.data(); const v=data.videos[idx];
 
-      v.views = (v.views||0)+1; 
-      data.videos[idx] = v; 
+      v.views=(v.views||0)+1; 
+      data.videos[idx]=v; 
       await ref.update({videos:data.videos});
 
-      sectionTitle.textContent = `▶ ${folder}`;
-      folderGrid.style.display = "none";
+      sectionTitle.textContent=`▶ ${folder}`;
+      folderGrid.style.display="none";
 
-      videoSection.innerHTML = `
-        <div class="video-player">
-          <video id="videoPlayer" controls autoplay poster="${v.poster||v.url}" controlsList="nodownload">
-            <source src="${v.url}" type="video/mp4">
-          </video>
-          <p>👁️ ${v.views} vistas</p>
-          <div id="adContainer"></div>
+      const sorted = [...data.videos].sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
+
+      videoSection.innerHTML=`
+        <div class="video-container">
+          <div class="video-player">
+            <video id="videoPlayer" controls autoplay poster="${v.poster||v.url}" controlsList="nodownload">
+              <source src="${v.url}" type="video/mp4">
+            </video>
+            <p>👁️ ${v.views} vistas</p>
+            <div id="adContainer"></div>
+          </div>
+          <div class="most-viewed">
+            <h3>Los más vistos</h3>
+            ${sorted.map(mv=>`
+              <div class="mv-item" onclick="playVideo('${folder}', ${data.videos.indexOf(mv)})">
+                <video src="${mv.url}#t=2" muted preload="metadata" playsinline></video>
+                <div class="mv-title">${mv.views||0} vistas</div>
+              </div>
+            `).join("")}
+          </div>
         </div>
       `;
-
-      const player = document.getElementById("videoPlayer");
-      let ads = {start:false, mid:false, end:false};
-
-      // Anuncio al inicio
-      player.addEventListener("play", ()=>{
-        if(!ads.start){ ads.start=true; showAd(); }
-      });
-
-      // Anuncio a los 50 segundos
-      player.addEventListener("timeupdate", ()=>{
-        if(player.currentTime>=50 && !ads.mid){ ads.mid=true; showAd(); }
-      });
-
-      // Anuncio al final
-      player.addEventListener("ended", ()=>{
-        if(!ads.end){ ads.end=true; showAd(); }
-      });
-    }
-
-    // Inyectar anuncio en adContainer
-    function showAd(){
-      const ad = document.getElementById("adContainer");
-      if(!ad) return;
-      ad.innerHTML = `
-        <a href="https://overplantovervaluetwine.com/2061965" target="_blank">
-          <img src="https://s11.erome.com/2497/nZMW9sgy/GEJPGxVJ.jpeg?v=1714070791" 
-               alt="Publicidad" style="max-width:100%;border-radius:8px;">
-        </a>
-      `;
-    }
-
 
       const player=document.getElementById("videoPlayer");
       let ads={start:false,mid:false,end:false};
 
+      // 🔹 anuncio al inicio
       player.addEventListener("play",()=>{ if(!ads.start){ ads.start=true; showAd(); } });
+
+      // 🔹 anuncio a los 50 segundos
       player.addEventListener("timeupdate",()=>{ if(player.currentTime>=50 && !ads.mid){ ads.mid=true; showAd(); } });
+
+      // 🔹 anuncio al final
       player.addEventListener("ended",()=>{ if(!ads.end){ ads.end=true; showAd(); } });
     }
 
     function showAd(){
       const ad=document.getElementById("adContainer");
       if(!ad) return;
-      ad.innerHTML="";
-      const s1=document.createElement("script");
-      s1.type="text/javascript";
-      s1.text=`
-        atOptions = {
-          'key' : 'de13ddc2442e4144561bcec2fa1af174',
-          'format' : 'iframe',
-          'height' : 60,
-          'width' : 468,
-          'params' : {}
-        };
+      ad.innerHTML=`
+        <script type="text/javascript">
+          atOptions = {
+            'key' : 'de13ddc2442e4144561bcec2fa1af174',
+            'format' : 'iframe',
+            'height' : 60,
+            'width' : 468,
+            'params' : {}
+          };
+        </script>
+        <script type="text/javascript" src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js"></script>
       `;
-      const s2=document.createElement("script");
-      s2.type="text/javascript";
-      s2.src="//leaklitre.com/de13ddc2442e4144561bcec2fa1af174/invoke.js";
-      ad.appendChild(s1);
-      ad.appendChild(s2);
     }
 
-  // Previews (aleatorio de cada carpeta)
-function renderPreviews(docs){
-  let previews = [];
-  docs.forEach(doc=>{
-    const data = doc.data(); 
-    const videos = data.videos || [];
-    if(videos.length > 0){
-      const randomIndex = Math.floor(Math.random()*videos.length);
-      previews.push({folder:doc.id, url:videos[randomIndex].url});
+    function renderPreviews(docs){
+      let previews = [];
+      docs.forEach(doc=>{
+        const data = doc.data(); 
+        const videos = data.videos || [];
+        if(videos.length > 0){
+          const randomIndex = Math.floor(Math.random()*videos.length);
+          previews.push({folder:doc.id, url:videos[randomIndex].url});
+        }
+      });
+
+      previewList.innerHTML = previews.map(p=>`
+        <div class="preview-item" onclick="playVideo('${p.folder}', 0)">
+          <video src="${p.url}#t=2" muted preload="metadata" playsinline></video>
+          <div class="preview-title">${p.folder}</div>
+        </div>
+      `).join("");
     }
-  });
-
-  previewList.innerHTML = previews.map(p=>`
-    <div class="preview-item" onclick="playVideo('${p.folder}', 0)">
-      <video src="${p.url}#t=2" muted preload="metadata" playsinline></video>
-      <div class="preview-title">${p.folder}</div>
-    </div>
-  `).join("");
-}
-
 
     function goHome(){db.collection("folders").get().then(s=>renderHome(s.docs));}
 
