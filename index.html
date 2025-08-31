@@ -97,53 +97,16 @@
       padding:8px;
     }
 
-    .video-container {
-      display:flex;
-      flex-direction:row;
-      gap:15px;
-      justify-content:center;
-      align-items:flex-start;
-    }
-    .video-player {
-      flex:2;
-      text-align:center;
-    }
-    .video-player video {
-      width:100%;
-      max-width:480px;
-      border-radius:10px;
-      background:#000;
-    }
-    .most-viewed {
-      flex:1;
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:10px;
-      max-height:480px;
-      overflow-y:auto;
-    }
-    .most-viewed h3 {
-      font-size:1rem;
-      margin-bottom:10px;
-      text-align:center;
-      color:var(--accent);
-    }
-    .most-viewed .mv-item {margin-bottom:10px; cursor:pointer;}
-    .most-viewed .mv-item video {
-      width:100%; height:100px; object-fit:cover; border-radius:8px;
-    }
-    .most-viewed .mv-title {
-      font-size:.8rem; margin-top:4px; text-align:center; color:#ccc;
-    }
-
+    .video-container {display:flex; gap:15px; justify-content:center; align-items:flex-start;}
+    .video-player {flex:2; text-align:center;}
+    .video-player video {width:100%; max-width:480px; border-radius:10px; background:#000;}
     #adContainer {margin-top:12px; text-align:center;}
+    .countdown {color:var(--accent); font-weight:bold; margin:10px 0;}
 
     @media(max-width:900px){
       .layout {grid-template-columns:1fr;}
       .ads-left, .previews-right {display:none;}
       .video-container {flex-direction:column;}
-      .most-viewed {width:100%; max-height:none; margin-top:15px;}
     }
   </style>
 </head>
@@ -151,6 +114,13 @@
   <header onclick="goHome()">
     <h1 class="title">HubPorn</h1>
   </header>
+
+  <!-- 🔹 Publicidad arriba (móvil) -->
+  <div class="ads-mobile" style="text-align:center; margin:10px 0;">
+    <a href="https://overplantovervaluetwine.com/2061965" target="_blank">
+      <img src="https://s11.erome.com/2497/nZMW9sgy/GEJPGxVJ.jpeg" alt="Publicidad" style="max-width:100%; border-radius:8px;">
+    </a>
+  </div>
 
   <div class="layout">
     <aside class="ads-left">
@@ -243,27 +213,33 @@
             </video>
             <p>👁️ ${v.views} vistas</p>
             <div id="adContainer"></div>
+            <div id="bannerAd" style="margin-top:15px;">
+              <a href="https://overplantovervaluetwine.com/2061965" target="_blank">
+                <img src="https://s11.erome.com/2497/nZMW9sgy/GEJPGxVJ.jpeg" alt="Publicidad" style="max-width:100%; border-radius:8px;">
+              </a>
+            </div>
           </div>
         </div>
       `;
 
       const player=document.getElementById("videoPlayer");
-      let ads={start:false,mid:false,end:false};
+      let ads={start:false,mid:false};
 
       player.addEventListener("play",()=>{ if(!ads.start){ ads.start=true; showAd(player); } });
       player.addEventListener("timeupdate",()=>{ if(player.currentTime>=50 && !ads.mid){ ads.mid=true; showAd(player); } });
-      player.addEventListener("ended",()=>{ if(!ads.end){ ads.end=true; showAd(player); } });
     }
 
     function showAd(player){
       const current=player.currentTime;
       player.pause();
-      const win=window.open("https://overplantovervaluetwine.com/2061965","_blank");
-      setTimeout(()=>{
-        if(win){ win.close(); }
-        player.currentTime=current;
-        player.play();
-      },4000);
+      const adBox=document.getElementById("adContainer");
+      adBox.innerHTML=`<div class="countdown">Publicidad... regresando en <span id="cd">5</span>s</div>`;
+      window.open("https://overplantovervaluetwine.com/2061965","_blank");
+      let c=5;
+      const timer=setInterval(()=>{
+        c--; document.getElementById("cd").textContent=c;
+        if(c===0){ clearInterval(timer); adBox.innerHTML=""; player.currentTime=current; player.play(); }
+      },1000);
     }
 
     function renderPreviews(docs){
@@ -285,7 +261,9 @@
 
     function goHome(){db.collection("folders").get().then(s=>renderHome(s.docs));}
     window.openFolder=openFolder; window.playVideo=playVideo; window.goHome=goHome;
-    db.collection("folders").onSnapshot(s=>{renderHome(s.docs);renderPreviews(s.docs);});
+
+    // 🔹 Ya no refresca cada 10s
+    db.collection("folders").get().then(s=>{renderHome(s.docs);renderPreviews(s.docs);});
   });
   </script>
 </body>
